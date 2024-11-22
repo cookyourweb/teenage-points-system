@@ -1,3 +1,24 @@
+
+
+# Teenage Points System
+
+Este es un sistema para la gestión de tareas, puntos y privilegios para adolescentes y sus padres/madres. Desarrollado con **React**, **TypeScript**, **Firebase** y **Tailwind CSS**.
+
+## Instalación y configuración
+1. Clona este repositorio: `git clone <URL del repositorio>`.
+2. Instala las dependencias: `npm install`.
+3. Configura las variables de entorno según `.env.example`.
+
+## Tecnologías
+- React
+- TypeScript
+- Firebase
+- Tailwind CSS
+
+## Despliegue
+Este proyecto se despliega automáticamente con **Vercel**.
+
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

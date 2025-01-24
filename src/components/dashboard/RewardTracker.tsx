@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
-import { CheckSquare, Gift, AlertCircle } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheckSquare, faGift, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import { useUserRole } from '../../hooks/useUserRole';
 import useAuth from '../../hooks/useAuth'; 
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { ToastContainer, toast } from 'react-toastify'; // Import toast notifications
+import 'react-toastify/dist/ReactToastify.css'; // Import toast styles
 
 const RewardTracker: React.FC = () => {
   const { user } = useAuth();
@@ -107,7 +110,7 @@ const RewardTracker: React.FC = () => {
       const unlockedPrivileges = privileges.filter(privilege => totalPoints >= privilege.puntos);
       if (unlockedPrivileges.length > 0) {
         // Logic to unlock privileges can be added here
-        console.log("Unlocked privileges:", unlockedPrivileges);
+        toast.success("¡Privilegios desbloqueados!", { position: "top-right" }); // Notify user
       }
       return nuevoEstado;
     });
@@ -132,6 +135,7 @@ const RewardTracker: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <ToastContainer /> {/* Add ToastContainer for notifications */}
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-bold">Tracker de Recompensas</h1>
         <button 
@@ -141,99 +145,7 @@ const RewardTracker: React.FC = () => {
           Volver al Dashboard
         </button>
       </div>
-      <Card className="w-full max-w-6xl">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Sistema de Puntos Semanal</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="p-2 border bg-gray-100">Tareas</th>
-                  <th className="p-2 border bg-gray-100">Puntos</th>
-                  {diasSemana.map(dia => (
-                    <th key={dia} className="p-2 border bg-gray-100">{dia}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={9} className="p-2 border bg-blue-50 font-bold">
-                    Tareas Diarias
-                  </td>
-                </tr>
-                {initialTasks.diarias.map((tarea, index) => (
-                  <tr key={`diaria-${index}`}>
-                    <td className="p-2 border">{tarea.nombre}</td>
-                    <td className="p-2 border text-center">{tarea.puntos}</td>
-                    {diasSemana.map(dia => (
-                      <td key={`${dia}-${index}`} className="p-2 border text-center">
-                        <button
-                          onClick={() => toggleTarea(dia, 'diarias', index)}
-                          className={`p-2 rounded-full transition-colors ${
-                            tasks[dia]?.diarias[index]?.completada 
-                              ? 'bg-green-100 hover:bg-green-200' 
-                              : 'bg-gray-100 hover:bg-gray-200'
-                          }`}
-                        >
-                          <CheckSquare 
-                            className={`w-5 h-5 ${
-                              tasks[dia]?.diarias[index]?.completada 
-                                ? 'text-green-600' 
-                                : 'text-gray-400'
-                            }`} 
-                          />
-                        </button>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-                <tr>
-                  <td colSpan={9} className="p-2 border bg-purple-50 font-bold">
-                    Tareas Extra (Opcionales)
-                  </td>
-                </tr>
-                {initialTasks.extra.map((tarea, index) => (
-                  <tr key={`extra-${index}`}>
-                    <td className="p-2 border">{tarea.nombre}</td>
-                    <td className="p-2 border text-center">{tarea.puntos}</td>
-                    {diasSemana.map(dia => (
-                      <td key={`${dia}-${index}`} className="p-2 border text-center">
-                        <button
-                          onClick={() => toggleTarea(dia, 'extra', index)}
-                          className={`p-2 rounded-full transition-colors ${
-                            tasks[dia]?.extra[index]?.completada 
-                              ? 'bg-green-100 hover:bg-green-200' 
-                              : 'bg-gray-100 hover:bg-gray-200'
-                          }`}
-                        >
-                          <CheckSquare 
-                            className={`w-5 h-5 ${
-                              tasks[dia]?.extra[index]?.completada 
-                                ? 'text-green-600' 
-                                : 'text-gray-400'
-                            }`} 
-                          />
-                        </button>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-                <tr className="bg-gray-100 font-bold">
-                  <td colSpan={2} className="p-2 border">Puntos Totales del Día</td>
-                  {diasSemana.map(dia => (
-                    <td key={`total-${dia}`} className="p-2 border text-center">
-                      {calcularPuntosDia(dia)}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
+     
       <Card className="w-full max-w-6xl">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
@@ -246,7 +158,7 @@ const RewardTracker: React.FC = () => {
         <CardContent>
           {errorMessage && (
             <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md flex items-center">
-              <AlertCircle className="w-5 h-5 mr-2" />
+              <FontAwesomeIcon icon={faExclamationCircle} className="w-5 h-5 mr-2" />
               {errorMessage}
             </div>
           )}
@@ -273,9 +185,9 @@ const RewardTracker: React.FC = () => {
                       ? 'bg-green-500 hover:bg-green-600 text-white'
                       : 'bg-gray-300 text-gray-600 cursor-not-allowed'
                   }`}
-                  disabled={availablePoints < privilegio.puntos}
+                  aria-label={`Redeem privilege ${privilegio.nombre}`} // Accessibility improvement
                 >
-                  <Gift className="w-4 h-4" />
+                  <FontAwesomeIcon icon={faGift} className="w-4 h-4" />
                   <span>Canjear</span>
                 </button>
               </div>
@@ -298,9 +210,106 @@ const RewardTracker: React.FC = () => {
             </div>
           )}
         </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-export default RewardTracker;
+                    </Card>
+           
+            <Card className="w-full max-w-6xl">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-center">Sistema de Puntos Semanal</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr>
+                        <th className="p-2 border bg-gray-100">Tareas</th>
+                        <th className="p-2 border bg-gray-100">Puntos</th>
+                        {diasSemana.map(dia => (
+                          <th key={dia} className="p-2 border bg-gray-100">{dia}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colSpan={9} className="p-2 border bg-blue-50 font-bold">
+                          Tareas Diarias
+                        </td>
+                      </tr>
+                      {initialTasks.diarias.map((tarea, index) => (
+                        <tr key={`diaria-${index}`}>
+                          <td className="p-2 border">{tarea.nombre}</td>
+                          <td className="p-2 border text-center">{tarea.puntos}</td>
+                          {diasSemana.map(dia => (
+                            <td key={`${dia}-${index}`} className="p-2 border text-center">
+                              <button
+                                onClick={() => toggleTarea(dia, 'diarias', index)}
+                                className={`p-2 rounded-full transition-colors ${
+                                  tasks[dia]?.diarias[index]?.completada 
+                                    ? 'bg-green-100 hover:bg-green-200' 
+                                    : 'bg-gray-100 hover:bg-gray-200'
+                                }`}
+                                aria-label={`Toggle task ${tarea.nombre} for ${dia}`} // Accessibility improvement
+                              >
+                                <FontAwesomeIcon 
+                                  icon={faCheckSquare}
+                                  className={`w-5 h-5 ${
+                                    tasks[dia]?.diarias[index]?.completada 
+                                      ? 'text-green-600' 
+                                      : 'text-gray-400'
+                                  }`} 
+                                />
+                              </button>
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                      <tr>
+                        <td colSpan={9} className="p-2 border bg-purple-50 font-bold">
+                          Tareas Extra (Opcionales)
+                        </td>
+                      </tr>
+                      {initialTasks.extra.map((tarea, index) => (
+                        <tr key={`extra-${index}`}>
+                          <td className="p-2 border">{tarea.nombre}</td>
+                          <td className="p-2 border text-center">{tarea.puntos}</td>
+                          {diasSemana.map(dia => (
+                            <td key={`${dia}-${index}`} className="p-2 border text-center">
+                              <button
+                                onClick={() => toggleTarea(dia, 'extra', index)}
+                                className={`p-2 rounded-full transition-colors ${
+                                  tasks[dia]?.extra[index]?.completada 
+                                    ? 'bg-green-100 hover:bg-green-200' 
+                                    : 'bg-gray-100 hover:bg-gray-200'
+                                }`}
+                                aria-label={`Toggle extra task ${tarea.nombre} for ${dia}`} // Accessibility improvement
+                              >
+                                <FontAwesomeIcon 
+                                  icon={faCheckSquare}
+                                  className={`w-5 h-5 ${
+                                    tasks[dia]?.extra[index]?.completada 
+                                      ? 'text-green-600' 
+                                      : 'text-gray-400'
+                                  }`} 
+                                />
+                              </button>
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                      <tr className="bg-gray-100 font-bold">
+                        <td colSpan={2} className="p-2 border">Puntos Totales del Día</td>
+                        {diasSemana.map(dia => (
+                          <td key={`total-${dia}`} className="p-2 border text-center">
+                            {calcularPuntosDia(dia)}
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      };
+      
+      export default RewardTracker;

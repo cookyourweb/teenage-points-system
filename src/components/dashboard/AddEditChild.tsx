@@ -144,7 +144,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
 
       {/* Modal para mostrar definición y soluciones */}
       {showModal && selectedPregunta && (
-        <Modal onClose={() => setShowModal(false)}>
+<Modal onClose={() => setShowModal(false)} isOpen={showModal}>
           <h2 className="text-lg font-bold">Consejos para tratar a estos adolescentes</h2>
           <p><strong>Definición:</strong> {selectedPregunta.definicion}</p>
           <p><strong>Soluciones:</strong> {selectedPregunta.soluciones.join(", ")}</p>

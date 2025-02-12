@@ -1,3 +1,4 @@
+//InviteMember.tsx
 import React, { useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -41,7 +42,7 @@ const InviteMember: React.FC<InviteMemberProps> = ({ familyId, onClose }) => {
   };
 
   return (
-    <div className="p-6 bg-white rounded shadow">
+    <div className="p-6 bg-white dark:bg-gray-800 rounded shadow">
       <h2 className="text-lg font-bold mb-4">Invitar a Nuevo Miembro</h2>
       <div>
         <label className="block text-sm font-medium mb-1">Correo Electrónico:</label>

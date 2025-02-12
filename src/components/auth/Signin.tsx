@@ -1,4 +1,3 @@
-//Signin.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -12,6 +11,7 @@ const Signin = () => {
   const navigate = useNavigate();
 
   const handleSignin = async (e: React.FormEvent) => {
+    // Remove hardcoded credentials for testing
     e.preventDefault();
 
     try {
@@ -48,13 +48,12 @@ const Signin = () => {
 
   return (
     <form onSubmit={handleSignin} className="space-y-4 p-4">
-      
       <input
         type="email"
         placeholder="Correo electrónico"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded font-sans"
         required
       />
       <input
@@ -62,13 +61,14 @@ const Signin = () => {
         placeholder="Contraseña"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded font-sans"
         required
       />
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500" style={{ color: 'var(--color-red-500)' }}>{error}</p>}
       <button
         type="submit"
-        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+        className="w-full p-2 rounded"
+        style={{ backgroundColor: 'var(--color-blue-500)', color: 'var(--color-white)' }}
       >
         Iniciar Sesión
       </button>

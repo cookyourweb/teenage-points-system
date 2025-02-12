@@ -1,27 +1,16 @@
-export interface TaskHistory {
-  date: string; // Fecha en que la tarea fue marcada como completada
-  completedBy: string; // ID del usuario (hijo) que completó la tarea
-  pointsEarned: number; // Puntos obtenidos al completar la tarea
-}
-
+// Definir el tipo para una tarea (Task)
 export interface Task {
-  id: string;
-  title: string;
-  type: string;
-  name: string;
-  tipe: string;
-  description: string;
-  points: number;
-  completed: boolean;
-  day: string; // Día asociado a la tarea (nuevo campo añadido)
-  history?: TaskHistory[]; // Historial de cumplimiento de la tarea
-}
-export interface TaskHistory {
-  date: string; // Fecha en que la tarea fue marcada como completada
-  completedBy: string; // ID del usuario (hijo) que completó la tarea
-  pointsEarned: number; // Puntos obtenidos al completar la tarea
+  id: number; // ID único de la tarea
+  nombre: string; // Nombre de la tarea
+  tipo: 'diarias' | 'extra';
+  puntos: number; // Puntos que otorga la tarea
+  completada: boolean; // Estado de la tarea (completada o no)
 }
 
-
-
-
+// Definir el tipo para el estado de las tareas (TasksState)
+export interface TasksState {
+  [dia: string]: {
+    diarias: Task[]; // Tareas diarias
+    extra: Task[]; // Tareas extra
+  };
+}

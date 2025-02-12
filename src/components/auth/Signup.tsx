@@ -50,7 +50,7 @@ const SignUp: React.FC = () => {
         placeholder="Nombre"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded font-sans"
         required
       />
       <input
@@ -58,7 +58,7 @@ const SignUp: React.FC = () => {
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded font-sans"
         required
       />
       <input
@@ -66,13 +66,14 @@ const SignUp: React.FC = () => {
         placeholder="Contraseña"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded font-sans"
         required
       />
       {error && <p className="text-red-500">{error}</p>}
       <button
         type="submit"
-        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+        className="w-full p-2 rounded"
+        style={{ backgroundColor: 'var(--color-blue-500)', color: 'var(--color-white)' }}
       >
         Registrarse
       </button>

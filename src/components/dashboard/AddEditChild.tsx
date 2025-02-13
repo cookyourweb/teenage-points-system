@@ -96,7 +96,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
     
     // Generar el rewardLink usando el nombre normalizado (sin espacios)
     const normalizedName = nombre.trim().toLowerCase().replace(/\s+/g, '-');
-    const rewardLink = `http://localhost/family/${normalizedName}/${childId}`;
+    const rewardLink = `/family/${normalizedName}/${childId}`; // Cambiado a enlace relativo
 
     const child: Child = {
       id: childId,
@@ -206,7 +206,10 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
         <Modal onClose={() => setShowModal(false)} isOpen={showModal}>
           <h2 className="text-lg font-bold">Consejos para tratar a estos adolescentes</h2>
           <p><strong>Definición:</strong> {selectedPregunta.definicion}</p>
-          <p><strong>Soluciones:</strong> {selectedPregunta.soluciones.join(", ")}</p>
+          <p><strong>Soluciones:</strong></p>
+          {selectedPregunta.soluciones.map(sol => (
+            <p key={sol.id}>{sol.texto}</p>
+          ))}
         </Modal>
       )}
     </div>

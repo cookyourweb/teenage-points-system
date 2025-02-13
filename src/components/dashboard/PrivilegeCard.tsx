@@ -1,3 +1,4 @@
+// PrivilegeCard.tsx
 import React, { useState } from 'react';
 import PrivilegeRedemptionModal from '../ui/PrivilegeRedemptionModal';
 
@@ -22,7 +23,7 @@ const PrivilegeCard: React.FC<PrivilegeCardProps> = ({ privilege, points }) => {
   };
 
   return (
-    <div className="border p-4 rounded shadow">
+      <div className="border p-4 rounded shadow bg-white dark:bg-gray-800">
       <h4 className="font-semibold">{privilege.name}</h4>
       <p className="text-sm text-gray-600">Puntos necesarios: {privilege.pointsRequired}</p>
       <button

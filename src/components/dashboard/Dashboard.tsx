@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+ // Dashboard.tsx
+ import React, { useState, useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../../firebase";
@@ -10,27 +11,44 @@ import Modal from "../ui/Modal";
 import { Card } from "../ui/Card";
 import { Child } from "../../types/familyTypes";
 import { useUserRole } from "../../hooks/useUserRole";
-import { addChildToFamily, fetchFamilyById } from "../../services/familyService";
+import { addChildToFamily, fetchFamilyById, deleteChildFromFamily, updateChildInFamily } from "../../services/familyService";
 import { doc, getDoc } from "firebase/firestore";
 
 const Dashboard: React.FC = () => {
+const [childToEdit, setChildToEdit] = useState<Child | null>(null); // State to hold the child data for editing
+
+const handleEditChild = (childId: string) => {
+    const child = children.find(c => c.id === childId);
+    if (child) {
+      setChildToEdit(child);
+      setIsAddingChild(true); // Open the modal with child data
+    } else {
+      setChildToEdit(null); // Ensure it's null if not found
+    }
+  };
+
+  const handleProfileUpdated = () => {
+    // Logic to handle profile updates
+    setShowCompleteProfile(false);
+    // Optionally, refresh data or show a success message
+  };
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
   const [familyId, setFamilyId] = useState<string | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingChild, setEditingChild] = useState<Child | undefined>(undefined);
-const [isInviting, setIsInviting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isInviting, setIsInviting] = useState(false);
+  const [isAddingChild, setIsAddingChild] = useState(false);
   const [showCompleteProfile, setShowCompleteProfile] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { role, isLoading: isRoleLoading, error: roleError } = useUserRole(user?.uid);
   const isAdmin = role === "admin";
 
   // Obtener el ID de la familia del usuario
   useEffect(() => {
-    const fetchFamilyId = async () => {
+const fetchFamilyId = async () => {
+    console.log("Fetching family ID for user:", user?.uid); // Debugging log
       if (user) {
         const userDocRef = doc(db, "usuarios", user.uid);
         const userDoc = await getDoc(userDocRef); 
@@ -56,6 +74,7 @@ const [isInviting, setIsInviting] = useState(false);
         console.warn("No se puede cargar los hijos: el ID de la familia es nulo.");
         return;
       }
+      console.log("Fetching children for family ID:", familyId); // Debugging log
 
       try {
         const family = await fetchFamilyById(familyId);
@@ -75,44 +94,46 @@ const [isInviting, setIsInviting] = useState(false);
     fetchChildren();
   }, [familyId]);
 
-  const handleAddChild = () => {
-    console.log("Add Child button clicked"); // Debugging log
-    setIsEditing(true);
-    setEditingChild(undefined);
+const handleAddChild = () => {
+    console.log("Adding a new child");
+    setIsAddingChild(true);
   };
 
-  const handleEditChild = (id: string) => {
-    const childToEdit = children.find(child => child.id === id);
-    if (childToEdit) {
-      setIsEditing(true);
-      setEditingChild(childToEdit);
-    }
+  const handleCloseAddChild = () => {
+    setIsAddingChild(false);
+    setChildToEdit(null); // Reset the edit state when closing the modal
   };
 
-  const handleSaveChild = async (child: Child) => {
+const handleSaveChild = async (child: Child) => {
     if (!familyId) return;
 
     try {
-      await addChildToFamily(familyId, child);
+      if (childToEdit) {
+        // Si estamos editando un hijo existente
+        await updateChildInFamily(familyId, childToEdit.id, child);
+      } else {
+        // Si estamos añadiendo un nuevo hijo
+        await addChildToFamily(familyId, child);
+      }
+      
+      // Actualizar la lista de hijos
       const family = await fetchFamilyById(familyId);
       if (family) {
         const allChildren = Object.values(family.miembros.hijos || {});
         setChildren(allChildren);
       }
-      setIsEditing(false);
+      
+      // Resetear el estado de edición
+      setChildToEdit(null);
+      setIsAddingChild(false);
     } catch (err) {
       console.error("Error al guardar el hijo:", err);
       setError("No se pudo guardar el hijo.");
     }
   };
 
-  const handleCloseForm = () => {
-    setIsEditing(false);
-    setEditingChild(undefined);
-  };
-
-  const handleProfileUpdated = () => {
-    setShowCompleteProfile(false);
+  const handleCompleteProfile = () => {
+    setShowCompleteProfile(true);
   };
 
   if (isRoleLoading) {
@@ -141,34 +162,39 @@ const [isInviting, setIsInviting] = useState(false);
         Este es tu sistema de puntos para adolescentes. Aquí puedes añadir a tus hijos y enviar invitaciones a otros miembros de tu familia.
       </p>
 
-      {showCompleteProfile && user && (
-        <CompleteProfile userId={user.uid} onProfileUpdated={handleProfileUpdated} />
-      )}
-
       <div className="flex space-x-4 mt-4">
-        <Button onClick={() => { console.log("Button clicked"); handleAddChild(); }}>Añadir Hijo</Button>
-        <Button onClick={() => setIsInviting(true)} variant="secondary">
+        <Button onClick={handleAddChild}>Añadir Hijo</Button>
+        <Button onClick={handleCompleteProfile}>Completar Perfil</Button>
+        <Button onClick={() => setIsInviting(true)}>
           Invitar Miembro
         </Button>
         {isAdmin && (
-          <Button onClick={() => navigate("/admin/faqs")} variant="secondary">
-            Administrar FAQs
+          <Button onClick={() => setIsInviting(true)}>
+            Invitar Miembro
           </Button>
         )}
       </div>
 
-      {isEditing && (
-        <AddEditChild
-          childToEdit={editingChild}
-          familyId={familyId!}
-          onSave={handleSaveChild}
-          onCancel={handleCloseForm}
-        />
+      {isAddingChild && (
+        <Modal onClose={handleCloseAddChild} isOpen={isAddingChild}>
+<AddEditChild
+  childToEdit={childToEdit || undefined} // Pass the child to edit or undefined for a new child
+            familyId={familyId!}
+            onSave={handleSaveChild}
+            onCancel={handleCloseAddChild}
+          />
+        </Modal>
       )}
 
       {isInviting && (
         <Modal onClose={() => setIsInviting(false)} isOpen={isInviting}>
           <InviteMember familyId={familyId!} onClose={() => setIsInviting(false)} />
+        </Modal>
+      )}
+
+      {showCompleteProfile && user && (
+        <Modal onClose={() => setShowCompleteProfile(false)} isOpen={showCompleteProfile}>
+          <CompleteProfile userId={user.uid} onProfileUpdated={handleProfileUpdated} />
         </Modal>
       )}
 
@@ -182,10 +208,19 @@ const [isInviting, setIsInviting] = useState(false);
               <strong>Edad:</strong> {child.edad}
             </p>
             <p>
-<strong>Tipo de Adolescente:</strong> {child.tiposAdolescente.length > 0 ? child.tiposAdolescente.join(', ') : 'No hay tipos de adolescente'}
+              <strong>Tipo de Adolescente:</strong> {child.tiposAdolescente.length > 0 ? child.tiposAdolescente.join(', ') : 'No hay tipos de adolescente'}
             </p>
             <div className="flex space-x-2">
               <Button onClick={() => handleEditChild(child.id)}>Editar</Button>
+              <Button onClick={async () => {
+                  const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este hijo?");
+                  if (confirmDelete) {
+                    // Lógica para eliminar el hijo de la base de datos
+                    await deleteChildFromFamily(familyId, child.id);
+                    // Actualizar la lista de hijos
+                    setChildren(prevChildren => prevChildren.filter(c => c.id !== child.id));
+                  }
+              }}>Eliminar</Button>
               <Button onClick={() => {
                   navigate(`/reward-tracker/${familyId}/${child.id}`); // Navigate to RewardTracker with familyId
               }}>

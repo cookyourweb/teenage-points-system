@@ -1,3 +1,4 @@
+//PrivilegeRedemptionModal tsx
 import React, { useState } from 'react';
 import Modal from './Modal';
 import Button from './Button';

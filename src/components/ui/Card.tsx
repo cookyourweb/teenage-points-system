@@ -1,3 +1,5 @@
+
+//Card.tsx
 import React from "react";
 
 type CardProps = {
@@ -5,9 +7,9 @@ type CardProps = {
   className?: string;
 };
 
-export const Card = ({ children, className }: CardProps) => {
+export const Card: React.FC<CardProps> = ({ children, className = "" }) => {
   return (
-    <div className={`border rounded-lg shadow-md p-4 bg-white ${className}`}>
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 ${className}`}>
       {children}
     </div>
   );
@@ -18,7 +20,7 @@ type CardHeaderProps = {
   className?: string;
 };
 
-export const CardHeader = ({ children, className }: CardHeaderProps) => {
+export const CardHeader: React.FC<CardHeaderProps> = ({ children, className = "" }) => {
   return (
     <div className={`border-b pb-2 mb-4 ${className}`}>
       {children}
@@ -31,7 +33,7 @@ type CardTitleProps = {
   className?: string;
 };
 
-export const CardTitle = ({ children, className }: CardTitleProps) => {
+export const CardTitle: React.FC<CardTitleProps> = ({ children, className = "" }) => {
   return (
     <h2 className={`text-xl font-bold ${className}`}>{children}</h2>
   );
@@ -42,6 +44,6 @@ type CardContentProps = {
   className?: string;
 };
 
-export const CardContent = ({ children, className }: CardContentProps) => {
+export const CardContent: React.FC<CardContentProps> = ({ children, className = "" }) => {
   return <div className={`${className}`}>{children}</div>;
 };

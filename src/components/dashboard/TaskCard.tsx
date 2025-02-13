@@ -1,5 +1,6 @@
 import React from "react";
 
+//TaskCard.tsx
 interface Task {
   id: number;
   name: string;
@@ -14,7 +15,7 @@ interface TaskCardProps {
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, onComplete }) => {
   return (
-    <div className="border p-4 rounded shadow">
+    <div className="border p-4 rounded shadow bg-white dark:bg-gray-800">
       <h4 className="font-semibold">{task.name}</h4>
       <p className="text-sm text-gray-600">Puntos: {task.points}</p>
       <button

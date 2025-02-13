@@ -1,3 +1,4 @@
+//useAuth.tsx
 import { useState, useEffect } from "react";
 import { onAuthStateChanged, User, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";

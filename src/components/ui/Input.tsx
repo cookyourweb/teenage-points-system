@@ -1,16 +1,19 @@
+
+//Input.tsx
+
 import React from "react";
 
 type InputProps = {
-  label?: string; // Etiqueta opcional para el campo de entrada
-  type?: string; // Tipo de entrada, por defecto "text"
-  value: string | number;
-  placeholder?: string; // Texto de marcador de posición
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void; // Función para manejar cambios
-  className?: string; // Clases adicionales para estilizar
-  errorMessage?: string; // Mensaje de error opcional
-  required?: boolean; // Indicador de campo obligatorio
-  disabled?: boolean; // Indicador de campo deshabilitado
-  name?: string; // Nombre del campo, necesario para identificarlo
+  label?: string; // Optional label for the input field
+  type?: string; // Input type, defaults to "text"
+  value: string | number; // Value of the input
+  placeholder?: string; // Placeholder text
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void; // Change event handler
+  className?: string; // Additional classes for styling
+  errorMessage?: string; // Optional error message
+  required?: boolean; // Required field indicator
+  disabled?: boolean; // Disabled field indicator
+  name?: string; // Name of the field, necessary for identification
 };
 
 const Input: React.FC<InputProps> = ({
@@ -19,38 +22,37 @@ const Input: React.FC<InputProps> = ({
   value,
   placeholder,
   onChange,
-  className,
+  className = "",
   errorMessage,
   required = false,
   disabled = false,
   name,
 }) => {
   return (
-    <div className={`w-full ${className || ""}`}>
-      {/* Etiqueta */}
+    <div className={`w-full ${className}`}>
+      {/* Label */}
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+<label className="block text-sm font-medium text-gray-700">
           {label}
           {required && <span className="text-red-500"> *</span>}
         </label>
       )}
-      {/* Campo de entrada */}
+      {/* Input field */}
       <input
-        name={name} // Asegúrate de pasar el nombre
+        name={name} // Ensure to pass the name
         type={type}
         value={value}
         placeholder={placeholder}
         onChange={onChange}
         disabled={disabled}
-        className={`w-full p-2 border ${
+        className={`w-full p-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 ${
           errorMessage
             ? "border-red-500 focus:ring-red-500"
             : "border-gray-300 focus:ring-blue-500"
-        } rounded-md shadow-sm focus:outline-none focus:ring-1 ${
-          disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
-        }`}
+        } ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
+        style={{ backgroundColor: 'var(--color-white)' }} // Set background color
       />
-      {/* Mensaje de error */}
+      {/* Error message */}
       {errorMessage && (
         <p className="text-sm text-red-500 mt-1">{errorMessage}</p>
       )}

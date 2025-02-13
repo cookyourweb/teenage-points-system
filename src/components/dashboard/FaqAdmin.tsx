@@ -144,7 +144,7 @@ const FaqAdmin: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+<div className="p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
       <h1 className="text-2xl font-bold mb-4">Administración de FAQs</h1>
 
       {/* Agregar categoría */}
@@ -193,8 +193,8 @@ const FaqAdmin: React.FC = () => {
                   className="border p-2 rounded w-full"
                 />
                 <div className="flex space-x-2 mt-2">
-                  <Button onClick={() => handleUpdateCategoria(cat.id)}>Guardar Cambios</Button>
-                  <Button onClick={() => setEditMode((prev) => ({ ...prev, [cat.id]: false }))} variant="secondary">
+<Button onClick={() => handleUpdateCategoria(cat.id)}>Guardar Cambios</Button>
+                  <Button onClick={() => setEditMode((prev) => ({ ...prev, [cat.id]: false }))}>
                     Cancelar
                   </Button>
                 </div>
@@ -206,8 +206,8 @@ const FaqAdmin: React.FC = () => {
                 </p>
                 <p className="italic">Definición: {cat.definicion}</p>
                 <div className="flex space-x-2 mt-2">
-                  <Button onClick={() => handleEditCategoria(cat)} variant="secondary">Editar</Button>
-                  <Button onClick={() => handleDeleteCategoria(cat.id)} variant="danger">Eliminar</Button>
+<Button onClick={() => handleEditCategoria(cat)}>Editar</Button>
+<Button onClick={() => handleDeleteCategoria(cat.id)}>Eliminar</Button>
                 </div>
               </div>
             )}
@@ -239,10 +239,10 @@ const FaqAdmin: React.FC = () => {
                       <p className="font-semibold">Título: {preg.titulo}</p>
                       <p className="italic">Definición: {preg.definicion}</p>
                       <div className="flex space-x-2 mt-2">
-                        <Button onClick={() => handleUpdatePreguntaClick(cat.id, preg)} variant="secondary">
+                        <Button onClick={() => handleUpdatePreguntaClick(cat.id, preg)}>
                           Editar Pregunta
                         </Button>
-                        <Button onClick={() => handleDeletePreguntaClick(cat.id, preg.id)} variant="danger">
+                        <Button onClick={() => handleDeletePreguntaClick(cat.id, preg.id)}>
                           Eliminar Pregunta
                         </Button>
                       </div>
@@ -266,10 +266,10 @@ const FaqAdmin: React.FC = () => {
                             <li key={sol.id} className="ml-4 flex items-center justify-between border p-2 rounded">
                               <span>{sol.texto}</span>
                               <div className="flex space-x-2">
-                                <Button onClick={() => handleDeleteSolucionClick(cat.id, preg, sol.id)} variant="danger">
+                                <Button onClick={() => handleDeleteSolucionClick(cat.id, preg, sol.id)}>
                                   Eliminar
                                 </Button>
-                                <Button onClick={() => handleUpdateSolucionClick(cat.id, preg, sol)} variant="secondary">
+                                <Button onClick={() => handleUpdateSolucionClick(cat.id, preg, sol)}>
                                   Editar
                                 </Button>
                               </div>

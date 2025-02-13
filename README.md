@@ -1,6 +1,38 @@
 # Familias Estelares - Plataforma Educativa
 
+## Descripción
+Plataforma educativa tipo Netflix diseñada para la gestión y apoyo en la educación de adolescentes. Ofrece un sistema integral que conecta a padres, profesores y adolescentes en un entorno educativo interactivo y gamificado.
+
 ## ToDo
+
+### Mejoras de UI/UX
+- [ ] Limpieza y Optimización de Estilos
+  - Eliminar estilos CSS personalizados innecesarios
+  - Migrar a clases base de Tailwind
+  - Remover duplicados y conflictos
+  - Optimizar especificidad de selectores
+  - Implementar sistema de diseño consistente
+
+- [ ] Configuración Base de Tailwind
+  - Configurar theme.extend en tailwind.config.js
+  - Definir colores personalizados
+  - Establecer tipografía base
+  - Configurar espaciados y breakpoints
+  - Crear plugins personalizados si son necesarios
+
+- [ ] Sistema de Tema Oscuro/Claro
+  - Implementar modo oscuro usando Tailwind
+  - Ajustar colores de texto para mejor legibilidad
+  - Asegurar contraste adecuado
+  - Persistencia de preferencia de tema
+  - Transiciones suaves entre temas
+
+- [ ] Estilos Generales
+  - Unificar paleta de colores
+  - Mejorar responsividad
+  - Optimizar espaciados
+  - Añadir animaciones y transiciones
+  - Mejorar accesibilidad
 
 ### Funcionalidades de Administrador
 - [ ] Panel de Administración de FAQs en Dashboard
@@ -47,21 +79,6 @@
   - Gráficos y estadísticas
   - Recomendaciones basadas en uso
 
-### Mejoras de UI/UX
-- [ ] Limpieza y Optimización de Estilos
-  - Eliminar estilos CSS personalizados innecesarios
-  - Migrar a clases base de Tailwind
-  - Remover duplicados y conflictos
-  - Optimizar especificidad de selectores
-  - Implementar sistema de diseño consistente
-
-- [ ] Sistema de Tema Oscuro/Claro
-  - Implementar modo oscuro usando Tailwind
-  - Ajustar colores de texto para mejor legibilidad
-  - Asegurar contraste adecuado
-  - Persistencia de preferencia de tema
-  - Transiciones suaves entre temas
-
 ### Testing con Vitest
 - [ ] Pruebas Unitarias y de Integración
   - Componentes
@@ -69,59 +86,12 @@
   - Hooks
   - Sistema de autenticación
   - Flujos de usuario
-
-## Configuración de Tailwind CSS
-
-```javascript
-// tailwind.config.js
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  darkMode: 'class',
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          50: '#f0f9ff',
-          // ... otros tonos
-        },
-      },
-      fontFamily: {
-        sans: ['Inter var', 'sans-serif'],
-      },
-    },
-  },
-  plugins: [],
-}
-```
-
-```css
-/* globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  html {
-    @apply antialiased;
-  }
-}
-
-@layer components {
-  .btn-primary {
-    @apply px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600;
-  }
-}
-
-@layer utilities {
-  .text-shadow {
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-  }
-}
-```
+  - Pruebas para el componente AddEditChild
+  - Pruebas para el componente App
+  - Pruebas para el sistema de privilegios
+  - Pruebas para el histórico de uso
+  - Pruebas para el sistema de bloqueo/desbloqueo
+  - Pruebas para el registro de tareas completadas
 
 ## Instalación y Uso
 

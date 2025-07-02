@@ -1,10 +1,18 @@
-// Definir el tipo para una tarea (Task)
 export interface Task {
-  id: number; // ID único de la tarea
-  nombre: string; // Nombre de la tarea
+  id: string;
+  nombre: string;
   tipo: 'diarias' | 'extra';
-  puntos: number; // Puntos que otorga la tarea
-  completada: boolean; // Estado de la tarea (completada o no)
+  puntos: number;
+  completada: boolean;
+  fechaCompletada?: string;
+  childId: string;
+}
+
+export interface DiaTareas {
+  [dia: string]: {
+    diarias: Task[];
+    extra: Task[];
+  };
 }
 
 // Definir el tipo para el estado de las tareas (TasksState)

@@ -8,70 +8,174 @@ const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Función para manejar errores de Firebase
+  const handleFirebaseError = (errorCode: string) => {
+    switch (errorCode) {
+      case 'auth/user-not-found':
+        return "No existe una cuenta con este email. ¿Necesitas registrarte?";
+      case 'auth/wrong-password':
+        return "Contraseña incorrecta. Inténtalo de nuevo.";
+      case 'auth/invalid-email':
+        return "El formato del email no es válido.";
+      case 'auth/user-disabled':
+        return "Esta cuenta ha sido deshabilitada.";
+      case 'auth/too-many-requests':
+        return "Demasiados intentos fallidos. Espera unos minutos.";
+      case 'auth/network-request-failed':
+        return "Error de conexión. Verifica tu internet.";
+      default:
+        return "Error al iniciar sesión. Verifica tus credenciales.";
+    }
+  };
+
+  const validateInputs = () => {
+    if (!email.trim()) {
+      setError("El email es obligatorio");
+      return false;
+    }
+    if (!email.includes("@")) {
+      setError("Ingresa un email válido");
+      return false;
+    }
+    if (!password) {
+      setError("La contraseña es obligatoria");
+      return false;
+    }
+    return true;
+  };
+
   const handleSignin = async (e: React.FormEvent) => {
-    // Remove hardcoded credentials for testing
     e.preventDefault();
+    
+    // Prevenir múltiples envíos
+    if (isLoading) return;
+    
+    // Limpiar errores previos
+    setError("");
+    
+    // Validar inputs
+    if (!validateInputs()) return;
+    
+    setIsLoading(true);
 
     try {
-      console.log("Intentando iniciar sesión en Firebase Auth...");
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Intentando iniciar sesión para:", email);
+      
+      // Autenticar usuario
+      const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
       const user = userCredential.user;
-      console.log("Usuario autenticado:", user);
+      
+      console.log("Usuario autenticado:", user.uid);
 
-      // Obtener datos del usuario desde Firestore
+      // Verificar datos del usuario en Firestore
       const userRef = doc(db, "usuarios", user.uid);
       const userSnap = await getDoc(userRef);
 
       if (userSnap.exists()) {
         const userData = userSnap.data();
-        console.log("Datos del usuario obtenidos de Firestore:", userData);
+        console.log("Datos del usuario obtenidos:", userData);
 
-        // Verificar si tiene familia asociada
         if (userData.familyId) {
-          console.log("El usuario pertenece a la familia con ID:", userData.familyId);
+          console.log("Usuario pertenece a familia:", userData.familyId);
           navigate("/dashboard");
         } else {
-          console.error("No se encontró una familia asociada al usuario.");
-          setError("Tu cuenta no tiene una familia asociada. Por favor, contacta al soporte.");
+          setError("Tu cuenta no tiene una familia asociada. Contacta al soporte.");
         }
       } else {
-        console.error("No se encontraron datos para este usuario en Firestore.");
-        setError("Tu cuenta no está configurada correctamente en el sistema.");
+        console.error("No se encontró información del usuario en la base de datos");
+        setError("Tu cuenta no está configurada correctamente.");
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error al iniciar sesión:", err);
-      setError("Error al iniciar sesión: " + (err instanceof Error ? err.message : ""));
+
+      // Manejar errores específicos de Firebase
+      if (typeof err === "object" && err !== null && "code" in err) {
+        setError(handleFirebaseError((err as { code: string }).code));
+      } else if (typeof err === "object" && err !== null && "message" in err) {
+        setError((err as { message?: string }).message || "Error inesperado al iniciar sesión");
+      } else {
+        setError("Error inesperado al iniciar sesión");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSignin} className="space-y-4 p-4">
-      <input
-        type="email"
-        placeholder="Correo electrónico"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full p-2 border rounded font-sans"
-        required
-      />
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full p-2 border rounded font-sans"
-        required
-      />
-      {error && <p className="text-red-500" style={{ color: 'var(--color-red-500)' }}>{error}</p>}
+    <form onSubmit={handleSignin} className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <h2 className="text-center text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        Iniciar Sesión
+      </h2>
+      
+      <div>
+        <label htmlFor="signin-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Correo electrónico
+        </label>
+        <input
+          id="signin-email"
+          type="email"
+          placeholder="tu@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={isLoading}
+          className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          required
+        />
+      </div>
+      
+      <div>
+        <label htmlFor="signin-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Contraseña
+        </label>
+        <input
+          id="signin-password"
+          type="password"
+          placeholder="Tu contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={isLoading}
+          className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          required
+        />
+      </div>
+      
+      {error && (
+        <div className="p-3 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg">
+          <p className="text-red-700 dark:text-red-400 text-sm font-medium">
+            {error}
+          </p>
+          {error.includes("email") && (
+            <p className="text-red-600 dark:text-red-400 text-xs mt-1">
+              💡 ¿Necesitas crear una cuenta? Usa el formulario de registro.
+            </p>
+          )}
+        </div>
+      )}
+      
       <button
         type="submit"
-        className="w-full p-2 rounded"
-        style={{ backgroundColor: 'var(--color-blue-500)', color: 'var(--color-white)' }}
+        disabled={isLoading}
+        className="w-full p-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
       >
-        Iniciar Sesión
+        {isLoading ? (
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            Iniciando sesión...
+          </div>
+        ) : (
+          "Iniciar Sesión"
+        )}
       </button>
+      
+      <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        ¿No tienes cuenta?{" "}
+        <span className="text-blue-600 dark:text-blue-400 font-medium">
+          Usa el formulario de la derecha para registrarte
+        </span>
+      </p>
     </form>
   );
 };

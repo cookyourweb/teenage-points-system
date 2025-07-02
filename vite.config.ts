@@ -5,6 +5,9 @@ import { resolve } from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  css: {
+    postcss: './postcss.config.js'
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'), // Adding alias for src directory

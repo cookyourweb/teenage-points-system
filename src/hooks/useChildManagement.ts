@@ -1,35 +1,78 @@
-import { useState, useEffect } from "react";
-import { fetchFamilyById, addChildToFamily, deleteChildFromFamily, updateChildInFamily } from "../services/familyService";
+// src/hooks/useChildManagement.ts
+import { useState, useEffect, useCallback } from "react";
+import { fetchFamilyById, addChildToFamily, updateChildInFamily, deleteChildFromFamily } from "../services/familyService";
 import { Child, Family } from "../types/familyTypes";
 
-const useChildManagement = (initialFamilyId: string | null) => {
+interface UseChildManagementReturn {
+  family: Family | null;
+  children: Child[];
+  isLoading: boolean;
+  error: string | null;
+  handleAddChild: (child: Child) => Promise<boolean>;
+  handleEditChild: (childId: string, updatedChild: Child) => Promise<boolean>;
+  handleDeleteChild: (childId: string) => Promise<boolean>;
+  refreshFamily: () => Promise<void>;
+  clearError: () => void;
+}
+
+const useChildManagement = (initialFamilyId: string | null): UseChildManagementReturn => {
   const [family, setFamily] = useState<Family | null>(null);
+  const [children, setChildren] = useState<Child[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const loadFamily = async () => {
-      if (!initialFamilyId) return;
-      setIsLoading(true);
-      try {
-        const fetchedFamily = await fetchFamilyById(initialFamilyId);
-        setFamily(fetchedFamily);
-      } catch (err) {
-        console.error(err);
-        setError("Error al cargar la familia.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    loadFamily();
+  // Función para cargar la familia
+  const loadFamily = useCallback(async () => {
+    if (!initialFamilyId) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const fetchedFamily = await fetchFamilyById(initialFamilyId);
+      
+      if (fetchedFamily) {
+        setFamily(fetchedFamily);
+        
+        // Extraer los hijos del objeto de familia
+        const childrenArray = fetchedFamily.miembros?.hijos 
+          ? Object.values(fetchedFamily.miembros.hijos)
+          : [];
+        
+        setChildren(childrenArray);
+      } else {
+        setError("No se encontró la familia");
+      }
+    } catch (err) {
+      console.error("Error loading family:", err);
+      setError("Error al cargar la familia");
+    } finally {
+      setIsLoading(false);
+    }
   }, [initialFamilyId]);
 
-  const handleAddChild = async (child: Child) => {
-    if (!family) return false;
+  // Cargar familia al montar el hook
+  useEffect(() => {
+    loadFamily();
+  }, [loadFamily]);
+
+  // Función para añadir un hijo
+  const handleAddChild = async (child: Child): Promise<boolean> => {
+    if (!family) {
+      setError("No hay familia cargada");
+      return false;
+    }
+
     try {
+      setError(null);
+      
       await addChildToFamily(family.familyId, child);
-      setFamily(prev => prev ? ({
+
+      // Actualizar estado local
+      setFamily(prev => prev ? {
         ...prev,
         miembros: {
           ...prev.miembros,
@@ -38,19 +81,42 @@ const useChildManagement = (initialFamilyId: string | null) => {
             [child.id]: child,
           },
         },
-      }) : prev);
+      } : prev);
+
+      setChildren(prev => [...prev, child]);
+
       return true;
-    } catch {
-      setError("Error al añadir el hijo.");
+    } catch (err) {
+      console.error("Error adding child:", err);
+      setError("Error al añadir el hijo");
       return false;
     }
   };
 
-  const handleEditChild = async (childId: string, updatedChild: Child) => {
-    if (!family) return false;
+  // Función para refrescar los datos de la familia
+  const refreshFamily = async (): Promise<void> => {
+    await loadFamily();
+  };
+
+  // Función para limpiar errores
+  const clearError = (): void => {
+    setError(null);
+  };
+
+  // Función para editar un hijo
+  const handleEditChild = async (childId: string, updatedChild: Child): Promise<boolean> => {
+    if (!family) {
+      setError("No hay familia cargada");
+      return false;
+    }
+
     try {
+      setError(null);
+      
       await updateChildInFamily(family.familyId, childId, updatedChild);
-      setFamily(prev => prev ? ({
+      
+      // Actualizar estado local
+      setFamily(prev => prev ? {
         ...prev,
         miembros: {
           ...prev.miembros,
@@ -59,39 +125,63 @@ const useChildManagement = (initialFamilyId: string | null) => {
             [childId]: updatedChild,
           },
         },
-      }) : prev);
+      } : prev);
+
+      setChildren(prev => prev.map(child => 
+        child.id === childId ? updatedChild : child
+      ));
+      
       return true;
-    } catch {
-      setError("Error al editar el hijo.");
+    } catch (err) {
+      console.error("Error editing child:", err);
+      setError("Error al editar el hijo");
       return false;
     }
   };
 
-  const handleDeleteChild = async (childId: string) => {
-    if (!family) return;
+  // Función para eliminar un hijo
+  const handleDeleteChild = async (childId: string): Promise<boolean> => {
+    if (!family) {
+      setError("No hay familia cargada");
+      return false;
+    }
+
     try {
+      setError(null);
+      
       await deleteChildFromFamily(family.familyId, childId);
-      setFamily(prev => prev ? ({
+      
+      // Actualizar estado local
+      setFamily(prev => prev ? {
         ...prev,
         miembros: {
           ...prev.miembros,
           hijos: Object.fromEntries(
-            Object.entries(prev.miembros.hijos).filter(([key]) => key !== childId)
+            Object.entries(prev.miembros.hijos || {}).filter(([id]) => id !== childId)
           ),
         },
-      }) : prev);
-    } catch {
-      setError("Error al eliminar el hijo.");
+      } : prev);
+
+      setChildren(prev => prev.filter(child => child.id !== childId));
+
+      return true;
+    } catch (err) {
+      console.error("Error deleting child:", err);
+      setError("Error al eliminar el hijo");
+      return false;
     }
   };
 
   return {
     family,
+    children,
     isLoading,
     error,
     handleAddChild,
     handleEditChild,
     handleDeleteChild,
+    refreshFamily,
+    clearError,
   };
 };
 

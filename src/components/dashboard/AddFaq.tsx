@@ -21,7 +21,7 @@ const Faqs: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-6 bg-background dark:bg-background-dark text-text dark:text-text-dark">
+    <div className="p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors">
       <h2 className="text-2xl font-bold mb-4">FAQs</h2>
       {categorias.length === 0 ? (
         <p className="text-gray-500 dark:text-gray-400">No hay FAQs disponibles.</p>
@@ -30,7 +30,7 @@ const Faqs: React.FC = () => {
           {categorias.map((categoria) => (
             <li
               key={categoria.id}
-              className="p-4 bg-gray-100 dark:bg-gray-800 rounded shadow"
+              className="p-4 bg-gray-100 dark:bg-gray-700 rounded shadow transition-colors"
             >
               <p className="text-lg font-semibold">
                 <strong>Categoría:</strong> {categoria.titulo}
@@ -42,7 +42,7 @@ const Faqs: React.FC = () => {
                 {categoria.preguntas.map((pregunta) => (
                   <li
                     key={pregunta.id}
-                    className="border p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="border border-gray-200 dark:border-gray-600 p-2 rounded bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 transition-colors"
                   >
                     <p className="font-semibold">Título: {pregunta.titulo}</p>
                     <strong>Soluciones:</strong>

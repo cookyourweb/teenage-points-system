@@ -1,185 +1,629 @@
- // Dashboard.tsx
- import React, { useState, useEffect } from "react";
+// src/components/dashboard/Dashboard.tsx (Actualizado con gestión de tareas)
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../../firebase";
+import { signOut } from "firebase/auth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { 
+  faSignOutAlt, 
+  faUsers, 
+  faPlus, 
+
+  faTasks,
+  faGift,
+  faChartLine
+} from "@fortawesome/free-solid-svg-icons";
 import AddEditChild from "./AddEditChild";
 import InviteMember from "./InviteMember";
 import CompleteProfile from "./CompleteProfile";
+import FamilyPointsOverview from "./FamilyPointsOverview";
+import TaskManagement from "./TaskManagement";
+import PrivilegeManagement from "./PrivilegeManagement";
+
 import Button from "../ui/Button";
 import Modal from "../ui/Modal";
-import { Card } from "../ui/Card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { Child } from "../../types/familyTypes";
 import { useUserRole } from "../../hooks/useUserRole";
-import { addChildToFamily, fetchFamilyById, deleteChildFromFamily, updateChildInFamily } from "../../services/familyService";
+import { 
+  addChildToFamily, 
+  fetchFamilyById, 
+  deleteChildFromFamily, 
+  updateChildInFamily 
+} from "../../services/familyService";
 import { doc, getDoc } from "firebase/firestore";
+import ShareChildLink from "../ShareChildLink";
 
 const Dashboard: React.FC = () => {
-const [childToEdit, setChildToEdit] = useState<Child | null>(null); // State to hold the child data for editing
-
-const handleEditChild = (childId: string) => {
-    const child = children.find(c => c.id === childId);
-    if (child) {
-      setChildToEdit(child);
-      setIsAddingChild(true); // Open the modal with child data
-    } else {
-      setChildToEdit(null); // Ensure it's null if not found
-    }
-  };
-
-  const handleProfileUpdated = () => {
-    // Logic to handle profile updates
-    setShowCompleteProfile(false);
-    // Optionally, refresh data or show a success message
-  };
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
+  // Estados principales
   const [familyId, setFamilyId] = useState<string | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
+  const [childToEdit, setChildToEdit] = useState<Child | null>(null);
+  
+  // Estados de UI - Pestañas principales
+  const [activeTab, setActiveTab] = useState<'overview' | 'children' | 'tasks' | 'privileges'>('overview');
+  
+  // Estados de modales
   const [isInviting, setIsInviting] = useState(false);
   const [isAddingChild, setIsAddingChild] = useState(false);
   const [showCompleteProfile, setShowCompleteProfile] = useState(false);
+  
+  // Estados de carga y errores
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { role, isLoading: isRoleLoading, error: roleError } = useUserRole(user?.uid);
   const isAdmin = role === "admin";
+  const isPadre = role === "padre" || role === "admin";
 
-  // Obtener el ID de la familia del usuario
-  useEffect(() => {
-const fetchFamilyId = async () => {
-    console.log("Fetching family ID for user:", user?.uid); // Debugging log
-      if (user) {
-        const userDocRef = doc(db, "usuarios", user.uid);
-        const userDoc = await getDoc(userDocRef); 
-        console.log("Datos del usuario:", userDoc.data()); // Depuración
+  // Función para obtener el ID de la familia (memoizada para evitar bucles)
+  const fetchFamilyId = useCallback(async (userId: string) => {
+    try {
+      console.log("Fetching family ID for user:", userId);
+      const userDocRef = doc(db, "usuarios", userId);
+      const userDoc = await getDoc(userDocRef);
 
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const retrievedFamilyId = userData.familyId; // Aquí debe ser solo un string
-          if (retrievedFamilyId && typeof retrievedFamilyId === "string") {
-            setFamilyId(retrievedFamilyId);
-          }
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const retrievedFamilyId = userData.familyId;
+        
+        if (retrievedFamilyId && typeof retrievedFamilyId === "string") {
+          setFamilyId(retrievedFamilyId);
+          return retrievedFamilyId;
+        } else {
+          console.warn("No se encontró un ID de familia válido.");
+          setError("No se encontró un ID de familia válido.");
+          return null;
         }
+      } else {
+        console.warn("No se encontró el documento del usuario.");
+        setError("No se encontró el documento del usuario.");
+        return null;
       }
-    };
+    } catch (err) {
+      console.error("Error al obtener familia:", err);
+      setError("Error al obtener la información de la familia.");
+      return null;
+    }
+  }, []);
 
-    fetchFamilyId();
-  }, [user]);
+  // Función para cargar los hijos (memoizada)
+  const fetchChildren = useCallback(async (familyId: string) => {
+    try {
+      console.log("Fetching children for family ID:", familyId);
+      const family = await fetchFamilyById(familyId);
+      
+      if (family && family.miembros && family.miembros.hijos) {
+        const allChildren = Object.values(family.miembros.hijos);
+        setChildren(allChildren);
+      } else {
+        console.warn("No se encontró la familia o no tiene hijos.");
+        setChildren([]);
+      }
+    } catch (err) {
+      console.error("Error al cargar los hijos:", err);
+      setError("No se pudieron cargar los hijos.");
+      setChildren([]);
+    }
+  }, []);
 
-  // Cargar los hijos de la familia
+  // Efecto para obtener el ID de la familia cuando el usuario cambia
   useEffect(() => {
-    const fetchChildren = async () => {
-      if (!familyId) {
-        console.warn("No se puede cargar los hijos: el ID de la familia es nulo.");
+    let isMounted = true;
+
+    const loadFamilyId = async () => {
+      if (!user?.uid) {
+        setLoading(false);
         return;
       }
-      console.log("Fetching children for family ID:", familyId); // Debugging log
 
       try {
-        const family = await fetchFamilyById(familyId);
-        if (family) {
-          const allChildren = Object.values(family.miembros.hijos || {});
-          setChildren(allChildren);
-        } else {
-          console.warn("No se encontró la familia con el ID proporcionado.");
-          setChildren([]);
+        setLoading(true);
+        setError(null);
+        
+        const retrievedFamilyId = await fetchFamilyId(user.uid);
+        
+        if (isMounted && retrievedFamilyId) {
+          await fetchChildren(retrievedFamilyId);
         }
       } catch (err) {
-        console.error("Error al cargar los hijos:", err);
-        setError("No se pudieron cargar los hijos.");
+        if (isMounted) {
+          console.error("Error en loadFamilyId:", err);
+          setError("Error al cargar los datos de la familia.");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchChildren();
-  }, [familyId]);
+    loadFamilyId();
 
-const handleAddChild = () => {
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.uid, fetchFamilyId, fetchChildren]);
+
+  // Handlers para las acciones
+  const handleAddChild = useCallback(() => {
     console.log("Adding a new child");
+    setChildToEdit(null);
     setIsAddingChild(true);
-  };
+  }, []);
 
-  const handleCloseAddChild = () => {
+  const handleCloseAddChild = useCallback(() => {
     setIsAddingChild(false);
-    setChildToEdit(null); // Reset the edit state when closing the modal
-  };
+    setChildToEdit(null);
+  }, []);
 
-const handleSaveChild = async (child: Child) => {
+  const handleSaveChild = useCallback(async (child: Child) => {
     if (!familyId) return;
 
     try {
       if (childToEdit) {
-        // Si estamos editando un hijo existente
         await updateChildInFamily(familyId, childToEdit.id, child);
       } else {
-        // Si estamos añadiendo un nuevo hijo
         await addChildToFamily(familyId, child);
       }
       
-      // Actualizar la lista de hijos
-      const family = await fetchFamilyById(familyId);
-      if (family) {
-        const allChildren = Object.values(family.miembros.hijos || {});
-        setChildren(allChildren);
-      }
+      await fetchChildren(familyId);
       
-      // Resetear el estado de edición
       setChildToEdit(null);
       setIsAddingChild(false);
     } catch (err) {
       console.error("Error al guardar el hijo:", err);
       setError("No se pudo guardar el hijo.");
     }
+  }, [familyId, childToEdit, fetchChildren]);
+
+  const handleEditChild = useCallback((child: Child) => {
+    setChildToEdit(child);
+    setIsAddingChild(true);
+  }, []);
+
+  const handleDeleteChild = useCallback(async (childId: string, childName: string) => {
+    if (!familyId) return;
+
+    const confirmDelete = window.confirm(
+      `¿Estás seguro de que deseas eliminar a ${childName}?`
+    );
+    
+    if (confirmDelete) {
+      try {
+        await deleteChildFromFamily(familyId, childId);
+        setChildren(prevChildren => prevChildren.filter(c => c.id !== childId));
+      } catch (err) {
+        console.error("Error al eliminar hijo:", err);
+        setError("No se pudo eliminar el hijo.");
+      }
+    }
+  }, [familyId]);
+
+
+  const handleProfileUpdated = useCallback(() => {
+    setShowCompleteProfile(false);
+  }, []);
+
+  // Función para renderizar el contenido de cada pestaña
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <div className="space-y-6">
+            {/* Introducción */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Sistema de Puntos para Adolescentes
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    Gestiona las tareas y recompensas de tus hijos. Aquí puedes ver el progreso en tiempo real,
+                    añadir nuevos hijos, crear tareas personalizadas y gestionar privilegios.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Vista general de puntos */}
+            <FamilyPointsOverview familyId={familyId!} />
+
+            {/* Acciones rápidas */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Acciones Rápidas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Button 
+                    onClick={handleAddChild}
+                    className="flex items-center justify-center gap-2 h-12"
+                  >
+                    <FontAwesomeIcon icon={faPlus} />
+                    Añadir Hijo
+                  </Button>
+                  <Button 
+                    onClick={() => setActiveTab('tasks')}
+                    className="flex items-center justify-center gap-2 h-12 bg-green-500 hover:bg-green-600"
+                    disabled={!isPadre}
+                  >
+                    <FontAwesomeIcon icon={faTasks} />
+                    Gestionar Tareas
+                  </Button>
+                  <Button 
+                    onClick={() => setActiveTab('privileges')}
+                    className="flex items-center justify-center gap-2 h-12 bg-purple-500 hover:bg-purple-600"
+                    disabled={!isPadre}
+                  >
+                    <FontAwesomeIcon icon={faGift} />
+                    Gestionar Privilegios
+                  </Button>
+                  {isAdmin && (
+                    <Button 
+                      onClick={() => setIsInviting(true)}
+                      className="flex items-center justify-center gap-2 h-12 bg-blue-500 hover:bg-blue-600"
+                    >
+                      <FontAwesomeIcon icon={faUsers} />
+                      Invitar Miembro
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Estadísticas rápidas */}
+            {children.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FontAwesomeIcon icon={faChartLine} className="text-blue-500" />
+                    Resumen Familiar
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                        {children.length}
+                      </div>
+                      <p className="text-sm text-blue-600 dark:text-blue-400">
+                        Hijo{children.length > 1 ? 's' : ''} registrado{children.length > 1 ? 's' : ''}
+                      </p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        12
+                      </div>
+                      <p className="text-sm text-green-600 dark:text-green-400">
+                        Tareas base disponibles
+                      </p>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                        10
+                      </div>
+                      <p className="text-sm text-purple-600 dark:text-purple-400">
+                        Privilegios disponibles
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        );
+
+      case 'children':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                Gestión de Hijos
+              </h2>
+              <Button onClick={handleAddChild} className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faPlus} />
+                Añadir Hijo
+              </Button>
+            </div>
+
+            {children.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <FontAwesomeIcon icon={faUsers} size="3x" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    No hay hijos registrados
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    Comienza añadiendo a tu primer hijo para empezar a usar el sistema de puntos.
+                  </p>
+                  <Button onClick={handleAddChild}>
+                    Añadir Primer Hijo
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {children.map((child) => (
+                  <Card key={child.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="text-center mb-4">
+                        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <span className="text-2xl">👤</span>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                          {child.nombre}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          {child.edad} años
+                        </p>
+                      </div>
+
+                      <div className="space-y-3 mb-6">
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Tipos de Adolescente:
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {child.tiposAdolescente.length > 0 ? (
+                              child.tiposAdolescente.map((tipo, index) => (
+                                <span
+                                  key={index}
+                                  className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full"
+                                >
+                                  {tipo}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                No asignado
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Button
+                          onClick={() => navigate(`/reward-tracker/${familyId}/${child.id}`)}
+                          className="w-full"
+                        >
+                          Ver Sistema de Puntos
+                        </Button>
+                        <div className="grid grid-cols-3 gap-2">
+                          <ShareChildLink child={child} familyId={familyId!} />
+                          <Button
+                            onClick={() => handleEditChild(child)}
+                            className="bg-yellow-500 hover:bg-yellow-600"
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteChild(child.id, child.nombre)}
+                            className="bg-red-500 hover:bg-red-600"
+                          >
+                            Eliminar
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'tasks':
+        return (
+          <div className="space-y-6">
+            {!isPadre ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <FontAwesomeIcon icon={faTasks} size="3x" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    Acceso Restringido
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Solo los padres pueden gestionar las tareas personalizadas.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <TaskManagement familyId={familyId!} />
+            )}
+          </div>
+        );
+
+      case 'privileges':
+        return (
+          <div className="space-y-6">
+            {!isPadre ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <FontAwesomeIcon icon={faGift} size="3x" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    Acceso Restringido
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Solo los padres pueden gestionar los privilegios personalizados.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <PrivilegeManagement familyId={familyId!} />
+            )}
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
-  const handleCompleteProfile = () => {
-    setShowCompleteProfile(true);
-  };
-
-  if (isRoleLoading) {
-    return <p>Cargando...</p>;
+  // Mostrar loading si está cargando
+  if (isRoleLoading || loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Cargando dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
+  // Mostrar error si hay alguno
   if (error || roleError) {
-    return <p>{error || roleError || "Error inesperado."}</p>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="text-center max-w-md">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Error al cargar el dashboard
+          </h2>
+          <p className="text-red-600 dark:text-red-400 mb-4">
+            {error || roleError || "Error inesperado."}
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    );
   }
 
+  // Verificar que tengamos familyId
   if (!familyId) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold">Dashboard Familiar</h1>
-        <p className="text-red-600 mt-4">
-          No se encontró un ID de familia asociado a este usuario. Por favor, contacte al soporte.
-        </p>
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="text-center max-w-md">
+          <div className="text-yellow-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Configuración Incompleta
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            No se encontró un ID de familia asociado a tu usuario. Por favor, contacta al soporte.
+          </p>
+          <Button onClick={() => signOut(auth)}>
+            Cerrar Sesión
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Bienvenido, {user?.displayName || "Usuario"}.</h1>
-      <p className="mt-4">
-        Este es tu sistema de puntos para adolescentes. Aquí puedes añadir a tus hijos y enviar invitaciones a otros miembros de tu familia.
-      </p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                Dashboard Familiar
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Bienvenido, {user?.displayName || "Usuario"}
+                {isPadre && <span className="ml-2 text-blue-600 dark:text-blue-400">👑 Padre</span>}
+              </p>
+            </div>
+            <button
+              onClick={async () => {
+                await signOut(auth);
+                navigate("/");
+              }}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              title="Cerrar sesión"
+            >
+              <FontAwesomeIcon icon={faSignOutAlt} />
+              <span className="hidden sm:inline">Cerrar Sesión</span>
+            </button>
+          </div>
+        </div>
+      </header>
 
-      <div className="flex space-x-4 mt-4">
-        <Button onClick={handleAddChild}>Añadir Hijo</Button>
-        <Button onClick={handleCompleteProfile}>Completar Perfil</Button>
-        <Button onClick={() => setIsInviting(true)}>
-          Invitar Miembro
-        </Button>
-        {isAdmin && (
-          <Button onClick={() => setIsInviting(true)}>
-            Invitar Miembro
-          </Button>
-        )}
+      {/* Navigation Tabs */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          <nav className="-mb-px flex space-x-8 overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                activeTab === 'overview'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+              Vista General
+            </button>
+            <button
+              onClick={() => setActiveTab('children')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                activeTab === 'children'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              <FontAwesomeIcon icon={faUsers} className="mr-2" />
+              Gestión de Hijos
+            </button>
+            <button
+              onClick={() => setActiveTab('tasks')}
+              disabled={!isPadre}
+              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                activeTab === 'tasks'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : isPadre 
+                    ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                    : 'border-transparent text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              <FontAwesomeIcon icon={faTasks} className="mr-2" />
+              Tareas Personalizadas
+              {!isPadre && <span className="ml-1 text-xs">🔒</span>}
+            </button>
+            <button
+              onClick={() => setActiveTab('privileges')}
+              disabled={!isPadre}
+              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                activeTab === 'privileges'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : isPadre 
+                    ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                    : 'border-transparent text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              <FontAwesomeIcon icon={faGift} className="mr-2" />
+              Privilegios Personalizados
+              {!isPadre && <span className="ml-1 text-xs">🔒</span>}
+            </button>
+          </nav>
+        </div>
       </div>
 
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {renderTabContent()}
+      </main>
+
+      {/* Modals */}
       {isAddingChild && (
         <Modal onClose={handleCloseAddChild} isOpen={isAddingChild}>
-<AddEditChild
-  childToEdit={childToEdit || undefined} // Pass the child to edit or undefined for a new child
-            familyId={familyId!}
+          <AddEditChild
+            childToEdit={childToEdit || undefined}
+            familyId={familyId}
             onSave={handleSaveChild}
             onCancel={handleCloseAddChild}
           />
@@ -188,7 +632,7 @@ const handleSaveChild = async (child: Child) => {
 
       {isInviting && (
         <Modal onClose={() => setIsInviting(false)} isOpen={isInviting}>
-          <InviteMember familyId={familyId!} onClose={() => setIsInviting(false)} />
+          <InviteMember familyId={familyId} onClose={() => setIsInviting(false)} />
         </Modal>
       )}
 
@@ -198,37 +642,15 @@ const handleSaveChild = async (child: Child) => {
         </Modal>
       )}
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {children.map((child) => (
-          <Card key={child.id}>
-            <p>
-              <strong>Nombre:</strong> {child.nombre}
-            </p>
-            <p>
-              <strong>Edad:</strong> {child.edad}
-            </p>
-            <p>
-              <strong>Tipo de Adolescente:</strong> {child.tiposAdolescente.length > 0 ? child.tiposAdolescente.join(', ') : 'No hay tipos de adolescente'}
-            </p>
-            <div className="flex space-x-2">
-              <Button onClick={() => handleEditChild(child.id)}>Editar</Button>
-              <Button onClick={async () => {
-                  const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este hijo?");
-                  if (confirmDelete) {
-                    // Lógica para eliminar el hijo de la base de datos
-                    await deleteChildFromFamily(familyId, child.id);
-                    // Actualizar la lista de hijos
-                    setChildren(prevChildren => prevChildren.filter(c => c.id !== child.id));
-                  }
-              }}>Eliminar</Button>
-              <Button onClick={() => {
-                  navigate(`/reward-tracker/${familyId}/${child.id}`); // Navigate to RewardTracker with familyId
-              }}>
-                  Acceder a su Sistema de Puntos
-              </Button>
-            </div>
-          </Card>
-        ))}
+      {/* Floating Action Button para añadir hijo (móvil) */}
+      <div className="fixed bottom-6 right-6 md:hidden">
+        <button
+          onClick={handleAddChild}
+          className="w-14 h-14 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
+          title="Añadir hijo"
+        >
+          <FontAwesomeIcon icon={faPlus} size="lg" />
+        </button>
       </div>
     </div>
   );

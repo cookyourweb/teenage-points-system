@@ -11,11 +11,12 @@ export const fetchTasks = async (): Promise<Task[]> => {
     return querySnapshot.docs.map((docSnap) => {
       const data = docSnap.data();
       const task: Task = {
-        id: parseInt(docSnap.id, 10),
+        id: docSnap.id,
         nombre: data.nombre || "Sin Nombre",
         tipo: data.tipo || 'diarias', // Ensure tipo is provided
         puntos: typeof data.puntos === 'number' ? data.puntos : parseFloat(data.puntos) || 0, // Ensure puntos is a number
         completada: data.completada || false,
+        childId: data.childId || "Sin ID",
       };
       return task;
     });
@@ -30,7 +31,7 @@ export const addTask = async (task: Task): Promise<Task> => {
   try {
     const tasksCollection = collection(db, "tareas");
     const docRef = await addDoc(tasksCollection, task);
-    return { ...task, id: parseInt(docRef.id, 10) };
+    return { ...task, id: docRef.id };
   } catch (error) {
     console.error("Error adding task:", error);
     throw new Error("Failed to add task");

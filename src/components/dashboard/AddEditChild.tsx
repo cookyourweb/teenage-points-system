@@ -3,8 +3,8 @@ import Button from "../ui/Button";
 import { fetchCategorias } from "../../services/faqsService";
 import { Child } from "../../types/familyTypes";
 import { Categoria, Pregunta } from "../../types/faqsTypes";
-import { addChildToFamily, updateChildInFamily } from "../../services/familyService";
-import Modal from "../ui/Modal"; // Asegúrate de que el componente Modal esté importado
+import { familyService } from "../../services/familyService";
+import Modal from "../ui/Modal";
 
 interface AddEditChildProps {
   childToEdit?: Child;
@@ -27,30 +27,25 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
   const [showModal, setShowModal] = useState(false);
   const [selectedPregunta, setSelectedPregunta] = useState<Pregunta | null>(null);
 
-  // Cargar la categoría "Tipo de Adolescente"
   useEffect(() => {
     const loadCategorias = async () => {
       try {
         const categoriasData = await fetchCategorias();
         const tipoAdolescenteCategoria = categoriasData.find(c => c.titulo.toLowerCase() === "tipo de adolescente");
         if (tipoAdolescenteCategoria) {
-          setCategoria(tipoAdolescenteCategoria); // Guardamos la categoría en el estado
-          setTiposAdolescente(childToEdit?.tiposAdolescente || []); // Set selected types for editing
-          console.log("Preguntas de la categoría:", tipoAdolescenteCategoria.preguntas); // Verificar preguntas
-        } else {
-          console.log("No se encontró la categoría 'Tipo de Adolescente'"); // Depuración
+          setCategoria(tipoAdolescenteCategoria);
+          setTiposAdolescente(childToEdit?.tiposAdolescente || []);
         }
       } catch (err) {
         console.error("Error al cargar las categorías:", err);
       } finally {
-        setLoading(false); // Para detener el estado de carga
+        setLoading(false);
       }
     };
 
     loadCategorias();
   }, [childToEdit]);
 
-  // Función para verificar si un tipo ya existe (ignorando mayúsculas/minúsculas)
   const tipoExiste = (tipo: string, lista: string[]) => {
     return lista.some(t => t.toLowerCase() === tipo.toLowerCase());
   };
@@ -59,18 +54,15 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
     const pregunta = categoria?.preguntas.find(p => p.id === preguntaId);
     if (!pregunta) return;
 
-    setTiposAdolescente((prev) => {
-      // Si el tipo ya existe (ignorando mayúsculas/minúsculas), lo removemos
+    setTiposAdolescente((prev: string[]) => {
       if (tipoExiste(pregunta.titulo, prev)) {
         return prev.filter(tipo => tipo.toLowerCase() !== pregunta.titulo.toLowerCase());
       }
-      // Si no existe, lo añadimos
       return [...prev, pregunta.titulo];
     });
   };
 
   const handleSave = async () => {
-    // Validación de campos requeridos según la interfaz Child
     if (!nombre.trim()) {
       alert("El nombre es obligatorio.");
       return;
@@ -86,17 +78,10 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
       return;
     }
 
-    console.log("Saving child data:", { nombre, edad, tiposAdolescente });
-
-    // Ya no necesitamos mapear los IDs a títulos porque ahora guardamos directamente los títulos
     const uniqueTipos = [...new Set(tiposAdolescente.map(tipo => tipo.trim()))];
-
-    // Si estamos editando, mantener el ID existente
     const childId = childToEdit?.id || `new-${Date.now()}`;
-    
-    // Generar el rewardLink usando el nombre normalizado (sin espacios)
     const normalizedName = nombre.trim().toLowerCase().replace(/\s+/g, '-');
-    const rewardLink = `/family/${normalizedName}/${childId}`; // Cambiado a enlace relativo
+    const rewardLink = `/family/${normalizedName}/${childId}`;
 
     const child: Child = {
       id: childId,
@@ -108,11 +93,9 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
 
     try {
       if (childToEdit) {
-        // Si estamos editando, usamos updateChildInFamily
-        await updateChildInFamily(familyId, childId, child);
+        await familyService.updateChildInFamily(familyId, childId, child);
       } else {
-        // Si estamos creando uno nuevo, usamos addChildToFamily
-        await addChildToFamily(familyId, child);
+        await familyService.addChildToFamily(familyId, child);
       }
       await onSave(child);
       onCancel();
@@ -123,11 +106,11 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
   };
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-800 shadow-md rounded-md">
-      <h2 className="text-xl font-bold mb-4">{childToEdit ? "Estos son los datos de tu hijo" : "Vamos a añadir a tu hijo"}</h2>
+    <div className="p-4 bg-white dark:bg-gray-800 shadow-md rounded-md transition-colors">
+      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">{childToEdit ? "Estos son los datos de tu hijo" : "Vamos a añadir a tu hijo"}</h2>
       <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
         <div className="mb-4">
-          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">Nombre</label>
+          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
           <input 
             type="text" 
             id="nombre" 
@@ -135,12 +118,12 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
             onChange={(e) => setNombre(e.target.value.replace(/\s+/g, ' '))} 
             onBlur={(e) => setNombre(e.target.value.trim())}
             required 
-            className="mt-1 block w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
+            className="mt-1 block w-full p-3 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
           />
         </div>
 
         <div className="mb-4">
-          <label htmlFor="edad" className="block text-sm font-medium text-gray-700">Edad</label>
+          <label htmlFor="edad" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Edad</label>
           <input 
             type="number" 
             id="edad" 
@@ -148,7 +131,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
             onChange={(e) => setEdad(Math.max(0, Number(e.target.value)))} 
             min="0"
             required 
-            className="mt-1 block w-full p-3 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
+            className="mt-1 block w-full p-3 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
           />
         </div>
 
@@ -157,7 +140,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
             <p>Cargando preguntas...</p>
           ) : categoria ? (
             <div>
-              <h3 className="text-lg font-bold">Tipos de Adolescente</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Tipos de Adolescente</h3>
               <div className="mt-2">
                 {categoria.preguntas.map((pregunta) => {
                   const isChecked = tipoExiste(pregunta.titulo, tiposAdolescente);
@@ -171,7 +154,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
                           onChange={() => handleTipoChange(pregunta.id)} 
                           className="mr-2" 
                         />
-                        <span className="flex items-center">
+                        <span className="flex items-center text-gray-900 dark:text-gray-100">
                           {pregunta.titulo}
                           <button 
                             type="button" 
@@ -179,7 +162,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
                               setSelectedPregunta(pregunta); 
                               setShowModal(true); 
                             }} 
-                            className="ml-2 text-blue-500 hover:underline"
+                            className="ml-2 text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
                           >
                             ❓
                           </button>
@@ -196,12 +179,11 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
         </div>
 
         <div className="flex justify-end space-x-2">
-          <Button onClick={onCancel} className="bg-gray-300">Cancelar</Button> {/* Light gray button */}
+          <Button onClick={onCancel} className="bg-gray-300">Cancelar</Button>
           <Button onClick={handleSave}>{childToEdit ? "Guardar Cambios" : "Guardar"}</Button>
         </div>
       </form>
 
-      {/* Modal para mostrar definición y soluciones */}
       {showModal && selectedPregunta && (
         <Modal onClose={() => setShowModal(false)} isOpen={showModal}>
           <h2 className="text-lg font-bold">Consejos para tratar a estos adolescentes</h2>

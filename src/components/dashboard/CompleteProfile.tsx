@@ -1,4 +1,4 @@
-//CompletProfile.tsx
+ //CompletProfile.tsx
 import React, { useState } from "react";
 import { updatePhoneNumber } from "../../services/usersService";
 
@@ -46,7 +46,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ userId, onProfileUpda
       <button
         onClick={handleSubmit}
         disabled={isSubmitting}
-        className="mt-4 bg-blue-500 text-white py-2 px-4 rounded disabled:opacity-50"
+        className="mt-4 bg-primary-600 text-white py-2 px-4 rounded disabled:opacity-50 hover:bg-primary-700 transition-colors"
       >
         {isSubmitting ? "Guardando..." : "Guardar"}
       </button>

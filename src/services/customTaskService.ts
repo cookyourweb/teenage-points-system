@@ -1,4 +1,4 @@
-// src/services/customTasksService.ts
+// src/services/customTaskService.ts - SOLUCIÓN TEMPORAL
 import { 
   collection, 
   getDocs, 
@@ -44,48 +44,78 @@ export const fetchCustomTasks = async (): Promise<CustomTask[]> => {
   }
 };
 
-// Obtener tareas por familia
+// Obtener tareas por familia - SIMPLIFICADO TEMPORALMENTE
 export const getTasksByFamily = async (familyId: string): Promise<CustomTask[]> => {
   try {
     const tasksCollection = collection(db, "customTasks");
+    // Consulta simplificada sin múltiples orderBy
     const q = query(
       tasksCollection, 
-      where("familyId", "==", familyId),
-      orderBy("tipo", "asc"),
-      orderBy("createdAt", "desc")
+      where("familyId", "==", familyId)
     );
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map((docSnap) => ({
+    const tasks = querySnapshot.docs.map((docSnap) => ({
       id: docSnap.id,
       ...docSnap.data(),
     })) as CustomTask[];
+    
+    // Ordenar en el cliente mientras se construye el índice
+    return tasks.sort((a, b) => {
+      // Primero por tipo
+      if (a.tipo !== b.tipo) {
+        return a.tipo.localeCompare(b.tipo);
+      }
+      // Luego por fecha de creación (más recientes primero)
+      const aTime = a.createdAt?.toDate().getTime() || 0;
+      const bTime = b.createdAt?.toDate().getTime() || 0;
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error("Error fetching family tasks:", error);
     throw new Error("Failed to fetch family tasks");
   }
 };
 
-// Obtener tareas activas por familia
+// ✅ FUNCIÓN TEMPORAL: Obtener tareas activas por familia 
 export const getActiveTasksByFamily = async (familyId: string): Promise<CustomTask[]> => {
   try {
     const tasksCollection = collection(db, "customTasks");
+    
+    // ✅ CONSULTA SIMPLIFICADA - Solo usar where, sin orderBy múltiple
     const q = query(
       tasksCollection, 
       where("familyId", "==", familyId),
-      where("isActive", "==", true),
-      orderBy("tipo", "asc"),
-      orderBy("createdAt", "desc")
+      where("isActive", "==", true)
+      // ❌ Temporalmente removemos los orderBy para evitar el error de índice
     );
+    
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map((docSnap) => ({
+    const tasks = querySnapshot.docs.map((docSnap) => ({
       id: docSnap.id,
       ...docSnap.data(),
     })) as CustomTask[];
+    
+    // ✅ ORDENAR EN EL CLIENTE (mientras se construye el índice)
+    return tasks.sort((a, b) => {
+      // Primero ordenar por tipo: 'diarias' antes que 'extra'
+      if (a.tipo !== b.tipo) {
+        return a.tipo.localeCompare(b.tipo);
+      }
+      
+      // Dentro del mismo tipo, ordenar por fecha de creación (más recientes primero)
+      const aTime = a.createdAt?.toDate().getTime() || 0;
+      const bTime = b.createdAt?.toDate().getTime() || 0;
+      return bTime - aTime;
+    });
+    
   } catch (error) {
     console.error("Error fetching active family tasks:", error);
-    throw new Error("Failed to fetch active family tasks");
+    
+    // ✅ FALLBACK: Si hay error, devolver array vacío para evitar crashes
+    console.warn("🔄 Devolviendo array vacío mientras se construye el índice de Firebase");
+    return [];
   }
 };
 
@@ -171,21 +201,28 @@ export const toggleMultipleTasksStatus = async (taskIds: string[], isActive: boo
   }
 };
 
-// Obtener tareas creadas por un usuario específico
+// Obtener tareas creadas por un usuario específico - SIMPLIFICADO TEMPORALMENTE
 export const getTasksByCreator = async (createdBy: string): Promise<CustomTask[]> => {
   try {
     const tasksCollection = collection(db, "customTasks");
+    // Consulta simplificada
     const q = query(
       tasksCollection, 
-      where("createdBy", "==", createdBy),
-      orderBy("createdAt", "desc")
+      where("createdBy", "==", createdBy)
     );
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map((docSnap) => ({
+    const tasks = querySnapshot.docs.map((docSnap) => ({
       id: docSnap.id,
       ...docSnap.data(),
     })) as CustomTask[];
+    
+    // Ordenar en el cliente
+    return tasks.sort((a, b) => {
+      const aTime = a.createdAt?.toDate().getTime() || 0;
+      const bTime = b.createdAt?.toDate().getTime() || 0;
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error("Error fetching tasks by creator:", error);
     throw new Error("Failed to fetch tasks by creator");

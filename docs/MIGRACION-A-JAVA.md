@@ -90,13 +90,42 @@ DELETE /api/tasks/{id}         204
 
 7 tests Java en verde.
 
+**Frontend conectado a la API (31-jul-2026).** `customTaskService.ts` ya no habla con
+Firestore: habla con `localhost:8080`. Los componentes no han cambiado ni una línea,
+porque nunca supieron de dónde venían los datos.
+
+Y funcionó como decía el plan: la dependencia de Firebase estaba encerrada en el
+servicio, así que migrar fue escribir otro adaptador, no reescribir la aplicación.
+Un solo componente importa este servicio, `TaskManagement.tsx`, y usa cuatro funciones.
+
+Tres cosas que aparecieron al conectar:
+
+| Qué | Por qué importaba |
+|---|---|
+| `createdAt` y `updatedAt` pasan de `Timestamp` de Firestore a `string` ISO-8601 | Ningún componente las leía, así que no rompió nada. Si las hubiera leído, habría fallado al llamar a `.toDate()` |
+| `updateCustomTask` recibe la tarea entera, no un parcial | El `PUT` reemplaza el registro completo porque `Task` es un `record` inmutable. Los dos sitios que la llaman ya mandaban el objeto entero |
+| `toggleMultipleTasksStatus` ahora lee antes de escribir | Mandaba solo `{ isActive }`. Contra la API eso sería un 400 por nombre en blanco |
+
+**Dos funciones eliminadas**, ninguna con consumidores:
+
+- `fetchCustomTasks()` devolvía **las tareas de todas las familias**. En un sistema
+  con datos de menores eso no es una función que falte migrar: es una que no debía
+  existir. No tiene equivalente en la API y no lo va a tener.
+- `getTasksByCreator()` no tiene ruta en el controlador. El repositorio sí tiene
+  `findByCreatedBy`, así que el día que haga falta son cuatro líneas.
+
+**CORS configurado (31-jul-2026).** `config/CorsConfig.java`, con 4 tests.
+
+Los orígenes se declaran uno a uno en vez de abrir con `*`, y se leen de
+`application.properties` para que producción no dependa de recompilar. Hay un test
+que comprueba que un origen desconocido recibe **403**: sin él, el día que alguien
+escriba `*` para salir del paso, nada avisaría.
+
 ### Pendiente
 
-- [ ] **Conectar el frontend.** Cambiar `customTaskService.ts` para que llame a
-      `localhost:8080` en vez de a Firestore. Es el momento en que esto deja de ser
-      un backend suelto y pasa a ser una migración de verdad.
-- [ ] **CORS.** Sin configurarlo, el navegador bloqueará las llamadas de `:5173` a
-      `:8080`. Es lo primero que va a fallar.
+- [ ] **Probar el circuito completo con Docker levantado.** Los tests cubren el
+      contrato por los dos lados, pero todavía no se ha visto al navegador real
+      hacer la preflight contra el servidor real.
 - [ ] **Autenticación.** Hoy la API está abierta: cualquiera puede pedir las tareas
       de cualquier familia. Es la pieza más grande que queda.
 - [ ] Resto de dominios: `Privilege`, `Family`, `Reward`.

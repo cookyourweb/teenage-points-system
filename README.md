@@ -129,7 +129,6 @@ porque lo que se prueba ahí son las reglas de negocio y no que Mongo sepa guard
 
 ## Qué falta
 
-- Conectar el frontend a la API en lugar de a Firestore
 - Autenticación en el backend, que hoy está abierto
 - Los dominios de privilegios, familias y recompensas
 - Migrar los datos existentes

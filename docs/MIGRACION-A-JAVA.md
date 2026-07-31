@@ -152,10 +152,45 @@ fue el de métodos CORS, que pasaba sin la configuración puesta porque Spring
 responde 200 al `OPTIONS` por defecto. La regla que queda: si un test pasa antes de
 escribir la funcionalidad, el test está roto.
 
+**Eliminada una copia duplicada del servicio (31-jul-2026).**
+
+`src/components/FamilyPointsOverview.tsx` no era un componente: era una copia entera
+de `customTaskService`, con las mismas 9 funciones, guardada con nombre de componente
+en julio de 2025. Seguía hablando con Firestore.
+
+Y tenía consumidor. `usePointsManagement` importaba `getActiveTasksByFamily` de ahí,
+y ese hook lo usa `ChildView`. Así que al migrar `customTaskService` la aplicación se
+quedó con dos fuentes de verdad para las mismas tareas:
+
+```
+TaskManagement  ->  customTaskService    ->  API Java  ->  Mongo
+ChildView       ->  usePointsManagement  ->  la copia  ->  Firestore
+```
+
+Se creaba una tarea desde el panel y la vista del hijo no la veía.
+
+**El fallo no lo introdujo la copia: lo introdujo migrar sin buscarla.** Llevaba más
+de un año sin molestar porque las dos rutas iban a Firestore y coincidían. Migrar una
+y no la otra es lo que las puso a discrepar.
+
+Lo encontró una pregunta, no una herramienta: *"¿seguro que eso no era para algo?"*.
+La comprobación previa buscó quién importaba `customTaskService` y respondió "un solo
+fichero". Era cierto, y era la pregunta equivocada: nadie preguntó si existía **otra
+copia del mismo servicio con otro nombre**.
+
+Quedan `docs/arquitectura` en forma de tests (`src/__tests__/arquitectura.test.ts`):
+cada operación de tareas se exporta desde un único fichero, `customTaskService` no
+importa firebase, y ningún fichero de `components/` exporta funciones de acceso a
+datos sin ser un componente.
+
+Un test de comportamiento no habría detectado nada: **las dos copias funcionaban. Lo
+que fallaba era que hubiera dos.**
+
 ### Pendiente
 
 - [ ] **Probarlo en el navegador.** Falta abrir la aplicación y crear una tarea de
-      verdad desde la interfaz. El circuito HTTP está verificado; la pantalla no.
+      verdad desde la interfaz, y comprobar que la vista del hijo la ve. El circuito
+      HTTP está verificado; la pantalla no.
 - [ ] **Autenticación.** Hoy la API está abierta: cualquiera puede pedir las tareas
       de cualquier familia. Es la pieza más grande que queda.
 - [ ] Resto de dominios: `Privilege`, `Family`, `Reward`.

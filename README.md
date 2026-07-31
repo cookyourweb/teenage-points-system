@@ -1,142 +1,138 @@
-# Familias Estelares - Plataforma Educativa
+# Sistema de puntos familiar
 
-## Descripción
-Plataforma educativa tipo Netflix diseñada para la gestión y apoyo en la educación de adolescentes. Ofrece un sistema integral que conecta a padres, profesores y adolescentes en un entorno educativo interactivo y gamificado.
+Una plataforma para que las familias acuerden tareas, puntos y privilegios con sus
+hijos adolescentes, y para que los hijos vean su progreso sin depender de que
+alguien se lo recuerde.
 
-## ToDo
+Los padres definen las tareas y lo que vale cada una. Los hijos las completan y
+acumulan puntos. Al llegar a cierto umbral se desbloquean privilegios, y cada hijo
+tiene un enlace propio de solo lectura para consultar su marcador.
 
-### Mejoras de UI/UX
-- [ ] Limpieza y Optimización de Estilos
-  - Eliminar estilos CSS personalizados innecesarios
-  - Migrar a clases base de Tailwind
-  - Remover duplicados y conflictos
-  - Optimizar especificidad de selectores
-  - Implementar sistema de diseño consistente
+Nació de un problema doméstico real y se ha convertido en el proyecto donde pruebo
+decisiones de arquitectura de punta a punta.
 
-- [ ] Configuración Base de Tailwind
-  - Configurar theme.extend en tailwind.config.js
-  - Definir colores personalizados
-  - Establecer tipografía base
-  - Configurar espaciados y breakpoints
-  - Crear plugins personalizados si son necesarios
+---
 
-- [ ] Sistema de Tema Oscuro/Claro
-  - Implementar modo oscuro usando Tailwind
-  - Ajustar colores de texto para mejor legibilidad
-  - Asegurar contraste adecuado
-  - Persistencia de preferencia de tema
-  - Transiciones suaves entre temas
+## Con qué está hecho
 
-- [ ] Estilos Generales
-  - Unificar paleta de colores
-  - Mejorar responsividad
-  - Optimizar espaciados
-  - Añadir animaciones y transiciones
-  - Mejorar accesibilidad
+**Frontend**
+React 18 · TypeScript · Vite · React Router · Tailwind · Vitest y Testing Library
 
-### Funcionalidades de Administrador
-- [ ] Panel de Administración de FAQs en Dashboard
-  - Botón de edición de FAQs visible solo para admin
-  - CRUD completo de FAQs desde dashboard
-  - Vista previa de cambios
-  - Sistema de publicación/borrador
-  - Historial de modificaciones
+**Backend**
+Java 17 · Spring Boot 4.1 · Spring Data MongoDB · Bean Validation · JUnit 5 y Mockito
 
-- [ ] Gestión de FAQs
-  - Nuevo diseño de interfaz de FAQs
-  - Mejorar estilos y usabilidad
-  - Categorización mejorada
-  - Sistema de búsqueda avanzado
-  - Estadísticas de uso
+**Datos y servicios**
+MongoDB · Firebase (Auth y Firestore, en migración)
 
-### Permisos y Roles de Padres
-- [ ] Sistema de Gestión de Tareas
-  - Panel de edición de tareas
-  - Crear nuevas tareas personalizadas
-  - Modificar tareas existentes
-  - Eliminar tareas no deseadas
-  - Historial de cambios
+---
 
-- [ ] Sistema de Gestión de Privilegios
-  - Panel de administración de privilegios
-  - Crear nuevos privilegios
-  - Editar privilegios existentes
-  - Eliminar privilegios
-  - Control de requisitos y puntos
+## Arquitectura, y por qué está a medio camino
 
-### Sistema de Histórico
-- [ ] Histórico de Privilegios
-  - Registro detallado de privilegios disfrutados
-  - Fecha y hora de uso
-  - Puntos gastados
-  - Tareas completadas asociadas
-  - Estadísticas de uso
+El backend original es Firestore, con el frontend hablando directamente con él.
+Ahora se está migrando a una API propia en Spring Boot. **Los dos conviven**: se
+migra endpoint por endpoint, sin reescribir nada y sin parar la aplicación.
 
-- [ ] Dashboard de Histórico
-  - Vista general de actividad
-  - Filtros por fecha
-  - Exportación de datos
-  - Gráficos y estadísticas
-  - Recomendaciones basadas en uso
+```
+componentes React
+       |
+src/services/*.ts        <- la unica capa que sabe de donde vienen los datos
+       |                                    |
+   Firestore                        API Spring Boot
+   (lo que queda)                          |
+                                        MongoDB
+```
 
-### Testing con Vitest
-- [ ] Pruebas Unitarias y de Integración
-  - Componentes
-  - Servicios
-  - Hooks
-  - Sistema de autenticación
-  - Flujos de usuario
-  - Pruebas para el componente AddEditChild
-  - Pruebas para el componente App
-  - Pruebas para el sistema de privilegios
-  - Pruebas para el histórico de uso
-  - Pruebas para el sistema de bloqueo/desbloqueo
-  - Pruebas para el registro de tareas completadas
+Que esto sea barato no es casualidad. Los componentes nunca llamaron a Firestore
+directamente: llaman a `fetchTasks()`, `addCustomTask()`, `updateCustomTask()`. Toda
+la dependencia del proveedor está encerrada en seis ficheros de `src/services/`.
 
-## Instalación y Uso
+El puerto ya estaba construido. La migración consiste en escribir otro adaptador.
+
+Es el mismo enfoque que aplico cuando hay que cambiar una pieza de un sistema vivo:
+incremental, con las dos versiones funcionando a la vez, nunca un big bang.
+
+El mapa completo con el estado y las decisiones está en
+[`docs/MIGRACION-A-JAVA.md`](docs/MIGRACION-A-JAVA.md).
+
+---
+
+## Algunas decisiones, y su motivo
+
+**`Task` es un `record` inmutable, no una clase con setters.** Una tarea no se muta
+a trozos: se reemplaza entera. Así es imposible dejarla en un estado intermedio.
+
+**El `Clock` se inyecta en lugar de llamar a `Instant.now()` dentro del servicio.**
+Sin eso ningún test puede afirmar nada sobre `createdAt` ni `updatedAt`. Con el
+reloj inyectado, los tests lo fijan y lo comprueban de verdad.
+
+**`actualizar()` ignora `familyId` y `createdBy` aunque vengan en la petición.** Una
+tarea no cambia de familia ni de autor. Sin esa regla, cualquiera con el id de una
+tarea podría moverla a la suya. Hay un test que lo comprueba.
+
+**Los nombres de los campos en Java son idénticos a los de TypeScript.** El JSON que
+devuelve la API es el mismo objeto que el frontend ya maneja, así que la migración
+no necesita capa de traducción.
+
+**Los errores salen como `ProblemDetail` (RFC 7807).** El cliente recibe siempre la
+misma forma: `404` para lo que no existe, `400` con la lista de campos que fallan y
+por qué.
+
+---
+
+## Cómo levantarlo
 
 ```bash
-# Crear proyecto con Vite + TypeScript + React
-npm create vite@latest familias-estelares -- --template react-ts
+# 1. Base de datos
+docker run -d --name points-mongo -p 27017:27017 -v points-mongo-data:/data/db mongo:7
 
-# Navegar al directorio
-cd familias-estelares
+# 2. API      (no hace falta instalar Maven: el proyecto trae el wrapper)
+cd backend && ./mvnw spring-boot:run          # http://localhost:8080
 
-# Instalar dependencias
-npm install
-
-# Ejecutar en desarrollo
-npm run dev
-
-# Ejecutar tests
-npm run test
-
-# Construir para producción
-npm run build
-npm run preview
+# 3. Frontend
+npm install && npm run dev                     # http://localhost:5173
 ```
 
-## Estructura del Proyecto
+Comprobar que la API responde:
 
-```
-src/
-├── components/
-│   ├── auth/         # Autenticación y roles
-│   ├── courses/      # Gestión de cursos
-│   ├── dashboard/    # Paneles principales
-│   ├── live/         # Clases en directo
-│   └── ui/          # Componentes reutilizables
-├── hooks/           # Hooks personalizados
-├── services/        # Servicios de Firebase
-├── types/          # Definiciones de tipos
-└── utils/          # Utilidades generales
+```bash
+curl localhost:8080/actuator/health
 ```
 
-## Tecnologías
-- Vite + React + TypeScript
-- Firebase (Auth + Firestore)
-- TailwindCSS
-- React Router
-- React Toastify
-- FontAwesome
-- Vitest + Testing Library
+El frontend necesita un `.env` con la configuración de Firebase mientras dure la
+migración. Las variables son las que aparecen en `src/firebase.ts`.
+
+---
+
+## Tests
+
+```bash
+npm test                    # frontend
+cd backend && ./mvnw test   # backend
+```
+
+Los tests del backend no necesitan MongoDB levantado: el repositorio va mockeado,
+porque lo que se prueba ahí son las reglas de negocio y no que Mongo sepa guardar.
+
+---
+
+## La API hoy
+
+| Método | Ruta | Qué hace |
+|---|---|---|
+| `GET` | `/api/tasks?familyId=` | Tareas de una familia. `&soloActivas=true` para filtrar |
+| `GET` | `/api/tasks/{id}` | Una tarea |
+| `POST` | `/api/tasks` | Crear. Devuelve `201` |
+| `PUT` | `/api/tasks/{id}` | Actualizar |
+| `DELETE` | `/api/tasks/{id}` | Borrar. Devuelve `204` |
+
+---
+
+## Qué falta
+
+- Conectar el frontend a la API en lugar de a Firestore
+- Autenticación en el backend, que hoy está abierto
+- Los dominios de privilegios, familias y recompensas
+- Migrar los datos existentes
+- Desplegar
+
+El plan de mejoras de interfaz está en [`docs/TODO-UI.md`](docs/TODO-UI.md).

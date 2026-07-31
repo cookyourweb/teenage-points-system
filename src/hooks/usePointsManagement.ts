@@ -1,14 +1,14 @@
-// src/hooks/usePointsManagement.ts (CORREGIDO)
+// src/hooks/usePointsManagement.ts - CON AUTO-REFRESH DE TAREAS PERSONALIZADAS
 import { useState, useEffect, useCallback } from 'react';
 import { TasksState } from '../types/taskTypes';
 import { getChildNameById } from '../services/familyService';
 import { initialTasks } from '../config/rewardConfig';
 import { toast } from 'react-toastify';
 
-// ✅ CORRECCIÓN PRINCIPAL: Importar desde customTaskService
+// ✅ IMPORTAR DESDE customTaskService
 import { CustomTask, getActiveTasksByFamily } from '../services/customTaskService';
 
-// ✅ IMPORTAR TAMBIÉN LOS SERVICIOS DE FIRESTORE
+// ✅ IMPORTAR SERVICIOS DE FIRESTORE
 import { 
   saveWeeklyTasks, 
   getWeeklyTasks, 
@@ -85,8 +85,8 @@ export const usePointsManagement = ({
     fetchChildName();
   }, [familyId, childId]);
 
-  // Cargar tareas personalizadas
-  const loadCustomTasks = useCallback(async () => {
+  // ✅ CARGAR TAREAS PERSONALIZADAS CON RETRY
+  const loadCustomTasks = useCallback(async (retryCount = 0) => {
     if (!familyId) return [];
     
     try {
@@ -95,6 +95,16 @@ export const usePointsManagement = ({
       return customTasksData;
     } catch (err) {
       console.error('Error loading custom tasks:', err);
+      
+      // ✅ RETRY AUTOMÁTICO EN CASO DE ERROR
+      if (retryCount < 2) {
+        console.log(`🔄 Reintentando cargar tareas personalizadas (intento ${retryCount + 1})`);
+        setTimeout(() => loadCustomTasks(retryCount + 1), 1000);
+        return [];
+      }
+      
+      // Si falla después de 2 intentos, usar array vacío
+      console.warn('⚠️ No se pudieron cargar las tareas personalizadas, usando solo tareas base');
       setCustomTasks([]);
       return [];
     }
@@ -120,14 +130,14 @@ export const usePointsManagement = ({
         isCustom: false
       }));
 
-      // Tareas personalizadas
+      // ✅ TAREAS PERSONALIZADAS CON VALIDACIÓN
       const customDailyTasks = customTasksData
-        .filter(task => task.tipo === 'diarias' && task.isActive)
+        .filter(task => task && task.tipo === 'diarias' && task.isActive && task.id)
         .map(task => ({
-          id: task.id || `custom-${Date.now()}`,
-          nombre: task.nombre,
+          id: task.id!,
+          nombre: task.nombre || 'Tarea personalizada',
           tipo: 'diarias' as const,
-          puntos: task.puntos,
+          puntos: task.puntos || 5,
           completada: false,
           childId,
           isCustom: true,
@@ -135,12 +145,12 @@ export const usePointsManagement = ({
         }));
 
       const customExtraTasks = customTasksData
-        .filter(task => task.tipo === 'extra' && task.isActive)
+        .filter(task => task && task.tipo === 'extra' && task.isActive && task.id)
         .map(task => ({
-          id: task.id || `custom-${Date.now()}`,
-          nombre: task.nombre,
+          id: task.id!,
+          nombre: task.nombre || 'Tarea extra personalizada',
           tipo: 'extra' as const,
-          puntos: task.puntos,
+          puntos: task.puntos || 10,
           completada: false,
           childId,
           isCustom: true,
@@ -156,7 +166,7 @@ export const usePointsManagement = ({
     return combinedTasks;
   }, [diasSemana, childId]);
 
-  // ✅ MIGRAR DE LOCALSTORAGE A FIRESTORE
+  // ✅ FUNCIÓN PRINCIPAL DE CARGA CON MEJOR MANEJO DE ERRORES
   const loadWeeklyData = useCallback(async () => {
     if (!familyId || !childId || !userId) return;
 
@@ -165,10 +175,9 @@ export const usePointsManagement = ({
       setError(null);
       setSyncStatus('syncing');
       
-      // Cargar tareas personalizadas primero
+      // ✅ CARGAR TAREAS PERSONALIZADAS PRIMERO
       const customTasksData = await loadCustomTasks();
       
-      // ✅ USAR FIRESTORE EN LUGAR DE LOCALSTORAGE
       try {
         // Intentar cargar desde Firestore
         const weeklyData = await getWeeklyTasks(familyId, childId);
@@ -262,6 +271,7 @@ export const usePointsManagement = ({
         }
       } catch (firestoreError) {
         console.error('Error accessing Firestore:', firestoreError);
+        setSyncStatus('error');
         
         // Fallback a localStorage si Firestore falla
         const storedTasks = localStorage.getItem(`tasks-${childId}`);
@@ -294,6 +304,18 @@ export const usePointsManagement = ({
           setWeeklyTotal(Number(total));
           
           toast.warn('⚠️ Usando datos locales - Firestore no disponible');
+        } else {
+          // Si no hay datos locales, crear estructura inicial
+          const estadoInicial = createCombinedTasks(customTasksData);
+          const puntosIniciales: { [key: string]: number } = {};
+          
+          diasSemana.forEach(dia => {
+            puntosIniciales[dia] = 0;
+          });
+          
+          setTasks(estadoInicial);
+          setTotalPoints(puntosIniciales);
+          setWeeklyTotal(0);
         }
       }
       
@@ -316,24 +338,32 @@ export const usePointsManagement = ({
     loadWeeklyData();
   }, [loadWeeklyData]);
 
-  // Escuchar cambios en tareas personalizadas
+  // ✅ ESCUCHAR CAMBIOS EN TAREAS PERSONALIZADAS CON DEBOUNCE
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     const handleCustomTasksUpdate = (event: CustomEvent) => {
       if (event.detail.familyId === familyId) {
         console.log('📝 Tareas personalizadas actualizadas, recargando...');
-        loadWeeklyData();
-        toast.info('🔄 Tareas actualizadas', { autoClose: 2000 });
+        
+        // ✅ DEBOUNCE PARA EVITAR MÚLTIPLES RECARGAS
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          loadWeeklyData();
+          toast.info('🔄 Tareas actualizadas', { autoClose: 2000 });
+        }, 500);
       }
     };
 
     window.addEventListener('customTasksUpdated', handleCustomTasksUpdate as EventListener);
     
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener('customTasksUpdated', handleCustomTasksUpdate as EventListener);
     };
   }, [familyId, loadWeeklyData]);
 
-  // ✅ FUNCIÓN PARA ALTERNAR TAREAS (USANDO FIRESTORE)
+  // ✅ FUNCIÓN PARA ALTERNAR TAREAS CON MEJOR MANEJO
   const toggleTask = async (dia: string, tipo: 'diarias' | 'extra', taskId: string, isCustom = false) => {
     if (!familyId || !childId || !userId) return;
 
@@ -349,7 +379,6 @@ export const usePointsManagement = ({
 
       const newCompletedState = !currentTask.completada;
       
-      // ✅ USAR FIRESTORE EN LUGAR DE LOCALSTORAGE
       try {
         // Actualizar en Firestore usando el servicio
         await updateTask(familyId, childId, dia, tipo, taskId, newCompletedState, userId);

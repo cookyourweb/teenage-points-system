@@ -1,21 +1,15 @@
-// src/components/dashboard/ChildView.tsx
-import React, { useState, useEffect } from 'react';
+// src/components/dashboard/ChildView.tsx - CORREGIDO para SOLO HIJOS
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { initialPrivileges } from '../../config/rewardConfig';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faTrophy, 
-  faCalendarWeek, 
-  faCheckCircle, 
-  faTimesCircle,
-  faStar,
+  
   faGift,
   faCheckSquare,
-  faSpinner,
-  faFireFlameCurved,
-  faHeart,
-  faMagic
+
+  faHeart
 } from '@fortawesome/free-solid-svg-icons';
 import { usePointsManagement } from '../../hooks/usePointsManagement';
 import { ToastContainer, toast } from 'react-toastify';
@@ -29,7 +23,7 @@ const ChildView: React.FC = () => {
 
   const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-  // Usar el hook de gestión de puntos
+  // ✅ USAR HOOK PARA VISTA DE HIJO - SIN PERMISOS DE EDICIÓN
   const {
     tasks,
     customTasks,
@@ -43,7 +37,7 @@ const ChildView: React.FC = () => {
   } = usePointsManagement({
     familyId: familyId!,
     childId: childId!,
-    userId: `child-${childId}` // ID especial para el hijo
+    userId: `child-view-${childId}` // ✅ ID especial para enlace compartido (SIN PERMISOS)
   });
 
   // Función para obtener tareas completadas del día
@@ -60,16 +54,6 @@ const ChildView: React.FC = () => {
     return { completed, total };
   };
 
-  // Función para obtener privilegios disponibles
-  const getAvailablePrivileges = () => {
-    return initialPrivileges.filter(privilege => weeklyTotal >= privilege.points);
-  };
-
-  // Función para obtener el próximo privilegio
-  const getNextPrivilege = () => {
-    return initialPrivileges.find(privilege => weeklyTotal < privilege.points);
-  };
-
   // Función para obtener mensaje motivacional
   const getMotivationalMessage = () => {
     if (weeklyTotal >= 200) return "¡Increíble! Has desbloqueado todos los privilegios 🎉";
@@ -80,7 +64,7 @@ const ChildView: React.FC = () => {
     return "¡Empecemos a ganar puntos! 🚀";
   };
 
-  // Función para alternar tarea con celebración
+  // ✅ FUNCIÓN SIMPLE PARA ALTERNAR TAREAS - SOLO PARA HIJOS
   const handleToggleTask = async (dia: string, tipo: 'diarias' | 'extra', taskId: string) => {
     const task = tasks[dia]?.[tipo]?.find(t => t.id === taskId);
     if (!task) return;
@@ -91,11 +75,10 @@ const ChildView: React.FC = () => {
     try {
       await toggleTask(dia, tipo, taskId, isCustomTask);
       
-      // Si se completó la tarea, mostrar celebración
+      // ✅ CELEBRACIÓN SOLO SI SE COMPLETÓ
       if (!wasCompleted) {
         setCelebratingTask(taskId);
         
-        // Mensaje especial dependiendo del tipo de tarea
         const celebrationMessage = isCustomTask 
           ? `✨ ¡Tarea especial completada! +${task.puntos} puntos` 
           : tipo === 'extra'
@@ -113,17 +96,15 @@ const ChildView: React.FC = () => {
           }
         });
 
-        // Quitar celebración después de 2 segundos
-        setTimeout(() => {
-          setCelebratingTask(null);
-        }, 2000);
+        setTimeout(() => setCelebratingTask(null), 2000);
 
-        // Verificar si desbloqueó un nuevo privilegio
+        // Verificar privilegios desbloqueados
         const newTotal = weeklyTotal + task.puntos;
         checkPrivilegeUnlock(newTotal, task.puntos);
       }
     } catch (error) {
       console.error("Error toggling task:", error);
+      toast.error("Error al actualizar la tarea. ¡Inténtalo de nuevo!");
     }
   };
 
@@ -148,14 +129,14 @@ const ChildView: React.FC = () => {
     });
   };
 
-  // Función para redimir privilegio
+  // ✅ FUNCIÓN SIMPLE PARA REDIMIR PRIVILEGIOS
   const handlePrivilegeRedeem = async (privilege: any, date: string) => {
     if (weeklyTotal < privilege.points || isRedeeming) return;
 
     setIsRedeeming(true);
     try {
-      // Aquí simularemos la redención - en una implementación real sería más compleja
-      toast.success(`🎉 ¡Privilegio "${privilege.name}" programado para ${date}!`, {
+      // Simular redención - en implementación real notificaría a los padres
+      toast.success(`🎉 ¡Privilegio "${privilege.name}" solicitado para ${date}!`, {
         position: "top-center",
         autoClose: 5000,
         style: {
@@ -167,9 +148,14 @@ const ChildView: React.FC = () => {
         }
       });
       
+      toast.info('¡Pídele a papá o mamá que confirme tu recompensa! 👨‍👩‍👧‍👦', {
+        position: "bottom-center",
+        autoClose: 3000
+      });
+      
       setSelectedPrivilege(null);
     } catch (error) {
-      toast.error('Error al redimir privilegio. Inténtalo de nuevo.');
+      toast.error('Error al solicitar privilegio. Inténtalo de nuevo.');
     } finally {
       setIsRedeeming(false);
     }
@@ -207,7 +193,7 @@ const ChildView: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
       <ToastContainer />
       
-      {/* Header Atractivo */}
+      {/* ✅ HEADER SOLO PARA HIJOS - SIN OPCIONES DE PADRE */}
       <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-teal-600 text-white shadow-2xl">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-center">
@@ -222,7 +208,7 @@ const ChildView: React.FC = () => {
               <p className="text-lg opacity-90">{getMotivationalMessage()}</p>
             </div>
             
-            {/* Indicador de sincronización bonito */}
+            {/* ✅ INDICADOR DE SINCRONIZACIÓN SIMPLIFICADO */}
             <div className="mt-4 flex justify-center">
               <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
                 syncStatus === 'synced' ? 'bg-green-500/20 text-green-100' :
@@ -235,8 +221,8 @@ const ChildView: React.FC = () => {
                   'bg-red-400'
                 }`}></div>
                 {syncStatus === 'synced' ? '✨ Actualizado' :
-                 syncStatus === 'syncing' ? '🔄 Sincronizando...' :
-                 '⚠️ Problema de conexión'}
+                 syncStatus === 'syncing' ? '🔄 Actualizando...' :
+                 '⚠️ Revisa tu conexión'}
               </div>
             </div>
           </div>
@@ -244,12 +230,12 @@ const ChildView: React.FC = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Progreso Semanal Visual */}
+        {/* ✅ PROGRESO SEMANAL VISUAL - SOLO LECTURA ATRACTIVA */}
         <Card className="mb-8 bg-gradient-to-r from-white to-blue-50 dark:from-gray-800 dark:to-gray-700 border-0 shadow-xl">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-3">
               <FontAwesomeIcon icon={faCalendarWeek} className="text-blue-500" />
-              Tu Semana Genial
+              Tu Progreso Esta Semana
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -261,7 +247,7 @@ const ChildView: React.FC = () => {
                 
                 return (
                   <div key={dia} className="text-center">
-                    <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-3 text-2xl font-bold transition-all duration-300 transform hover:scale-105 ${
+                    <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-3 text-2xl font-bold transition-all duration-300 ${
                       percentage === 100 
                         ? 'bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg' 
                         : percentage > 50
@@ -288,7 +274,7 @@ const ChildView: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Tareas de Hoy */}
+        {/* ✅ TAREAS DE HOY - INTERACTIVAS PARA EL HIJO */}
         <Card className="mb-8 bg-gradient-to-r from-white to-green-50 dark:from-gray-800 dark:to-gray-700 border-0 shadow-xl">
           <CardHeader>
             <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -307,8 +293,9 @@ const ChildView: React.FC = () => {
               if (!todayTasks) {
                 return (
                   <div className="text-center py-8">
-                    <div className="text-4xl mb-4">📝</div>
-                    <p className="text-gray-500">No hay tareas para hoy</p>
+                    <div className="text-4xl mb-4">🎉</div>
+                    <p className="text-xl font-bold text-green-600">¡No hay tareas para hoy!</p>
+                    <p className="text-gray-500">¡Disfruta tu día libre!</p>
                   </div>
                 );
               }
@@ -327,7 +314,7 @@ const ChildView: React.FC = () => {
                         className={`border-2 rounded-2xl p-4 transition-all duration-300 transform hover:scale-105 cursor-pointer ${
                           task.completada
                             ? 'bg-gradient-to-r from-green-100 to-green-200 border-green-300 dark:from-green-900/30 dark:to-green-800/30 dark:border-green-600'
-                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-purple-300'
+                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-purple-300 hover:shadow-lg'
                         } ${isCelebrating ? 'animate-pulse ring-4 ring-purple-300' : ''}`}
                         onClick={() => handleToggleTask(today, task.tipo, task.id)}
                       >
@@ -341,15 +328,15 @@ const ChildView: React.FC = () => {
                                   {task.nombre}
                                 </h4>
                                 <p className={`text-sm ${task.completada ? 'text-green-600' : 'text-purple-600'}`}>
-                                  {task.puntos} puntos {isCustom ? '(Especial)' : task.tipo === 'extra' ? '(Extra)' : ''}
+                                  +{task.puntos} puntos {isCustom ? '(¡Especial!)' : task.tipo === 'extra' ? '(¡Extra!)' : ''}
                                 </p>
                               </div>
                             </div>
                           </div>
                           <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all duration-300 ${
                             task.completada
-                              ? 'bg-green-500 text-white transform scale-110'
-                              : 'bg-gray-200 dark:bg-gray-600 hover:bg-purple-200 dark:hover:bg-purple-600'
+                              ? 'bg-green-500 text-white transform scale-110 shadow-lg'
+                              : 'bg-gray-200 dark:bg-gray-600 hover:bg-purple-200 dark:hover:bg-purple-600 hover:scale-110'
                           }`}>
                             {task.completada ? '✅' : '⭕'}
                           </div>
@@ -363,12 +350,12 @@ const ChildView: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Privilegios Disponibles */}
+        {/* ✅ PRIVILEGIOS - SOLO PUEDEN SOLICITAR, NO GESTIONAR */}
         <Card className="mb-8 bg-gradient-to-r from-white to-yellow-50 dark:from-gray-800 dark:to-gray-700 border-0 shadow-xl">
           <CardHeader>
             <CardTitle className="text-2xl font-bold flex items-center gap-3">
               <FontAwesomeIcon icon={faGift} className="text-yellow-500" />
-              ¡Tus Recompensas!
+              ¡Tus Recompensas Disponibles!
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -388,7 +375,7 @@ const ChildView: React.FC = () => {
                     onClick={() => canUnlock && setSelectedPrivilege(privilege)}
                   >
                     <div className="text-4xl mb-3">
-                      {canUnlock ? '🎉' : '🏆'}
+                      {canUnlock ? '🎉' : '🔒'}
                     </div>
                     <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200 mb-2">
                       {privilege.name}
@@ -397,7 +384,7 @@ const ChildView: React.FC = () => {
                       {privilege.points} puntos necesarios
                     </p>
                     
-                    {/* Barra de progreso bonita */}
+                    {/* Barra de progreso */}
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4">
                       <div
                         className={`h-3 rounded-full transition-all duration-500 ${
@@ -421,7 +408,7 @@ const ChildView: React.FC = () => {
                       }`}
                       disabled={!canUnlock}
                     >
-                      {canUnlock ? '🎉 ¡Desbloquear!' : '🔒 Sigue así'}
+                      {canUnlock ? '🎉 ¡Pedir Recompensa!' : '🔒 Sigue esforzándote'}
                     </button>
                   </div>
                 );
@@ -430,9 +417,9 @@ const ChildView: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Próximo Objetivo */}
+        {/* ✅ PRÓXIMO OBJETIVO */}
         {(() => {
-          const nextPrivilege = getNextPrivilege();
+          const nextPrivilege = initialPrivileges.find(privilege => weeklyTotal < privilege.points);
           if (!nextPrivilege) return null;
           
           const pointsNeeded = nextPrivilege.points - weeklyTotal;
@@ -458,16 +445,24 @@ const ChildView: React.FC = () => {
             </Card>
           );
         })()}
+
+        {/* ✅ MENSAJE FINAL MOTIVACIONAL */}
+        <div className="text-center py-8">
+          <div className="text-4xl mb-4">👨‍👩‍👧‍👦</div>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+            ¡Recuerda que papá y mamá pueden ver tu progreso en tiempo real y están muy orgullosos de ti!
+          </p>
+        </div>
       </div>
 
-      {/* Modal de Redención de Privilegio */}
+      {/* ✅ MODAL DE REDENCIÓN SIMPLIFICADO */}
       {selectedPrivilege && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full shadow-2xl">
             <div className="text-center">
               <div className="text-6xl mb-4">🎉</div>
               <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">
-                ¡Vas a desbloquear!
+                ¡Quieres pedir tu recompensa!
               </h3>
               <h4 className="text-xl text-purple-600 dark:text-purple-400 mb-6">
                 {selectedPrivilege.name}
@@ -502,7 +497,7 @@ const ChildView: React.FC = () => {
                 className="w-full p-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
                 disabled={isRedeeming}
               >
-                Cancelar
+                Mejor después
               </button>
             </div>
           </div>

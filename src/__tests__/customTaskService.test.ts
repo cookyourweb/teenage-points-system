@@ -132,15 +132,60 @@ describe('deleteCustomTask', () => {
 });
 
 describe('cuando la API responde con error', () => {
-  it('usa el detail del ProblemDetail como mensaje', async () => {
-    // La API devuelve RFC 7807. Ese "detail" explica el fallo de verdad; perderlo
-    // y lanzar "Failed to fetch" deja a quien depura sin la unica pista util.
+  it('saca el motivo por campo, que es donde esta la informacion util', async () => {
+    // Forma REAL de un 400, copiada de la respuesta del servidor. El "detail" de
+    // la validacion es generico ("hay campos que no cumplen las reglas") y el
+    // motivo de verdad esta en "campos". Quedarse con el detail es enseñarle a
+    // quien rellena el formulario un mensaje que no le dice que arreglar.
     fetchSimulado.mockResolvedValue(
-      respondeCon({ title: 'Bad Request', detail: 'los puntos no pueden ser negativos' }, 400),
+      respondeCon(
+        {
+          title: 'Datos invalidos',
+          status: 400,
+          detail: 'hay campos que no cumplen las reglas',
+          instance: '/api/tasks',
+          campos: { puntos: 'los puntos no pueden ser negativos' },
+        },
+        400,
+      ),
     );
 
     await expect(updateCustomTask('tarea-1', tareaDeEjemplo)).rejects.toThrow(
       'los puntos no pueden ser negativos',
+    );
+  });
+
+  it('junta los motivos cuando fallan varios campos', async () => {
+    // El orden de las claves de "campos" lo decide el servidor y no esta
+    // garantizado: contra la API real salen en orden distinto al de este mock.
+    // Por eso se comprueba que esten los dos, no en que orden.
+    fetchSimulado.mockResolvedValue(
+      respondeCon(
+        {
+          detail: 'hay campos que no cumplen las reglas',
+          campos: {
+            puntos: 'los puntos no pueden ser negativos',
+            nombre: 'el nombre de la tarea no puede estar vacio',
+          },
+        },
+        400,
+      ),
+    );
+
+    const fallo = await addCustomTask(tareaDeEjemplo).catch((e: Error) => e);
+
+    expect((fallo as Error).message).toContain('los puntos no pueden ser negativos');
+    expect((fallo as Error).message).toContain('el nombre de la tarea no puede estar vacio');
+  });
+
+  it('usa el detail cuando el error no es de validacion y no trae campos', async () => {
+    // Un 404 no tiene "campos": ahi el detail SI es el mensaje bueno.
+    fetchSimulado.mockResolvedValue(
+      respondeCon({ title: 'No encontrada', status: 404, detail: 'no existe la tarea tarea-9' }, 404),
+    );
+
+    await expect(updateCustomTask('tarea-9', tareaDeEjemplo)).rejects.toThrow(
+      'no existe la tarea tarea-9',
     );
   });
 

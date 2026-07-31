@@ -32,15 +32,31 @@ export interface CustomTask {
 /**
  * Convierte una respuesta con error en un Error con el motivo de verdad.
  *
- * La API devuelve ProblemDetail (RFC 7807), donde "detail" explica que ha fallado
- * y por que. Tirar eso y lanzar un "Failed to fetch" generico deja a quien depura
- * sin la unica pista util que habia.
+ * La API devuelve ProblemDetail (RFC 7807). Y el orden de lectura importa:
+ *
+ * En un 400 de validacion, "detail" es generico ("hay campos que no cumplen las
+ * reglas") y el motivo real esta en "campos", una propiedad por campo que falla.
+ * Quedarse con el detail es enseñarle a quien rellena el formulario un mensaje
+ * que no le dice que arreglar.
+ *
+ * En un 404 no hay "campos", y ahi el detail SI es el mensaje bueno.
+ *
+ * Por eso se mira primero campos y despues detail, y no al reves.
  */
 const errorDesde = async (respuesta: Response): Promise<Error> => {
   const cuerpo = await respuesta.text();
 
   try {
     const problema = JSON.parse(cuerpo);
+
+    const porCampo = problema.campos;
+    if (porCampo && typeof porCampo === 'object') {
+      const motivos = Object.values(porCampo).filter(Boolean);
+      // Se muestran todos, no solo el primero: si fallan tres campos y solo
+      // enseñas uno, se corrige, se reenvia y vuelve a fallar. Tres veces.
+      if (motivos.length > 0) return new Error(motivos.join('. '));
+    }
+
     const motivo = problema.detail ?? problema.title;
     if (motivo) return new Error(motivo);
   } catch {

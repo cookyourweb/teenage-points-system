@@ -5,7 +5,7 @@ import { getChildNameById } from '../services/familyService';
 import { initialTasks } from '../config/rewardConfig';
 
 import { toast } from 'react-toastify';
-import { CustomTask, getActiveTasksByFamily } from '../components/FamilyPointsOverview';
+import { CustomTask, getActiveTasksByFamily } from '../services/customTaskService';
 
 // Interfaces
 interface ChildPoints {

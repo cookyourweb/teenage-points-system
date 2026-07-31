@@ -121,11 +121,41 @@ Los orígenes se declaran uno a uno en vez de abrir con `*`, y se leen de
 que comprueba que un origen desconocido recibe **403**: sin él, el día que alguien
 escriba `*` para salir del paso, nada avisaría.
 
+**Circuito completo verificado contra el servidor real (31-jul-2026).** No solo con
+tests: con Mongo levantado, la API corriendo y la cabecera `Origin` en cada llamada,
+igual que la manda el navegador.
+
+```
+OPTIONS preflight     200  Allow-Origin, Allow-Methods, Max-Age 3600
+OPTIONS origen ajeno  403
+POST   /api/tasks     201  id y fechas puestas por el servidor
+GET    ?familyId=     200  filtrado por familia
+PUT    /{id}          200  createdAt conservado, updatedAt refrescado
+DELETE /{id}          204  y 404 al volver a pedirla
+                      400  con el detalle por campo
+```
+
+Y la prueba real encontró un fallo que los tests no veían.
+
+El adaptador se quedaba con el `detail` del `ProblemDetail`, pero en un 400 de
+validación ese `detail` es genérico: *"hay campos que no cumplen las reglas"*. El
+motivo de verdad viaja en la propiedad `campos`. Quien rellenaba el formulario veía
+un mensaje que no le decía qué arreglar.
+
+El mock del test tenía un `detail` específico que la API nunca devuelve. Es
+exactamente el fallo contra el que avisaba el comentario de ese mismo fichero:
+funcionar contra un mock que acepta cualquier cosa y romperse contra la API. Los
+tests nuevos usan el cuerpo copiado del servidor.
+
+**Es la segunda vez en el proyecto que un test verde no probaba nada.** La primera
+fue el de métodos CORS, que pasaba sin la configuración puesta porque Spring
+responde 200 al `OPTIONS` por defecto. La regla que queda: si un test pasa antes de
+escribir la funcionalidad, el test está roto.
+
 ### Pendiente
 
-- [ ] **Probar el circuito completo con Docker levantado.** Los tests cubren el
-      contrato por los dos lados, pero todavía no se ha visto al navegador real
-      hacer la preflight contra el servidor real.
+- [ ] **Probarlo en el navegador.** Falta abrir la aplicación y crear una tarea de
+      verdad desde la interfaz. El circuito HTTP está verificado; la pantalla no.
 - [ ] **Autenticación.** Hoy la API está abierta: cualquiera puede pedir las tareas
       de cualquier familia. Es la pieza más grande que queda.
 - [ ] Resto de dominios: `Privilege`, `Family`, `Reward`.

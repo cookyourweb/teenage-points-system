@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
-import { initialPrivileges, initialTasks } from '../../config/rewardConfig';
+import { initialPrivileges } from '../../config/rewardConfig';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faTrophy, 
@@ -13,8 +13,6 @@ import {
   faCheckSquare,
   faSpinner
 } from '@fortawesome/free-solid-svg-icons';
-import { getChildNameById, updateTask } from '../../services/familyService';
-import { TasksState } from '../../types/taskTypes';
 import { usePointsManagement } from '../../hooks/usePointsManagement';
 import { updatePrivilege, getPrivilegeById } from '../../services/privilegesService';
 import { ToastContainer, toast } from 'react-toastify';

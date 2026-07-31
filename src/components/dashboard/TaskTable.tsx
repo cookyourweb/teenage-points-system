@@ -3,7 +3,7 @@ import { Task } from "../../types/taskTypes";
 
 interface TaskTableProps {
   tasks: Task[];
-  onToggle: (taskId: number) => void;
+  onToggle: (taskId: string) => void;
   title: string;
 }
 

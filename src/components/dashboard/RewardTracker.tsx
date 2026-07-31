@@ -268,8 +268,8 @@ const RewardTracker: React.FC = () => {
 
     try {
       const privilege = await addPrivilege({
-        id: '', // Se asignará automáticamente
-        privilegioId: '', // Se asignará automáticamente
+        // id y privilegioId no van aquí: los asigna addPrivilege, y su firma
+        // (Omit<Privilege, "id" | "privilegioId">) los excluye a proposito.
         name: newPrivilege.name,
         points: newPrivilege.points,
         description: newPrivilege.description,

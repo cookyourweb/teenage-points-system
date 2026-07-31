@@ -2,6 +2,7 @@
 export interface PrivilegeHistory {
   dateUnlocked: string;  // Fecha en la que se desbloqueó el privilegio
   unlockedBy: string;  // ID del usuario (hijo) que desbloqueó el privilegio
+  privilegeName?: string;  // Nombre del privilegio, para poder pintar el historial sin resolver el id
 }
 
 export interface Privilege {

@@ -36,9 +36,13 @@
   --tps-neutral-800: #1f2937;
   --tps-neutral-900: #111827;
 
-  /* Marca. El azul ya era la identidad de facto. */
+  /* Marca. El azul ya era la identidad de facto.
+     Los tonos 300 y 400 existen para el modo oscuro: sobre fondo oscuro hay
+     que ACLARAR, no oscurecer. */
   --tps-brand-50:  #eff6ff;
   --tps-brand-100: #dbeafe;
+  --tps-brand-300: #93c5fd;
+  --tps-brand-400: #60a5fa;
   --tps-brand-500: #3b82f6;
   --tps-brand-600: #2563eb;
   --tps-brand-700: #1d4ed8;
@@ -52,6 +56,7 @@
 
   /* Positivo. Tarea hecha, puntos ganados. */
   --tps-positive-50:  #f0fdf4;
+  --tps-positive-400: #4ade80;
   --tps-positive-500: #22c55e;
   --tps-positive-600: #16a34a;
   --tps-positive-700: #15803d;
@@ -59,12 +64,14 @@
   /* Atencion. AMBER, no yellow: yellow-500 con texto blanco da 1,92:1 y no
      pasa AA. Amber-600 con blanco da 4,6:1 y dice exactamente lo mismo. */
   --tps-caution-50:  #fffbeb;
+  --tps-caution-400: #fbbf24;
   --tps-caution-500: #f59e0b;
   --tps-caution-600: #d97706;
   --tps-caution-700: #b45309;
 
   /* Negativo. Borrar, error, lo que no se deshace. */
   --tps-negative-50:  #fef2f2;
+  --tps-negative-400: #f87171;
   --tps-negative-500: #ef4444;
   --tps-negative-600: #dc2626;
   --tps-negative-700: #b91c1c;
@@ -81,34 +88,64 @@
   --tps-bg-overlay: rgb(0 0 0 / 0.5);
 
   /* Bordes */
+  /* --tps-border es decorativo (separadores): no le exige contraste la norma.
+     --tps-border-strong SI: es el borde de los campos de formulario, y WCAG
+     1.4.11 pide 3:1 para los limites de un componente de interfaz.
+     neutral-300 daba 1,47:1 sobre blanco. Era invisible. */
   --tps-border:        var(--tps-neutral-200);
-  --tps-border-strong: var(--tps-neutral-300);
+  --tps-border-strong: var(--tps-neutral-500);
 
-  /* Texto. Ojo con --tps-text-muted: es neutral-500, que da 4,83:1 sobre
-     blanco. NUNCA neutral-400, que da 2,54:1 y es un fallo de contraste. */
+  /* Texto. --tps-text-muted es neutral-600 y no neutral-500: neutral-500 da
+     4,83:1 sobre blanco (pasa) pero solo 4,39:1 sobre el fondo hundido (no
+     pasa), y el texto atenuado se usa en los dos sitios. neutral-600 da 7,56
+     y 6,87. Y NUNCA neutral-400, que da 2,54:1. */
   --tps-text:         var(--tps-neutral-900);
-  --tps-text-muted:   var(--tps-neutral-500);
+  --tps-text-muted:   var(--tps-neutral-600);
   --tps-text-inverse: var(--tps-neutral-0);
 
-  /* Accion principal */
+  /* Accion RELLENA: fondo de un boton solido. El par que hay que medir es
+     el fondo contra --tps-action-fg, y ademas el boton contra la tarjeta. */
   --tps-action:       var(--tps-brand-600);
   --tps-action-hover: var(--tps-brand-700);
   --tps-action-fg:    var(--tps-neutral-0);
+
+  /* Accion como TEXTO: enlaces, pestanas, botones sin relleno. Aqui el par a
+     medir es este color contra la SUPERFICIE. Son necesidades opuestas a las
+     del boton relleno, y por eso son dos tokens y no uno. */
+  --tps-link:       var(--tps-brand-600);
+  --tps-link-hover: var(--tps-brand-700);
 
   /* Accion secundaria. Mata los cuatro grises distintos de "Cancelar". */
   --tps-neutral-action:       var(--tps-neutral-100);
   --tps-neutral-action-hover: var(--tps-neutral-200);
   --tps-neutral-action-fg:    var(--tps-neutral-800);
 
-  /* Estados. Cada uno con su color de texto y su fondo suave. */
+  /* Estados. CUATRO papeles por estado, y no son intercambiables:
+       --tps-X        el relleno solido
+       --tps-X-fg     el texto que va ENCIMA de ese relleno
+       --tps-X-text   el texto sobre --tps-X-bg
+       --tps-X-bg     el fondo suave del aviso
+
+     Dos cosas que se aprendieron midiendo:
+     1. positive-600 sobre positive-50 daba 3,15:1. Como relleno va bien; como
+        texto no llegaba.
+     2. El verde y el ambar NO admiten texto blanco: 3,30:1 y 3,19:1. Con
+        texto oscuro dan 5,38 y 5,57. El rojo si admite blanco (4,83). Por eso
+        cada relleno declara su propio -fg en vez de asumir blanco. */
   --tps-positive:       var(--tps-positive-600);
   --tps-positive-hover: var(--tps-positive-700);
+  --tps-positive-fg:    var(--tps-neutral-900);
+  --tps-positive-text:  var(--tps-positive-700);
   --tps-positive-bg:    var(--tps-positive-50);
   --tps-caution:        var(--tps-caution-600);
   --tps-caution-hover:  var(--tps-caution-700);
+  --tps-caution-fg:     var(--tps-neutral-900);
+  --tps-caution-text:   var(--tps-caution-700);
   --tps-caution-bg:     var(--tps-caution-50);
   --tps-negative:       var(--tps-negative-600);
   --tps-negative-hover: var(--tps-negative-700);
+  --tps-negative-fg:    var(--tps-neutral-0);
+  --tps-negative-text:  var(--tps-negative-700);
   --tps-negative-bg:    var(--tps-negative-50);
 
   /* Foco. Un solo anillo en toda la aplicacion. */
@@ -178,26 +215,42 @@
   --tps-bg-sunken:  var(--tps-neutral-900);
 
   --tps-border:        var(--tps-neutral-700);
-  --tps-border-strong: var(--tps-neutral-600);
+  --tps-border-strong: var(--tps-neutral-400);
 
   /* El texto atenuado sube de 500 a 300. Sobre fondo oscuro, neutral-500 se
      queda en 4,1:1 y no llega a AA. */
   --tps-text:       var(--tps-neutral-50);
   --tps-text-muted: var(--tps-neutral-300);
 
-  /* La accion se aclara un punto: sobre fondo oscuro, brand-600 pesa. */
-  --tps-action:       var(--tps-brand-500);
-  --tps-action-hover: var(--tps-brand-600);
+  /* EL BOTON SE INVIERTE: claro con texto oscuro.
+     Sobre fondo oscuro no hay ningun azul que cumpla las dos cosas a la vez.
+     brand-600 deja el blanco legible (5,17) pero el boton no se distingue de
+     la tarjeta (2,84). brand-500 se distingue (3,99) pero el blanco encima
+     baja a 3,68. La salida es cambiar el texto: brand-400 de fondo con
+     neutral-900 encima da 6,98, y el boton contra la tarjeta 5,77. */
+  --tps-action:       var(--tps-brand-400);
+  --tps-action-hover: var(--tps-brand-300);
+  --tps-action-fg:    var(--tps-neutral-900);
+
+  /* Los enlaces ACLARAN al pasar el raton. Este era el fallo: en oscuro el
+     hover se iba a brand-600 y caia a 2,84:1, por debajo del minimo de 3.
+     Sobre fondo oscuro, mas oscuro es menos legible. */
+  --tps-link:       var(--tps-brand-400);
+  --tps-link-hover: var(--tps-brand-300);
 
   --tps-neutral-action:       var(--tps-neutral-700);
   --tps-neutral-action-hover: var(--tps-neutral-600);
   --tps-neutral-action-fg:    var(--tps-neutral-100);
 
   /* Los fondos de estado pasan de un tono solido a un velo translucido: sobre
-     oscuro, positive-50 seria un bloque casi blanco. */
-  --tps-positive-bg: rgb(34 197 94 / 0.15);
-  --tps-caution-bg:  rgb(245 158 11 / 0.15);
-  --tps-negative-bg: rgb(239 68 68 / 0.15);
+     oscuro, positive-50 seria un bloque casi blanco. Y el TEXTO de cada estado
+     sube al tono 400, porque el 700 sobre ese velo se hunde. */
+  --tps-positive-bg:   rgb(34 197 94 / 0.15);
+  --tps-positive-text: var(--tps-positive-400);
+  --tps-caution-bg:    rgb(245 158 11 / 0.15);
+  --tps-caution-text:  var(--tps-caution-400);
+  --tps-negative-bg:   rgb(239 68 68 / 0.15);
+  --tps-negative-text: var(--tps-negative-400);
 
   --tps-disabled-bg: var(--tps-neutral-700);
   --tps-disabled-fg: var(--tps-neutral-400);

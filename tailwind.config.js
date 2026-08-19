@@ -67,14 +67,40 @@ const roles = {
     DEFAULT: 'var(--tps-border)',
     strong: 'var(--tps-border-strong)',
   },
+  // Accion RELLENA: fondo de boton solido. `bg-action` con `text-action-fg`.
   action: {
     DEFAULT: 'var(--tps-action)',
     hover: 'var(--tps-action-hover)',
     fg: 'var(--tps-action-fg)',
   },
-  positive: { DEFAULT: 'var(--tps-positive)', bg: 'var(--tps-positive-bg)' },
-  caution: { DEFAULT: 'var(--tps-caution)', bg: 'var(--tps-caution-bg)' },
-  negative: { DEFAULT: 'var(--tps-negative)', bg: 'var(--tps-negative-bg)' },
+  // Accion como TEXTO: enlaces y pestanas. `text-link`, `hover:text-link-hover`.
+  // Es otro token y no `action` porque las dos necesidades son opuestas: el
+  // relleno se mide contra su texto, el enlace contra la superficie.
+  link: {
+    DEFAULT: 'var(--tps-link)',
+    hover: 'var(--tps-link-hover)',
+  },
+  // Cada estado con sus tres papeles. `fg` es el texto SOBRE el relleno y
+  // `text` el texto sobre el fondo suave. Verde y ambar llevan texto oscuro:
+  // con blanco se quedan en 3,30:1 y 3,19:1.
+  positive: {
+    DEFAULT: 'var(--tps-positive)',
+    fg: 'var(--tps-positive-fg)',
+    text: 'var(--tps-positive-text)',
+    bg: 'var(--tps-positive-bg)',
+  },
+  caution: {
+    DEFAULT: 'var(--tps-caution)',
+    fg: 'var(--tps-caution-fg)',
+    text: 'var(--tps-caution-text)',
+    bg: 'var(--tps-caution-bg)',
+  },
+  negative: {
+    DEFAULT: 'var(--tps-negative)',
+    fg: 'var(--tps-negative-fg)',
+    text: 'var(--tps-negative-text)',
+    bg: 'var(--tps-negative-bg)',
+  },
   disabled: { DEFAULT: 'var(--tps-disabled-bg)', fg: 'var(--tps-disabled-fg)' },
 };
 

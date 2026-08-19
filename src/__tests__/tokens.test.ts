@@ -100,3 +100,34 @@ describe('los primitivos no se usan directamente desde un componente', () => {
     expect(saltanNivel2).toEqual([]);
   });
 });
+
+describe('ninguna regla global pinta todos los botones', () => {
+  /**
+   * globals.css tenia esto:
+   *
+   *   button       { @apply bg-primary-500 ... }
+   *   button:hover { @apply bg-primary-600 ... }
+   *
+   * Y hacia dos destrozos distintos, el segundo peor que el primero:
+   *
+   * 1. Un boton sin clase bg-* salia azul. Se ve enseguida y se parchea.
+   * 2. `button:hover` tiene especificidad (0,1,1) y le GANA a `.bg-transparent`,
+   *    que es (0,1,0). Asi que un boton con fondo propio pero sin hover propio
+   *    se volvia azul SOLO al pasar el raton. Las pestanas del Dashboard
+   *    quedaban con texto neutral-700 sobre azul: 1,99:1. Y la pestana activa,
+   *    con texto primary-600 sobre fondo primary-600: 1,00:1. Invisible.
+   *
+   * El preflight de Tailwind ya deja los botones transparentes. No hace falta
+   * ninguna regla propia, y tenerla obliga a que cada boton se defienda.
+   */
+  it('globals.css no define reglas de elemento para button', () => {
+    const globals = readFileSync(join(SRC, 'globals.css'), 'utf8');
+
+    const reglasDeBoton = Array.from(
+      globals.matchAll(/^\s*(button[^{]*)\{/gm),
+      (m) => m[1].trim(),
+    );
+
+    expect(reglasDeBoton).toEqual([]);
+  });
+});

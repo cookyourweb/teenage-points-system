@@ -11,9 +11,8 @@ import { useTheme } from '../../hooks/useTheme';
  * pantalla, esto no es "hacer algo", es "activar o desactivar algo". Con
  * aria-pressed se anuncia el estado, sin el solo se anuncia "boton".
  *
- * El fondo va explicito (bg-surface-sunken) porque globals.css pinta de azul
- * todo <button> que no traiga fondo propio. Mientras esa regla exista, un
- * boton sin fondo sale azul.
+ * Los colores salen de los tokens (bg-surface-sunken, text-content-muted), asi
+ * que el modo oscuro lo cambia solo sin una sola clase dark:.
  */
 const ThemeToggle: React.FC = () => {
   const { resuelto, alternar } = useTheme();

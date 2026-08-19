@@ -29,14 +29,23 @@ body {
   }
 }
 
-/* Botones */
-button {
-  @apply bg-primary-500 text-white dark:bg-primary-600 py-2 px-4 rounded transition-colors;
-}
-
-button:hover {
-  @apply bg-primary-600 dark:bg-primary-700;
-}
+/* Aqui NO va ninguna regla para `button`.
+ *
+ * Habia esto, y se ha borrado a proposito:
+ *
+ *   button       { @apply bg-primary-500 text-white ... }
+ *   button:hover { @apply bg-primary-600 ... }
+ *
+ * `button:hover` tiene especificidad (0,1,1) y le gana a `.bg-transparent`,
+ * que es (0,1,0). Consecuencia: un boton con su propio fondo pero sin su
+ * propio hover se volvia azul SOLO al pasar el raton. Las pestanas del
+ * Dashboard quedaban en 1,99:1, y la pestana activa en 1,00:1, invisible.
+ *
+ * El preflight de Tailwind ya deja los botones transparentes. Un boton sin
+ * estilo ahora se ve que no lo tiene, que es justo lo que hace falta.
+ *
+ * Lo guarda tokens.test.ts.
+ */
 
 /* Clases reutilizables */
 @layer components {

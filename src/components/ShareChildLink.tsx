@@ -63,9 +63,8 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
 
   return (
     <>
-      <Button
+      <Button variant="primary" size="sm"
         onClick={() => setShowModal(true)}
-        className="flex items-center gap-2 bg-success-500 hover:bg-success-600 text-xs px-2 py-1"
       >
         <FontAwesomeIcon icon={faShare} />
         Compartir
@@ -103,25 +102,22 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
                   readOnly
                   className="flex-1 p-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 />
-                <Button
+                <Button variant="primary"
                   onClick={() => copyToClipboard(childViewLink)}
-                  className="bg-primary-500 hover:bg-primary-600 px-3"
                 >
                   <FontAwesomeIcon icon={faCopy} />
                 </Button>
               </div>
               
               <div className="flex gap-2">
-                <Button
+                <Button variant="primary" size="sm" layout="grow"
                   onClick={() => shareViaWebAPI(childViewLink, `Puntos de ${child.nombre}`)}
-                  className="flex-1 bg-success-500 hover:bg-success-600 text-sm"
                 >
                   <FontAwesomeIcon icon={faShare} className="mr-2" />
                   Compartir Enlace
                 </Button>
-                <Button
+                <Button variant="primary"
                   onClick={() => window.open(childViewLink, '_blank')}
-                  className="bg-accent-500 hover:bg-accent-600 px-3"
                 >
                   <FontAwesomeIcon icon={faEye} />
                 </Button>
@@ -161,17 +157,15 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
                   readOnly
                   className="flex-1 p-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 />
-                <Button
+                <Button variant="primary"
                   onClick={() => copyToClipboard(adminLink)}
-                  className="bg-warning-500 hover:bg-warning-600 px-3"
                 >
                   <FontAwesomeIcon icon={faCopy} />
                 </Button>
               </div>
               
-              <Button
+              <Button variant="primary" size="sm" layout="full"
                 onClick={() => window.open(adminLink, '_blank')}
-                className="w-full bg-warning-500 hover:bg-warning-600 text-sm"
               >
                 <FontAwesomeIcon icon={faEye} className="mr-2" />
                 Abrir Vista Completa
@@ -226,9 +220,8 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
 
           {/* Botones de acción */}
           <div className="flex justify-end gap-2 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-            <Button
+            <Button variant="neutral"
               onClick={() => setShowModal(false)}
-              className="bg-neutral-500 hover:bg-neutral-600"
             >
               Cerrar
             </Button>

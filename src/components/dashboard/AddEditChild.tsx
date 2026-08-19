@@ -179,7 +179,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
         </div>
 
         <div className="flex justify-end space-x-2">
-          <Button onClick={onCancel} className="bg-neutral-300">Cancelar</Button>
+          <Button variant="neutral" onClick={onCancel}>Cancelar</Button>
           <Button onClick={handleSave}>{childToEdit ? "Guardar Cambios" : "Guardar"}</Button>
         </div>
       </form>

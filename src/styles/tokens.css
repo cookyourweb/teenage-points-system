@@ -182,7 +182,14 @@
 
   --tps-btn-danger-bg:        var(--tps-negative);
   --tps-btn-danger-bg-hover:  var(--tps-negative-hover);
-  --tps-btn-danger-fg:        var(--tps-text-inverse);
+  --tps-btn-danger-fg:        var(--tps-negative-fg);
+
+  /* El boton terciario: sin relleno en reposo, con relleno suave en hover.
+     Su color de texto sale de --tps-link y no de --tps-action, porque en
+     reposo se mide contra la SUPERFICIE, no contra un relleno. */
+  --tps-btn-ghost-fg:        var(--tps-link);
+  --tps-btn-ghost-fg-hover:  var(--tps-link-hover);
+  --tps-btn-ghost-bg-hover:  var(--tps-bg-sunken);
 
   --tps-card-bg:     var(--tps-bg-surface);
   --tps-card-border: var(--tps-border);

@@ -323,15 +323,14 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
+              <Button variant="neutral" 
                 onClick={handleRefresh}
-                className="bg-neutral-500 hover:bg-neutral-600 px-3"
                 disabled={syncing}
               >
                 <FontAwesomeIcon icon={faSync} className={syncing ? "animate-spin" : ""} />
               </Button>
               {isPadre && (
-                <Button onClick={handleAddPrivilege} className="flex items-center gap-2 bg-accent-500 hover:bg-accent-600">
+                <Button variant="primary" onClick={handleAddPrivilege}>
                   <FontAwesomeIcon icon={faPlus} />
                   Nuevo Privilegio
                 </Button>
@@ -353,7 +352,7 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
                 }
               </p>
               {isPadre && (
-                <Button onClick={handleAddPrivilege} className="bg-accent-500 hover:bg-accent-600">
+                <Button variant="primary" onClick={handleAddPrivilege}>
                   <FontAwesomeIcon icon={faPlus} className="mr-2" />
                   Crear Primer Privilegio
                 </Button>
@@ -693,9 +692,8 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
 
             {/* Botones de acción */}
             <div className="flex gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-              <Button
+              <Button variant="neutral" layout="grow"
                 onClick={handleCloseModal}
-                className="flex-1 bg-neutral-500 hover:bg-neutral-600"
                 disabled={saving}
               >
                 <FontAwesomeIcon icon={faTimes} className="mr-2" />

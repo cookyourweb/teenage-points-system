@@ -10,8 +10,10 @@ const meta = {
     docs: {
       description: {
         component:
-          "El boton del sistema. Tiene una API tipada con seis variantes, tres tamanos y estado de carga. " +
-          "Hoy esa API no la usa nadie: en el codigo hay catorce llamadas que le pasan el color por className.",
+          "El boton del sistema. Cuatro variantes que son INTENCIONES, no colores, tres tamanos y estado de carga. " +
+          "`className` y `style` estan fuera del contrato: TypeScript los rechaza en compilacion. " +
+          "Antes de cerrarlo, la foto medida del repo era que `variant` se usaba 6 veces en todo src/ y " +
+          "`className` con colores 30 veces. La API existia y nadie la usaba.",
       },
     },
   },
@@ -21,21 +23,32 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Las seis variantes juntas. Vistas asi se nota que son seis colores sin jerarquia:
- *  nada dice cual es la accion principal de una pantalla. */
+/**
+ * Las cuatro variantes. Cada una es una INTENCION, no un color.
+ *
+ * Antes eran seis y tres sobraban. `success`, `warning` e `info` se eliminaron
+ * porque un boton no es un estado, es una accion: un boton verde de "guardar"
+ * comunica lo mismo que uno azul y anade un color al sistema. `warning` ademas
+ * era una trampa de contraste, amarillo con blanco da 1,92:1.
+ */
 export const Variantes: Story = {
   render: (args) => (
     <div className="flex flex-wrap gap-3">
-      <Button {...args} variant="primary">Primary</Button>
-      <Button {...args} variant="secondary">Secondary</Button>
-      <Button {...args} variant="success">Success</Button>
-      <Button {...args} variant="danger">Danger</Button>
-      <Button {...args} variant="warning">Warning</Button>
-      <Button {...args} variant="info">Info</Button>
+      <Button {...args} variant="primary">La accion que quieres</Button>
+      <Button {...args} variant="neutral">Cancelar</Button>
+      <Button {...args} variant="danger">Borrar</Button>
+      <Button {...args} variant="ghost">Terciaria</Button>
     </div>
   ),
 };
 
+/**
+ * Los tres tamanos. Todos cumplen 44 px de alto minimo.
+ *
+ * No es estetica: es el criterio 2.5.8 de WCAG 2.2. Por debajo de 44 px, un
+ * objetivo tactil se falla al pulsarlo. Y este producto lo usan adolescentes
+ * en el movil, que es donde mas se nota.
+ */
 export const Tamanos: Story = {
   render: (args) => (
     <div className="flex items-center gap-3">
@@ -46,6 +59,11 @@ export const Tamanos: Story = {
   ),
 };
 
+/**
+ * Los estados. Cargando lleva `aria-busy`, que es lo que hace que un lector de
+ * pantalla anuncie que esta ocupado; sin el, para alguien ciego el boton
+ * simplemente deja de responder.
+ */
 export const Estados: Story = {
   render: (args) => (
     <div className="flex flex-wrap gap-3">
@@ -56,8 +74,30 @@ export const Estados: Story = {
   ),
 };
 
-/** El caso que nadie escribe y el que encuentra los fallos.
- *  Con "Guardar" todo se ve bien; con el texto de una tarea real, no. */
+/**
+ * La disposicion es lo UNICO que puede aportar quien lo usa.
+ *
+ * Es una union cerrada de tres valores, y sale de mirar los className reales
+ * del repo: los legitimos eran todos de esta forma. El resto eran colores, que
+ * es justo lo que se cierra.
+ */
+export const Disposicion: Story = {
+  render: (args) => (
+    <div className="flex w-80 flex-col gap-3">
+      <Button {...args} layout="full">Ancho completo</Button>
+      <div className="flex gap-3">
+        <Button {...args} layout="grow">Crece</Button>
+        <Button {...args} variant="neutral" layout="grow">Crece</Button>
+      </div>
+    </div>
+  ),
+};
+
+/**
+ * El caso que nadie escribe y el que encuentra los fallos.
+ *
+ * Con "Guardar" todo se ve bien. Con el texto de una tarea real, no.
+ */
 export const TextoLargo: Story = {
   args: {
     children: "Recoger la habitacion y sacar la basura antes de cenar",
@@ -65,32 +105,38 @@ export const TextoLargo: Story = {
 };
 
 /**
- * ESTO ES UN FALLO, no una variante.
+ * LA PUERTA CERRADA.
  *
- * `Button.tsx:47` concatena `className` al final sin `tailwind-merge`, asi que
- * las dos clases de fondo conviven en el atributo y decide el orden del CSS
- * generado, que Tailwind emite alfabeticamente por familia de color.
+ * Aqui habia una story llamada `FalloDeOverride` que documentaba el agujero:
+ * `Button` concatenaba `className` al final, asi que dos clases de fondo
+ * convivian en el atributo y decidia el orden alfabetico del CSS generado.
+ * Los botones funcionaban por casualidad, y uno de ellos dejaba texto blanco
+ * sobre gris claro con 1,47:1 de contraste.
  *
- * `gray` y `purple` van despues de `blue` en el alfabeto, asi que ganan.
- * Funcionan por casualidad. Con `bg-warning-500` saldria azul.
+ * Ese agujero ya no existe. `ButtonProps` extiende
+ * `Omit<ButtonHTMLAttributes, 'className' | 'style'>`, asi que esto:
  *
- * Y hay dano real: el boton gris conserva el `text-white` y el
- * `hover:bg-primary-600` de la variante. Texto blanco sobre gris 300 da 1,47:1
- * de contraste, cuando WCAG AA pide 4,5:1. Y al pasar el raton se vuelve azul.
+ *     <Button className="bg-accent-500">Guardar</Button>
  *
- * Abre la pestana Accessibility con esta story seleccionada para verlo.
+ * ya no compila. Y por si alguien construye las props dinamicamente o entra
+ * desde JavaScript sin tipos, el componente tambien las descarta en ejecucion.
+ *
+ * Lo que se ve abajo es la traduccion de aquellos overrides a la API: los
+ * cuatro grises distintos de "Cancelar" son un solo `variant="neutral"`.
  */
-export const FalloDeOverride: Story = {
+export const AntesYDespues: Story = {
   render: (args) => (
-    <div className="flex flex-col gap-4">
+    <div className="flex max-w-md flex-col gap-4">
       <div className="flex flex-wrap gap-3">
-        <Button {...args} className="bg-neutral-300">Cancelar</Button>
-        <Button {...args} className="bg-accent-500">Funciona por alfabeto</Button>
-        <Button {...args} className="bg-warning-500">Deberia ser ambar</Button>
+        <Button {...args} variant="neutral">Cancelar</Button>
+        <Button {...args} variant="neutral">Cerrar</Button>
+        <Button {...args} variant="neutral">Volver</Button>
       </div>
-      <p className="max-w-md text-sm text-neutral-700">
-        El tercero sale azul: <code>amber</code> va antes que <code>blue</code>{" "}
-        en el alfabeto, asi que pierde. Los otros dos ganan por casualidad.
+      <p className="text-sm text-content-muted">
+        Estos tres llevaban <code>bg-neutral-500</code>,{" "}
+        <code>bg-neutral-300</code> y <code>bg-gray-500</code> escritos a mano.
+        Ahora son la misma intencion, y el dia que cambie el gris de cancelar
+        cambia en los tres a la vez.
       </p>
     </div>
   ),

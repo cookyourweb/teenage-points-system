@@ -148,7 +148,7 @@ const FaqAdmin: React.FC = () => {
       <h1 className="text-2xl font-bold mb-4">Administración de FAQs</h1>
 
       {/* Agregar categoría */}
-      <div className="mb-6">
+      <div className="mb-6 space-y-2">
         <h2 className="text-xl font-semibold">Categorías</h2>
         <label className="block font-medium">Título de la categoría:</label>
         <input
@@ -156,17 +156,17 @@ const FaqAdmin: React.FC = () => {
           value={newCategoriaTitulo}
           onChange={(e) => setNewCategoriaTitulo(e.target.value)}
           placeholder="Título de la categoría"
-          className="border p-2 rounded mr-2 w-full"
+          className="border p-2 rounded w-full"
         />
-        <label className="block font-medium mt-2">Definición de la categoría:</label>
+        <label className="block font-medium">Definición de la categoría:</label>
         <input
           type="text"
           value={newCategoriaDefinicion}
           onChange={(e) => setNewCategoriaDefinicion(e.target.value)}
           placeholder="Definición de la categoría"
-          className="border p-2 rounded mr-2 w-full"
+          className="border p-2 rounded w-full"
         />
-        <Button onClick={handleAddCategoria} className="mt-2">Agregar Categoría</Button>
+        <Button onClick={handleAddCategoria}>Agregar Categoría</Button>
       </div>
 
       <ul className="space-y-4">
@@ -183,7 +183,7 @@ const FaqAdmin: React.FC = () => {
                   }
                   className="border p-2 rounded w-full"
                 />
-                <label className="block font-medium mt-2">Editar Definición:</label>
+                <label className="block font-medium">Editar Definición:</label>
                 <input
                   type="text"
                   value={editCategoriaDefinicion[cat.id] || ""}
@@ -212,25 +212,25 @@ const FaqAdmin: React.FC = () => {
               </div>
             )}
 
-            <div className="mt-4 border-t pt-4">
+            <div className="mt-4 space-y-2 border-t pt-4">
               <h3 className="font-medium">Agregar Pregunta a {cat.titulo}:</h3>
-              <label className="block font-medium mt-2">Título de la pregunta:</label>
+              <label className="block font-medium">Título de la pregunta:</label>
               <input
                 type="text"
                 value={newPreguntaTitulo[cat.id] || ""}
                 onChange={(e) => setNewPreguntaTitulo((prev) => ({ ...prev, [cat.id]: e.target.value }))}
                 placeholder="Título de la pregunta"
-                className="border p-2 rounded w-full mt-2"
+                className="border p-2 rounded w-full"
               />
-              <label className="block font-medium mt-2">Definición de la pregunta:</label>
+              <label className="block font-medium">Definición de la pregunta:</label>
               <input
                 type="text"
                 value={newPreguntaDefinicion[cat.id] || ""}
                 onChange={(e) => setNewPreguntaDefinicion((prev) => ({ ...prev, [cat.id]: e.target.value }))}
                 placeholder="Definición de la pregunta"
-                className="border p-2 rounded w-full mt-2"
+                className="border p-2 rounded w-full"
               />
-              <Button onClick={() => handleAddPreguntaClick(cat.id)} className="mt-2">Agregar Pregunta</Button>
+              <Button onClick={() => handleAddPreguntaClick(cat.id)}>Agregar Pregunta</Button>
 
               {cat.preguntas.length > 0 && (
                 <ul className="mt-4 space-y-4">
@@ -248,15 +248,15 @@ const FaqAdmin: React.FC = () => {
                       </div>
 
                       {/* Agregar solución */}
-                      <label className="block font-medium mt-2">Nueva solución:</label>
+                      <label className="block font-medium">Nueva solución:</label>
                       <input
                         type="text"
                         value={newSolucionTexto[`${cat.id}-${preg.id}`] || ""}
                         onChange={(e) => setNewSolucionTexto((prev) => ({ ...prev, [`${cat.id}-${preg.id}`]: e.target.value }))}
                         placeholder="Nueva solución"
-                        className="border p-2 rounded w-full mt-2"
+                        className="border p-2 rounded w-full"
                       />
-                      <Button onClick={() => handleAddSolucionClick(cat.id, preg)} className="mt-2">
+                      <Button onClick={() => handleAddSolucionClick(cat.id, preg)}>
                         Agregar Solución
                       </Button>
 

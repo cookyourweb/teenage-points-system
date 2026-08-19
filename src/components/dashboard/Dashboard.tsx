@@ -243,31 +243,27 @@ const Dashboard: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Button 
                     onClick={handleAddChild}
-                    className="flex items-center justify-center gap-2 h-12"
                   >
                     <FontAwesomeIcon icon={faPlus} />
                     Añadir Hijo
                   </Button>
-                  <Button 
+                  <Button variant="primary" 
                     onClick={() => setActiveTab('tasks')}
-                    className="flex items-center justify-center gap-2 h-12 bg-success-500 hover:bg-success-600"
                     disabled={!isPadre}
                   >
                     <FontAwesomeIcon icon={faTasks} />
                     Gestionar Tareas
                   </Button>
-                  <Button 
+                  <Button variant="primary" 
                     onClick={() => setActiveTab('privileges')}
-                    className="flex items-center justify-center gap-2 h-12 bg-accent-500 hover:bg-accent-600"
                     disabled={!isPadre}
                   >
                     <FontAwesomeIcon icon={faGift} />
                     Gestionar Privilegios
                   </Button>
                   {isAdmin && (
-                    <Button 
+                    <Button variant="primary" 
                       onClick={() => setIsInviting(true)}
-                      className="flex items-center justify-center gap-2 h-12 bg-primary-500 hover:bg-primary-600"
                     >
                       <FontAwesomeIcon icon={faUsers} />
                       Invitar Miembro
@@ -326,7 +322,7 @@ const Dashboard: React.FC = () => {
               <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
                 Gestión de Hijos
               </h2>
-              <Button onClick={handleAddChild} className="flex items-center gap-2">
+              <Button onClick={handleAddChild}>
                 <FontAwesomeIcon icon={faPlus} />
                 Añadir Hijo
               </Button>
@@ -391,23 +387,20 @@ const Dashboard: React.FC = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Button
+                        <Button layout="full"
                           onClick={() => navigate(`/reward-tracker/${familyId}/${child.id}`)}
-                          className="w-full"
                         >
                           Ver Sistema de Puntos
                         </Button>
                         <div className="grid grid-cols-3 gap-2">
                           <ShareChildLink child={child} familyId={familyId!} />
-                          <Button
+                          <Button variant="primary"
                             onClick={() => handleEditChild(child)}
-                            className="bg-warning-500 hover:bg-warning-600"
                           >
                             Editar
                           </Button>
-                          <Button
+                          <Button variant="danger"
                             onClick={() => handleDeleteChild(child.id, child.nombre)}
-                            className="bg-danger-500 hover:bg-danger-600"
                           >
                             Eliminar
                           </Button>

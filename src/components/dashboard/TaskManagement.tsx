@@ -349,15 +349,14 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
+              <Button variant="neutral" 
                 onClick={handleRefresh}
-                className="bg-neutral-500 hover:bg-neutral-600 px-3"
                 disabled={syncing}
               >
                 <FontAwesomeIcon icon={faSync} className={syncing ? "animate-spin" : ""} />
               </Button>
               {isPadre && (
-                <Button onClick={handleAddTask} className="flex items-center gap-2">
+                <Button onClick={handleAddTask}>
                   <FontAwesomeIcon icon={faPlus} />
                   Nueva Tarea
                 </Button>
@@ -451,13 +450,12 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                       />
                     ))}
                   {customTasks.filter(t => t.tipo === 'diarias').length === 0 && (
-                    <div className="col-span-full text-center py-8 text-neutral-500 dark:text-neutral-400">
+                    <div className="col-span-full text-center py-8 space-y-3 text-neutral-500 dark:text-neutral-400">
                       <FontAwesomeIcon icon={faCheckSquare} className="text-2xl mb-2" />
                       <p>No hay tareas diarias personalizadas</p>
                       {isPadre && (
-                        <Button 
-                          onClick={handleAddTask} 
-                          className="mt-3 bg-success-500 hover:bg-success-600"
+                        <Button variant="primary" 
+                          onClick={handleAddTask}
                         >
                           Crear Tarea Diaria
                         </Button>
@@ -488,13 +486,12 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                       />
                     ))}
                   {customTasks.filter(t => t.tipo === 'extra').length === 0 && (
-                    <div className="col-span-full text-center py-8 text-neutral-500 dark:text-neutral-400">
+                    <div className="col-span-full text-center py-8 space-y-3 text-neutral-500 dark:text-neutral-400">
                       <FontAwesomeIcon icon={faStar} className="text-2xl mb-2" />
                       <p>No hay tareas extra personalizadas</p>
                       {isPadre && (
-                        <Button 
-                          onClick={handleAddTask} 
-                          className="mt-3 bg-warning-500 hover:bg-warning-600"
+                        <Button variant="primary" 
+                          onClick={handleAddTask}
                         >
                           Crear Tarea Extra
                         </Button>
@@ -651,17 +648,15 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
 
             {/* Botones de acción */}
             <div className="flex gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-              <Button
+              <Button variant="neutral" layout="grow"
                 onClick={handleCloseModal}
-                className="flex-1 bg-neutral-500 hover:bg-neutral-600"
                 disabled={saving}
               >
                 <FontAwesomeIcon icon={faTimes} className="mr-2" />
                 Cancelar
               </Button>
-              <Button
+              <Button layout="grow"
                 type="submit"
-                className="flex-1"
                 disabled={saving}
               >
                 {saving ? (

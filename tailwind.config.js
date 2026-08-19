@@ -102,6 +102,32 @@ const roles = {
     bg: 'var(--tps-negative-bg)',
   },
   disabled: { DEFAULT: 'var(--tps-disabled-bg)', fg: 'var(--tps-disabled-fg)' },
+
+  // NIVEL 3, el de componente. Existe para poder decir "los botones de esta
+  // app son un punto mas oscuros" sin tocar el sistema de acciones entero.
+  // Si nadie lo consume es decoracion, asi que Button tira de aqui.
+  btn: {
+    primary: {
+      DEFAULT: 'var(--tps-btn-primary-bg)',
+      hover: 'var(--tps-btn-primary-bg-hover)',
+      fg: 'var(--tps-btn-primary-fg)',
+    },
+    neutral: {
+      DEFAULT: 'var(--tps-btn-neutral-bg)',
+      hover: 'var(--tps-btn-neutral-bg-hover)',
+      fg: 'var(--tps-btn-neutral-fg)',
+    },
+    danger: {
+      DEFAULT: 'var(--tps-btn-danger-bg)',
+      hover: 'var(--tps-btn-danger-bg-hover)',
+      fg: 'var(--tps-btn-danger-fg)',
+    },
+    ghost: {
+      fg: 'var(--tps-btn-ghost-fg)',
+      'fg-hover': 'var(--tps-btn-ghost-fg-hover)',
+      'bg-hover': 'var(--tps-btn-ghost-bg-hover)',
+    },
+  },
 };
 
 export default {

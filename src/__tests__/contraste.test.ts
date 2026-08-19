@@ -122,6 +122,10 @@ const ESTADOS: Array<[string, string, string, number]> = [
   ['Boton peligro, reposo', '--tps-btn-danger-fg', '--tps-btn-danger-bg', TEXTO],
   ['Boton peligro, hover', '--tps-btn-danger-fg', '--tps-btn-danger-bg-hover', TEXTO],
 
+  // El boton terciario en reposo va sobre la superficie, sin relleno propio
+  ['Boton terciario, reposo', '--tps-btn-ghost-fg', '--tps-bg-surface', TEXTO],
+  ['Boton terciario, hover', '--tps-btn-ghost-fg-hover', '--tps-btn-ghost-bg-hover', TEXTO],
+
   // Accion como TEXTO: enlaces y pestañas. Aqui el fondo es la superficie.
   ['Enlace, reposo', '--tps-link', '--tps-bg-surface', TEXTO],
   ['Enlace, hover', '--tps-link-hover', '--tps-bg-surface', TEXTO],

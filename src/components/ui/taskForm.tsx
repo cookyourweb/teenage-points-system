@@ -353,18 +353,16 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
         {/* Botones de acción */}
         <div className="flex gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-          <Button
+          <Button variant="neutral" layout="grow"
             type="button"
             onClick={onCancel}
-            className="flex-1 bg-neutral-500 hover:bg-neutral-600"
             disabled={isDisabled}
           >
             <FontAwesomeIcon icon={faTimes} className="mr-2" />
             Cancelar
           </Button>
-          <Button
+          <Button layout="grow"
             type="submit"
-            className="flex-1"
             disabled={isDisabled}
           >
             {isSubmitting ? (

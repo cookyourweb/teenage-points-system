@@ -32,3 +32,6 @@ dist-ssr
 
 # Java / Maven
 backend/target/
+
+*storybook.log
+storybook-static

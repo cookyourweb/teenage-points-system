@@ -559,7 +559,7 @@ const Dashboard: React.FC = () => {
           <nav className="-mb-px flex space-x-8 overflow-x-auto">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              className={`py-2 px-1 bg-transparent border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === 'overview'
                   ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                   : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
@@ -570,7 +570,7 @@ const Dashboard: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('children')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              className={`py-2 px-1 bg-transparent border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === 'children'
                   ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                   : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
@@ -582,7 +582,7 @@ const Dashboard: React.FC = () => {
             <button
               onClick={() => setActiveTab('tasks')}
               disabled={!isPadre}
-              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              className={`py-2 px-1 bg-transparent border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === 'tasks'
                   ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                   : isPadre 
@@ -597,7 +597,7 @@ const Dashboard: React.FC = () => {
             <button
               onClick={() => setActiveTab('privileges')}
               disabled={!isPadre}
-              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              className={`py-2 px-1 bg-transparent border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === 'privileges'
                   ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                   : isPadre 

@@ -23,6 +23,7 @@ import PrivilegeManagement from "./PrivilegeManagement";
 
 import Button from "../ui/Button";
 import Modal from "../ui/Modal";
+import ThemeToggle from "../ui/ThemeToggle";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { Child } from "../../types/familyTypes";
 import { useUserRole } from "../../hooks/useUserRole";
@@ -538,17 +539,23 @@ const Dashboard: React.FC = () => {
                 {isPadre && <span className="ml-2 text-primary-600 dark:text-primary-400">👑 Padre</span>}
               </p>
             </div>
-            <button
-              onClick={async () => {
-                await signOut(auth);
-                navigate("/");
-              }}
-              className="flex items-center gap-2 px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700"
-              title="Cerrar sesión"
-            >
-              <FontAwesomeIcon icon={faSignOutAlt} />
-              <span className="hidden sm:inline">Cerrar Sesión</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              {/* bg-transparent no es decoracion: globals.css pinta de azul todo
+                  <button> que no traiga fondo propio, y sin esto este boton sale
+                  azul con el texto gris encima. */}
+              <button
+                onClick={async () => {
+                  await signOut(auth);
+                  navigate("/");
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-transparent text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                title="Cerrar sesión"
+              >
+                <FontAwesomeIcon icon={faSignOutAlt} />
+                <span className="hidden sm:inline">Cerrar Sesión</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>

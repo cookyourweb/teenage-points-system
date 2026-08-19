@@ -1,0 +1,113 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Fundamentos/Colores" />
+
+export const TONOS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+
+export const PALETA = {
+  primary: {
+    uso: "Accion principal: botones de guardar, enlaces, foco.",
+    hex: ["#eff6ff","#dbeafe","#bfdbfe","#93c5fd","#60a5fa","#3b82f6","#2563eb","#1d4ed8","#1e40af","#1e3a8a","#172554"],
+  },
+  neutral: {
+    uso: "Superficies, texto y bordes. Es la familia que mas se usa.",
+    hex: ["#f9fafb","#f3f4f6","#e5e7eb","#d1d5db","#9ca3af","#6b7280","#4b5563","#374151","#1f2937","#111827","#030712"],
+  },
+  success: {
+    uso: "Tarea completada, puntos ganados, confirmacion.",
+    hex: ["#f0fdf4","#dcfce7","#bbf7d0","#86efac","#4ade80","#22c55e","#16a34a","#15803d","#166534","#14532d","#052e16"],
+  },
+  danger: {
+    uso: "Borrar, error, cualquier accion que no se puede deshacer.",
+    hex: ["#fef2f2","#fee2e2","#fecaca","#fca5a5","#f87171","#ef4444","#dc2626","#b91c1c","#991b1b","#7f1d1d","#450a0a"],
+  },
+  warning: {
+    uso: "Aviso, pendiente, algo que requiere atencion pero no es un error.",
+    hex: ["#fffbeb","#fef3c7","#fde68a","#fcd34d","#fbbf24","#f59e0b","#d97706","#b45309","#92400e","#78350f","#451a03"],
+  },
+  accent: {
+    uso: "Privilegios y recompensas. Es lo que distingue esta app.",
+    hex: ["#faf5ff","#f3e8ff","#e9d5ff","#d8b4fe","#c084fc","#a855f7","#9333ea","#7e22ce","#6b21a8","#581c87","#3b0764"],
+  },
+};
+
+export const Escala = ({ nombre }) => {
+  const { uso, hex } = PALETA[nombre];
+  return (
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 2 }}>
+        <code style={{ fontSize: 15, fontWeight: 700 }}>{nombre}</code>
+        <span style={{ fontSize: 13, color: "#555" }}>{uso}</span>
+      </div>
+      <div style={{ display: "flex", marginTop: 8, borderRadius: 6, overflow: "hidden", border: "1px solid #e5e7eb" }}>
+        {hex.map((c, i) => (
+          <div key={c} style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ height: 52, background: c }} />
+            <div style={{ fontSize: 10, textAlign: "center", padding: "4px 0", color: "#666", fontFamily: "monospace" }}>
+              {TONOS[i]}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+# Colores
+
+Seis familias con nombre semantico. **El nombre dice para que sirve el color, no
+que color es.** Por eso se llama `danger` y no `red`: el dia que la marca decida
+que borrar se pinta en naranja, se cambia en un sitio y no hay que renombrar nada.
+
+Cada familia tiene la escala completa de 50 a 950 y funciona con cualquier
+utilidad de Tailwind: `bg-`, `text-`, `border-`, `ring-`, `from-`, `to-`.
+
+<Escala nombre="primary" />
+<Escala nombre="neutral" />
+<Escala nombre="success" />
+<Escala nombre="danger" />
+<Escala nombre="warning" />
+<Escala nombre="accent" />
+
+## Como se usa
+
+```jsx
+<button className="bg-primary-600 text-white hover:bg-primary-700">
+  Guardar
+</button>
+
+<div className="border border-neutral-200 bg-white text-neutral-900">
+  <span className="text-neutral-500">Puntos</span>
+</div>
+
+<span className="text-success-600">Tarea completada</span>
+```
+
+## Que tono elegir
+
+| Tono | Para que |
+| --- | --- |
+| **50 a 100** | Fondos suaves, avisos, estados seleccionados |
+| **200 a 300** | Bordes y separadores |
+| **400 a 500** | Iconos y texto secundario sobre fondo claro |
+| **600 a 700** | **Fondos de boton y texto de color.** Es el rango de trabajo |
+| **800 a 950** | Texto principal, fondos oscuros |
+
+**Regla de contraste:** para texto sobre blanco, a partir de **600**. Los tonos
+400 y 500 no llegan a los 4,5:1 que pide WCAG AA en texto normal.
+
+## Los nombres crudos de Tailwind no existen
+
+`bg-blue-500` y `bg-gray-100` no generan ninguna clase. La configuracion
+**reemplaza** `theme.colors` en lugar de extenderlo, asi que la paleta por
+defecto de Tailwind no esta disponible.
+
+No es una convencion que haya que recordar: **no se puede incumplir.**
+
+```jsx
+<div className="bg-blue-500" />     {/* no pinta nada */}
+<div className="bg-primary-500" />  {/* correcto */}
+```
+
+Si necesitas un color que no esta aqui, la respuesta no es escribir el nombre
+crudo: es anadirlo a la paleta con un nombre que diga para que sirve.

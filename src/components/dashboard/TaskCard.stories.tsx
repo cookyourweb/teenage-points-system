@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 import TaskCard from "./TaskCard";
 
 const meta = {
-  title: "Dashboard/TaskCard",
+  title: "Producto/TaskCard",
   component: TaskCard,
   parameters: { layout: "centered" },
   args: { onComplete: fn() },

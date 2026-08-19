@@ -423,9 +423,9 @@ const RewardTracker: React.FC = () => {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600 dark:text-gray-400">Cargando sistema de puntos...</p>
-          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-lg text-neutral-600 dark:text-neutral-400">Cargando sistema de puntos...</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-500 mt-2">
             Conectando con Firebase /weeklyTasks...
           </p>
         </div>
@@ -434,7 +434,7 @@ const RewardTracker: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 py-6">
       <ToastContainer />
       
       {/* Header */}
@@ -443,25 +443,25 @@ const RewardTracker: React.FC = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
             >
               <FontAwesomeIcon icon={faArrowLeft} />
               Volver al Dashboard
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
                 Sistema de Puntos
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
+              <p className="text-lg text-neutral-600 dark:text-neutral-400">
                 {childName} - Total: {weeklyTotal} puntos
               </p>
               {isPadre && (
-                <p className="text-sm text-blue-600 dark:text-blue-400">
+                <p className="text-sm text-primary-600 dark:text-primary-400">
                   👑 Modo Padre - Puedes editar privilegios
                 </p>
               )}
               {lastUpdated && (
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">
                   Última actualización: {new Date(lastUpdated).toLocaleString('es-ES')}
                 </p>
               )}
@@ -470,7 +470,7 @@ const RewardTracker: React.FC = () => {
 
           <div className="flex items-center gap-2">
             {syncing && (
-              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+              <div className="flex items-center gap-2 text-primary-600 dark:text-primary-400">
                 <FontAwesomeIcon icon={faSync} className="animate-spin" />
                 <span className="text-sm">Sincronizando...</span>
               </div>
@@ -478,7 +478,7 @@ const RewardTracker: React.FC = () => {
             <button
               onClick={refreshData}
               disabled={syncing}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 transition-colors"
               title="Actualizar datos desde Firebase"
             >
               <FontAwesomeIcon icon={faSync} className={syncing ? "animate-spin" : ""} />
@@ -493,7 +493,7 @@ const RewardTracker: React.FC = () => {
             <CardTitle className="text-2xl font-bold text-center">
               Sistema de Puntos Semanal
             </CardTitle>
-            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-center text-sm text-neutral-500 dark:text-neutral-400">
               Datos guardados en: /weeklyTasks/{familyId}_{childId}_[semana]
             </p>
           </CardHeader>
@@ -502,9 +502,9 @@ const RewardTracker: React.FC = () => {
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    <th className="p-3 border bg-gray-100 dark:bg-gray-700 text-left">Tareas</th>
+                    <th className="p-3 border bg-neutral-100 dark:bg-neutral-700 text-left">Tareas</th>
                     {diasSemana.map(dia => (
-                      <th key={dia} className="p-3 border bg-gray-100 dark:bg-gray-700 text-center">
+                      <th key={dia} className="p-3 border bg-neutral-100 dark:bg-neutral-700 text-center">
                         {dia}
                       </th>
                     ))}
@@ -516,7 +516,7 @@ const RewardTracker: React.FC = () => {
                       <td className="p-3 border">
                         <div>
                           <div className="font-medium">{tarea.nombre}</div>
-                          <div className="text-sm text-gray-500">({tarea.puntos} pts)</div>
+                          <div className="text-sm text-neutral-500">({tarea.puntos} pts)</div>
                         </div>
                       </td>
                       {diasSemana.map(dia => (
@@ -526,16 +526,16 @@ const RewardTracker: React.FC = () => {
                             disabled={syncing}
                             className={`p-3 rounded-full transition-colors disabled:opacity-50 ${
                               tasks[dia]?.diarias.find(t => t.id === tarea.id)?.completada
-                                ? "bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800"
-                                : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+                                ? "bg-success-100 hover:bg-success-200 dark:bg-success-900 dark:hover:bg-success-800"
+                                : "bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-700 dark:hover:bg-neutral-600"
                             }`}
                           >
                             <FontAwesomeIcon 
                               icon={faCheckSquare} 
                               className={`w-6 h-6 ${
                                 tasks[dia]?.diarias.find(t => t.id === tarea.id)?.completada
-                                  ? "text-green-600 dark:text-green-400"
-                                  : "text-gray-400 dark:text-gray-500"
+                                  ? "text-success-600 dark:text-success-400"
+                                  : "text-neutral-400 dark:text-neutral-500"
                               }`}
                             />
                           </button>
@@ -544,11 +544,11 @@ const RewardTracker: React.FC = () => {
                     </tr>
                   ))}
                   {initialTasks.Lunes.extra.map(tarea => (
-                    <tr key={tarea.id} className="bg-blue-50 dark:bg-blue-900/20">
+                    <tr key={tarea.id} className="bg-primary-50 dark:bg-primary-900/20">
                       <td className="p-3 border">
                         <div>
                           <div className="font-medium">{tarea.nombre}</div>
-                          <div className="text-sm text-blue-600 dark:text-blue-400">
+                          <div className="text-sm text-primary-600 dark:text-primary-400">
                             ({tarea.puntos} pts - Extra)
                           </div>
                         </div>
@@ -560,16 +560,16 @@ const RewardTracker: React.FC = () => {
                             disabled={syncing}
                             className={`p-3 rounded-full transition-colors disabled:opacity-50 ${
                               tasks[dia]?.extra.find(t => t.id === tarea.id)?.completada
-                                ? "bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700"
-                                : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+                                ? "bg-primary-100 hover:bg-primary-200 dark:bg-primary-800 dark:hover:bg-primary-700"
+                                : "bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-700 dark:hover:bg-neutral-600"
                             }`}
                           >
                             <FontAwesomeIcon 
                               icon={faCheckSquare} 
                               className={`w-6 h-6 ${
                                 tasks[dia]?.extra.find(t => t.id === tarea.id)?.completada
-                                  ? "text-blue-600 dark:text-blue-400"
-                                  : "text-gray-400 dark:text-gray-500"
+                                  ? "text-primary-600 dark:text-primary-400"
+                                  : "text-neutral-400 dark:text-neutral-500"
                               }`}
                             />
                           </button>
@@ -577,11 +577,11 @@ const RewardTracker: React.FC = () => {
                       ))}
                     </tr>
                   ))}
-                  <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
+                  <tr className="bg-neutral-100 dark:bg-neutral-700 font-bold">
                     <td className="p-3 border">Puntos del Día</td>
                     {diasSemana.map(dia => (
                       <td key={`puntos-${dia}`} className="p-3 border text-center">
-                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                        <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
                           {totalPoints[dia] || 0}
                         </span>
                       </td>
@@ -591,7 +591,7 @@ const RewardTracker: React.FC = () => {
               </table>
             </div>
 
-            <div className="mt-6 p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg">
+            <div className="mt-6 p-4 bg-gradient-to-r from-primary-500 to-accent-600 text-white rounded-lg">
               <div className="text-center">
                 <h3 className="text-2xl font-bold">Puntos Totales de la Semana</h3>
                 <p className="text-4xl font-bold mt-2">{weeklyTotal} puntos</p>
@@ -609,14 +609,14 @@ const RewardTracker: React.FC = () => {
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="text-xl font-bold">🏆 Privilegios Disponibles</CardTitle>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">
                   Privilegios guardados en: /privilegios/[privilegeId]
                 </p>
               </div>
               {isPadre && (
                 <button
                   onClick={() => setIsAddingPrivilege(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-success-500 text-white rounded-lg hover:bg-success-600 transition-colors"
                 >
                   <FontAwesomeIcon icon={faPlus} />
                   Añadir Privilegio
@@ -627,7 +627,7 @@ const RewardTracker: React.FC = () => {
           <CardContent>
             {/* Formulario para añadir privilegio */}
             {isPadre && isAddingPrivilege && (
-              <div className="mb-6 p-4 border-2 border-dashed border-green-300 rounded-lg bg-green-50 dark:bg-green-900/20">
+              <div className="mb-6 p-4 border-2 border-dashed border-success-300 rounded-lg bg-success-50 dark:bg-success-900/20">
                 <h4 className="font-semibold mb-3">Añadir Nuevo Privilegio</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input
@@ -655,7 +655,7 @@ const RewardTracker: React.FC = () => {
                 <div className="flex gap-2 mt-3">
                   <button
                     onClick={handleAddPrivilege}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                    className="flex items-center gap-2 px-4 py-2 bg-success-500 text-white rounded-lg hover:bg-success-600"
                   >
                     <FontAwesomeIcon icon={faSave} />
                     Guardar
@@ -665,7 +665,7 @@ const RewardTracker: React.FC = () => {
                       setIsAddingPrivilege(false);
                       setNewPrivilege({ name: '', points: 0, description: '' });
                     }}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                    className="flex items-center gap-2 px-4 py-2 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600"
                   >
                     <FontAwesomeIcon icon={faTimes} />
                     Cancelar
@@ -682,13 +682,13 @@ const RewardTracker: React.FC = () => {
                 const isEditing = editingPrivilege === privilegeId;
                 
                 return (
-                  <div key={privilegeId} className="border p-6 rounded-lg shadow-md bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow">
+                  <div key={privilegeId} className="border p-6 rounded-lg shadow-md bg-white dark:bg-neutral-800 hover:shadow-lg transition-shadow">
                     {/* Iconos de edición para padres */}
                     {isPadre && (
                       <div className="flex justify-end gap-1 mb-2">
                         <button
                           onClick={() => setEditingPrivilege(isEditing ? null : privilegeId)}
-                          className="p-1 text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900 rounded"
+                          className="p-1 text-primary-500 hover:bg-primary-100 dark:hover:bg-primary-900 rounded"
                           title="Editar privilegio"
                         >
                           <FontAwesomeIcon icon={faEdit} size="sm" />
@@ -699,7 +699,7 @@ const RewardTracker: React.FC = () => {
                               toast.info(`Privilegio "${privilege.name}" ocultado temporalmente`);
                             }
                           }}
-                          className="p-1 text-orange-500 hover:bg-orange-100 dark:hover:bg-orange-900 rounded"
+                          className="p-1 text-warning-500 hover:bg-warning-100 dark:hover:bg-warning-900 rounded"
                           title="Ocultar privilegio (no eliminar)"
                         >
                           <FontAwesomeIcon icon={faTrash} size="sm" />
@@ -716,7 +716,7 @@ const RewardTracker: React.FC = () => {
                             type="text"
                             defaultValue={privilege.name}
                             placeholder="Nombre del privilegio"
-                            className="w-full p-2 text-center font-semibold text-lg border rounded focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 text-center font-semibold text-lg border rounded focus:ring-2 focus:ring-primary-500"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 // Actualizar privilegio inicial (solo visual por ahora)
@@ -729,7 +729,7 @@ const RewardTracker: React.FC = () => {
                             type="number"
                             defaultValue={privilege.points}
                             placeholder="Puntos necesarios"
-                            className="w-full p-2 text-center border rounded focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 text-center border rounded focus:ring-2 focus:ring-primary-500"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 toast.success(`Puntos actualizados para "${privilege.name}"`);
@@ -740,7 +740,7 @@ const RewardTracker: React.FC = () => {
                           <input
                             type="text"
                             placeholder="Descripción (opcional)"
-                            className="w-full p-2 text-center border rounded text-sm focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 text-center border rounded text-sm focus:ring-2 focus:ring-primary-500"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 setEditingPrivilege(null);
@@ -753,14 +753,14 @@ const RewardTracker: React.FC = () => {
                                 toast.success(`Privilegio "${privilege.name}" guardado`);
                                 setEditingPrivilege(null);
                               }}
-                              className="flex-1 px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                              className="flex-1 px-3 py-1 bg-success-500 text-white rounded text-sm hover:bg-success-600"
                             >
                               <FontAwesomeIcon icon={faSave} className="mr-1" />
                               Guardar
                             </button>
                             <button
                               onClick={() => setEditingPrivilege(null)}
-                              className="flex-1 px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
+                              className="flex-1 px-3 py-1 bg-neutral-500 text-white rounded text-sm hover:bg-neutral-600"
                             >
                               <FontAwesomeIcon icon={faTimes} className="mr-1" />
                               Cancelar
@@ -769,24 +769,24 @@ const RewardTracker: React.FC = () => {
                         </div>
                       ) : (
                         <>
-                          <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-2">
+                          <h4 className="font-semibold text-lg text-neutral-900 dark:text-neutral-100 mb-2">
                             {privilege.name}
                           </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
                             Puntos necesarios: {privilege.points}
                           </p>
                         </>
                       )}
                       
                       {/* Barra de progreso */}
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4">
+                      <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-3 mb-4">
                         <div 
-                          className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-300"
+                          className="bg-gradient-to-r from-primary-500 to-accent-600 h-3 rounded-full transition-all duration-300"
                           style={{ width: `${Math.min((weeklyTotal / privilege.points) * 100, 100)}%` }}
                         ></div>
                       </div>
                       
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4">
                         {weeklyTotal}/{privilege.points} puntos ({Math.max(0, privilege.points - weeklyTotal)} faltan)
                       </p>
                     </div>
@@ -795,8 +795,8 @@ const RewardTracker: React.FC = () => {
                       <button
                         className={`w-full px-4 py-3 rounded-lg font-medium transition-all ${
                           canUnlock && !isEditing
-                            ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 transform hover:scale-105' 
-                            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                            ? 'bg-gradient-to-r from-success-500 to-success-600 text-white hover:from-success-600 hover:to-success-700 transform hover:scale-105' 
+                            : 'bg-neutral-300 dark:bg-neutral-600 text-neutral-500 dark:text-neutral-400 cursor-not-allowed'
                         }`}
                         disabled={!canUnlock || syncing || isEditing}
                         onClick={() => canUnlock && !isEditing && setShowCalendar(privilegeId)}
@@ -807,25 +807,25 @@ const RewardTracker: React.FC = () => {
                       {/* Calendario modal */}
                       {showCalendar === privilegeId && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
+                          <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg max-w-md w-full mx-4">
                             <h3 className="text-lg font-bold mb-4">📅 ¿Cuándo quieres disfrutar "{privilege.name}"?</h3>
                             
                             <div className="space-y-3 mb-4">
                               <button
                                 onClick={() => handlePrivilegeRedeem(privilege, 'Hoy')}
-                                className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                className="w-full p-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
                               >
                                 🕐 Hoy
                               </button>
                               <button
                                 onClick={() => handlePrivilegeRedeem(privilege, 'Mañana')}
-                                className="w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                className="w-full p-3 bg-success-500 text-white rounded-lg hover:bg-success-600"
                               >
                                 🌅 Mañana
                               </button>
                               <button
                                 onClick={() => handlePrivilegeRedeem(privilege, 'Este fin de semana')}
-                                className="w-full p-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+                                className="w-full p-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600"
                               >
                                 🎉 Este fin de semana
                               </button>
@@ -839,7 +839,7 @@ const RewardTracker: React.FC = () => {
                                 onChange={(e) => setSelectedDate(e.target.value)}
                                 min={getMinDate()}
                                 max={getMaxDate()}
-                                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                               />
                             </div>
 
@@ -847,7 +847,7 @@ const RewardTracker: React.FC = () => {
                               {selectedDate && (
                                 <button
                                   onClick={() => handlePrivilegeRedeem(privilege, new Date(selectedDate).toLocaleDateString('es-ES'))}
-                                  className="flex-1 p-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                                  className="flex-1 p-3 bg-warning-500 text-white rounded-lg hover:bg-warning-600"
                                 >
                                   <FontAwesomeIcon icon={faCalendar} className="mr-2" />
                                   Confirmar fecha
@@ -858,7 +858,7 @@ const RewardTracker: React.FC = () => {
                                   setShowCalendar(null);
                                   setSelectedDate('');
                                 }}
-                                className="flex-1 p-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                className="flex-1 p-3 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600"
                               >
                                 Cancelar
                               </button>
@@ -877,19 +877,19 @@ const RewardTracker: React.FC = () => {
                 const isEditing = editingPrivilege === privilege.id;
                 
                 return (
-                  <div key={privilege.id} className="border p-6 rounded-lg shadow-md bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow">
+                  <div key={privilege.id} className="border p-6 rounded-lg shadow-md bg-white dark:bg-neutral-800 hover:shadow-lg transition-shadow">
                     {isPadre && (
                       <div className="flex justify-end gap-1 mb-2">
                         <button
                           onClick={() => setEditingPrivilege(isEditing ? null : privilege.id)}
-                          className="p-1 text-blue-500 hover:bg-blue-100 rounded"
+                          className="p-1 text-primary-500 hover:bg-primary-100 rounded"
                           title="Editar"
                         >
                           <FontAwesomeIcon icon={faEdit} size="sm" />
                         </button>
                         <button
                           onClick={() => handleDeletePrivilege(privilege.id)}
-                          className="p-1 text-red-500 hover:bg-red-100 rounded"
+                          className="p-1 text-danger-500 hover:bg-danger-100 rounded"
                           title="Eliminar"
                         >
                           <FontAwesomeIcon icon={faTrash} size="sm" />
@@ -924,14 +924,14 @@ const RewardTracker: React.FC = () => {
                         </div>
                       ) : (
                         <>
-                          <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-2">
+                          <h4 className="font-semibold text-lg text-neutral-900 dark:text-neutral-100 mb-2">
                             {privilege.name}
                           </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
                             Puntos necesarios: {privilege.points}
                           </p>
                           {privilege.description && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4 italic">
                               {privilege.description}
                             </p>
                           )}
@@ -939,14 +939,14 @@ const RewardTracker: React.FC = () => {
                       )}
                       
                       {/* Barra de progreso */}
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4">
+                      <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-3 mb-4">
                         <div 
-                          className="bg-gradient-to-r from-purple-500 to-pink-600 h-3 rounded-full transition-all duration-300"
+                          className="bg-gradient-to-r from-accent-500 to-accent-600 h-3 rounded-full transition-all duration-300"
                           style={{ width: `${Math.min((weeklyTotal / privilege.points) * 100, 100)}%` }}
                         ></div>
                       </div>
                       
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4">
                         {weeklyTotal}/{privilege.points} puntos ({Math.max(0, privilege.points - weeklyTotal)} faltan)
                       </p>
                     </div>
@@ -955,8 +955,8 @@ const RewardTracker: React.FC = () => {
                       <button
                         className={`w-full px-4 py-3 rounded-lg font-medium transition-all ${
                           canUnlock 
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:from-purple-600 hover:to-pink-700 transform hover:scale-105' 
-                            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                            ? 'bg-gradient-to-r from-accent-500 to-accent-600 text-white hover:from-accent-600 hover:to-accent-700 transform hover:scale-105' 
+                            : 'bg-neutral-300 dark:bg-neutral-600 text-neutral-500 dark:text-neutral-400 cursor-not-allowed'
                         }`}
                         disabled={!canUnlock || syncing || isEditing}
                         onClick={() => canUnlock && setShowCalendar(privilege.id)}
@@ -967,25 +967,25 @@ const RewardTracker: React.FC = () => {
                       {/* Calendario modal para privilegios personalizados */}
                       {showCalendar === privilege.id && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
+                          <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg max-w-md w-full mx-4">
                             <h3 className="text-lg font-bold mb-4">📅 ¿Cuándo quieres disfrutar "{privilege.name}"?</h3>
                             
                             <div className="space-y-3 mb-4">
                               <button
                                 onClick={() => handlePrivilegeRedeem(privilege, 'Hoy')}
-                                className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                className="w-full p-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
                               >
                                 🕐 Hoy
                               </button>
                               <button
                                 onClick={() => handlePrivilegeRedeem(privilege, 'Mañana')}
-                                className="w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                className="w-full p-3 bg-success-500 text-white rounded-lg hover:bg-success-600"
                               >
                                 🌅 Mañana
                               </button>
                               <button
                                 onClick={() => handlePrivilegeRedeem(privilege, 'Este fin de semana')}
-                                className="w-full p-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+                                className="w-full p-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600"
                               >
                                 🎉 Este fin de semana
                               </button>
@@ -999,7 +999,7 @@ const RewardTracker: React.FC = () => {
                                 onChange={(e) => setSelectedDate(e.target.value)}
                                 min={getMinDate()}
                                 max={getMaxDate()}
-                                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                               />
                             </div>
 
@@ -1007,7 +1007,7 @@ const RewardTracker: React.FC = () => {
                               {selectedDate && (
                                 <button
                                   onClick={() => handlePrivilegeRedeem(privilege, new Date(selectedDate).toLocaleDateString('es-ES'))}
-                                  className="flex-1 p-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                                  className="flex-1 p-3 bg-warning-500 text-white rounded-lg hover:bg-warning-600"
                                 >
                                   <FontAwesomeIcon icon={faCalendar} className="mr-2" />
                                   Confirmar fecha
@@ -1018,7 +1018,7 @@ const RewardTracker: React.FC = () => {
                                   setShowCalendar(null);
                                   setSelectedDate('');
                                 }}
-                                className="flex-1 p-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                className="flex-1 p-3 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600"
                               >
                                 Cancelar
                               </button>
@@ -1038,7 +1038,7 @@ const RewardTracker: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>📜 Historial de Privilegios</CardTitle>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
               Historial guardado en: /weeklyTasks/{familyId}_{childId}_[semana]
             </p>
           </CardHeader>
@@ -1048,16 +1048,16 @@ const RewardTracker: React.FC = () => {
                 {privilegeHistory
                   .sort((a, b) => new Date(b.redeemedAt).getTime() - new Date(a.redeemedAt).getTime())
                   .map((entry, index) => (
-                  <div key={index} className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <div key={index} className="p-4 border rounded-lg bg-neutral-50 dark:bg-neutral-800">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">
+                        <p className="font-medium text-neutral-900 dark:text-neutral-100">
                           🏆 {entry.privilegeName}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
                           📅 Fecha programada: {entry.dateRedeemed}
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-500">
+                        <p className="text-sm text-neutral-500 dark:text-neutral-500">
                           ⏰ Redimido el: {new Date(entry.redeemedAt).toLocaleDateString('es-ES', {
                             year: 'numeric',
                             month: 'long',
@@ -1068,7 +1068,7 @@ const RewardTracker: React.FC = () => {
                         </p>
                       </div>
                       <div className="text-right">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200">
                           -{entry.pointsUsed} puntos
                         </span>
                       </div>
@@ -1079,10 +1079,10 @@ const RewardTracker: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <div className="text-6xl mb-4">🏆</div>
-                <p className="text-gray-500 dark:text-gray-400 mb-2">
+                <p className="text-neutral-500 dark:text-neutral-400 mb-2">
                   No hay privilegios redimidos aún
                 </p>
-                <p className="text-sm text-gray-400 dark:text-gray-500">
+                <p className="text-sm text-neutral-400 dark:text-neutral-500">
                   ¡Completa tareas para desbloquear recompensas!
                 </p>
               </div>
@@ -1092,19 +1092,19 @@ const RewardTracker: React.FC = () => {
 
         {/* Información de sincronización */}
         <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg">
-            <div className={`w-2 h-2 rounded-full ${syncing ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}></div>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-lg">
+            <div className={`w-2 h-2 rounded-full ${syncing ? 'bg-warning-500 animate-pulse' : 'bg-success-500'}`}></div>
             <span className="text-sm">
               {syncing ? "Sincronizando con Firebase /weeklyTasks..." : "Conectado y sincronizado"}
             </span>
           </div>
           {lastUpdated && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
               Los cambios se guardan automáticamente en Firebase
             </p>
           )}
           {isPadre && (
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+            <p className="text-xs text-primary-600 dark:text-primary-400 mt-1">
               👑 Como padre, puedes gestionar privilegios personalizados
             </p>
           )}

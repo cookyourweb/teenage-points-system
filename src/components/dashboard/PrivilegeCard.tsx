@@ -26,10 +26,10 @@ const PrivilegeCard: React.FC<PrivilegeCardProps> = ({ privilege, points, childN
   return (
     <div className="border p-4 rounded shadow bg-white dark:bg-black">
       <h4 className="font-semibold">{privilege.name}</h4>
-      <p className="text-sm text-gray-600">Puntos necesarios: {privilege.pointsRequired}</p>
+      <p className="text-sm text-neutral-600">Puntos necesarios: {privilege.pointsRequired}</p>
       <button
         className={`mt-2 px-4 py-2 rounded ${
-          canUnlock ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+          canUnlock ? 'bg-success-500 text-white' : 'bg-neutral-300 text-neutral-600'
         }`}
         disabled={!canUnlock}
         onClick={() => setIsModalOpen(true)} // Open the modal on click

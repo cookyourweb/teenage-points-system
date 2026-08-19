@@ -144,7 +144,7 @@ const FaqAdmin: React.FC = () => {
   };
 
   return (
-<div className="p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+<div className="p-6 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
       <h1 className="text-2xl font-bold mb-4">Administración de FAQs</h1>
 
       {/* Agregar categoría */}
@@ -171,7 +171,7 @@ const FaqAdmin: React.FC = () => {
 
       <ul className="space-y-4">
         {categorias.map((cat) => (
-          <li key={cat.id} className="p-4 bg-gray-100 rounded shadow">
+          <li key={cat.id} className="p-4 bg-neutral-100 rounded shadow">
             {editMode[cat.id] ? (
               <div>
                 <label className="block font-medium">Editar Título:</label>
@@ -277,7 +277,7 @@ const FaqAdmin: React.FC = () => {
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-gray-500 mt-2">Sin soluciones</p>
+                        <p className="text-neutral-500 mt-2">Sin soluciones</p>
                       )}
                     </li>
                   ))}

@@ -65,7 +65,7 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
     <>
       <Button
         onClick={() => setShowModal(true)}
-        className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-xs px-2 py-1"
+        className="flex items-center gap-2 bg-success-500 hover:bg-success-600 text-xs px-2 py-1"
       >
         <FontAwesomeIcon icon={faShare} />
         Compartir
@@ -74,23 +74,23 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
       <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
         <div className="space-y-6 max-w-2xl">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
               Compartir Sistema de Puntos
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-neutral-600 dark:text-neutral-400">
               Comparte el progreso de {child.nombre} con diferentes niveles de acceso
             </p>
           </div>
 
           {/* Vista para el Hijo */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+          <div className="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg">
             <div className="flex items-center gap-3 mb-3">
-              <FontAwesomeIcon icon={faEye} className="text-blue-500" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <FontAwesomeIcon icon={faEye} className="text-primary-500" />
+              <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                 Vista para {child.nombre}
               </h3>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
               Enlace simplificado donde {child.nombre} puede ver sus puntos y progreso 
               (solo lectura, interfaz amigable para niños)
             </p>
@@ -101,11 +101,11 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
                   type="text"
                   value={childViewLink}
                   readOnly
-                  className="flex-1 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  className="flex-1 p-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 />
                 <Button
                   onClick={() => copyToClipboard(childViewLink)}
-                  className="bg-blue-500 hover:bg-blue-600 px-3"
+                  className="bg-primary-500 hover:bg-primary-600 px-3"
                 >
                   <FontAwesomeIcon icon={faCopy} />
                 </Button>
@@ -114,14 +114,14 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
               <div className="flex gap-2">
                 <Button
                   onClick={() => shareViaWebAPI(childViewLink, `Puntos de ${child.nombre}`)}
-                  className="flex-1 bg-green-500 hover:bg-green-600 text-sm"
+                  className="flex-1 bg-success-500 hover:bg-success-600 text-sm"
                 >
                   <FontAwesomeIcon icon={faShare} className="mr-2" />
                   Compartir Enlace
                 </Button>
                 <Button
                   onClick={() => window.open(childViewLink, '_blank')}
-                  className="bg-purple-500 hover:bg-purple-600 px-3"
+                  className="bg-accent-500 hover:bg-accent-600 px-3"
                 >
                   <FontAwesomeIcon icon={faEye} />
                 </Button>
@@ -129,27 +129,27 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
 
               {/* QR Code para el hijo */}
               <div className="text-center">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-2">
                   Código QR para {child.nombre}
                 </p>
                 <img
                   src={generateQRCode(childViewLink)}
                   alt={`QR Code para ${child.nombre}`}
-                  className="mx-auto border border-gray-200 dark:border-gray-700 rounded"
+                  className="mx-auto border border-neutral-200 dark:border-neutral-700 rounded"
                 />
               </div>
             </div>
           </div>
 
           {/* Vista para Padres/Administradores */}
-          <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+          <div className="bg-warning-50 dark:bg-warning-900/20 p-4 rounded-lg">
             <div className="flex items-center gap-3 mb-3">
-              <FontAwesomeIcon icon={faQrcode} className="text-orange-500" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <FontAwesomeIcon icon={faQrcode} className="text-warning-500" />
+              <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                 Vista Completa (Padres)
               </h3>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
               Enlace completo con capacidad de editar tareas y gestionar privilegios
             </p>
             
@@ -159,11 +159,11 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
                   type="text"
                   value={adminLink}
                   readOnly
-                  className="flex-1 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  className="flex-1 p-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 />
                 <Button
                   onClick={() => copyToClipboard(adminLink)}
-                  className="bg-orange-500 hover:bg-orange-600 px-3"
+                  className="bg-warning-500 hover:bg-warning-600 px-3"
                 >
                   <FontAwesomeIcon icon={faCopy} />
                 </Button>
@@ -171,7 +171,7 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
               
               <Button
                 onClick={() => window.open(adminLink, '_blank')}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-sm"
+                className="w-full bg-warning-500 hover:bg-warning-600 text-sm"
               >
                 <FontAwesomeIcon icon={faEye} className="mr-2" />
                 Abrir Vista Completa
@@ -180,34 +180,34 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
           </div>
 
           {/* Instrucciones */}
-          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+            <h4 className="font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
               💡 Consejos de uso:
             </h4>
-            <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+            <ul className="text-sm text-neutral-600 dark:text-neutral-400 space-y-2">
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-1">•</span>
+                <span className="text-primary-500 mt-1">•</span>
                 <span>
                   <strong>Para {child.nombre}:</strong> Usa el enlace azul o el código QR. 
                   Podrá ver sus puntos y progreso de forma visual y motivadora.
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-orange-500 mt-1">•</span>
+                <span className="text-warning-500 mt-1">•</span>
                 <span>
                   <strong>Para otros padres:</strong> Usa el enlace naranja para que puedan 
                   ayudar a gestionar las tareas y privilegios.
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-1">•</span>
+                <span className="text-success-500 mt-1">•</span>
                 <span>
                   <strong>Compartir:</strong> Los enlaces funcionan en cualquier dispositivo 
                   sin necesidad de crear cuenta para la vista del hijo.
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-purple-500 mt-1">•</span>
+                <span className="text-accent-500 mt-1">•</span>
                 <span>
                   <strong>Seguridad:</strong> Los enlaces son únicos y seguros. Solo quien 
                   tenga el enlace puede acceder a los datos del niño.
@@ -218,17 +218,17 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
 
           {/* Estado de copia */}
           {copySuccess && (
-            <div className="bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg text-center">
+            <div className="bg-success-100 dark:bg-success-900/20 border border-success-300 dark:border-success-700 text-success-800 dark:text-success-200 px-4 py-3 rounded-lg text-center">
               <FontAwesomeIcon icon={faCopy} className="mr-2" />
               ¡Enlace copiado al portapapeles!
             </div>
           )}
 
           {/* Botones de acción */}
-          <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-end gap-2 pt-4 border-t border-neutral-200 dark:border-neutral-700">
             <Button
               onClick={() => setShowModal(false)}
-              className="bg-gray-500 hover:bg-gray-600"
+              className="bg-neutral-500 hover:bg-neutral-600"
             >
               Cerrar
             </Button>

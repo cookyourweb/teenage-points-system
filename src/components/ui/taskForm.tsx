@@ -153,14 +153,14 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
   return (
     <div className="max-w-md w-full">
-      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+      <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-6">
         {task ? 'Editar Tarea Personalizada' : 'Nueva Tarea Personalizada'}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Nombre de la tarea */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Nombre de la tarea *
           </label>
           <input
@@ -169,43 +169,43 @@ const TaskForm: React.FC<TaskFormProps> = ({
             onChange={(e) => updateField('nombre', e.target.value)}
             placeholder="Ej: Organizar el escritorio"
             maxLength={50}
-            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
               errors.nombre 
-                ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                : 'border-gray-300 dark:border-gray-600'
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100`}
+                ? 'border-danger-500 focus:ring-danger-500 focus:border-danger-500' 
+                : 'border-neutral-300 dark:border-neutral-600'
+            } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
             disabled={isDisabled}
           />
           {errors.nombre && (
-            <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>
+            <p className="text-danger-500 text-sm mt-1">{errors.nombre}</p>
           )}
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
             {formData.nombre.length}/50 caracteres
           </p>
         </div>
 
         {/* Tipo de tarea */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Tipo de tarea *
           </label>
           <select
             value={formData.tipo}
             onChange={(e) => updateField('tipo', e.target.value as 'diarias' | 'extra')}
-            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
               errors.tipo 
-                ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                : 'border-gray-300 dark:border-gray-600'
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100`}
+                ? 'border-danger-500 focus:ring-danger-500 focus:border-danger-500' 
+                : 'border-neutral-300 dark:border-neutral-600'
+            } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
             disabled={isDisabled}
           >
             <option value="diarias">Tarea Diaria</option>
             <option value="extra">Tarea Extra (Bonus)</option>
           </select>
           {errors.tipo && (
-            <p className="text-red-500 text-sm mt-1">{errors.tipo}</p>
+            <p className="text-danger-500 text-sm mt-1">{errors.tipo}</p>
           )}
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
             {formData.tipo === 'diarias' 
               ? 'Se mostrará todos los días en el sistema de puntos'
               : 'Tarea opcional con puntos bonus'
@@ -215,7 +215,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
         {/* Puntos */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Puntos que otorga *
           </label>
           <div className="relative">
@@ -225,37 +225,37 @@ const TaskForm: React.FC<TaskFormProps> = ({
               max="100"
               value={formData.puntos}
               onChange={(e) => updateField('puntos', parseInt(e.target.value) || 0)}
-              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
                 errors.puntos 
-                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                  : 'border-gray-300 dark:border-gray-600'
-              } bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100`}
+                  ? 'border-danger-500 focus:ring-danger-500 focus:border-danger-500' 
+                  : 'border-neutral-300 dark:border-neutral-600'
+              } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
               disabled={isDisabled}
             />
             <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-              <span className="text-gray-500 text-sm">pts</span>
+              <span className="text-neutral-500 text-sm">pts</span>
             </div>
           </div>
           {errors.puntos && (
-            <p className="text-red-500 text-sm mt-1">{errors.puntos}</p>
+            <p className="text-danger-500 text-sm mt-1">{errors.puntos}</p>
           )}
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
             Recomendado: Tareas diarias 5-15 pts, Tareas extra 15-50 pts
           </p>
           
           {/* Barra de puntos visual */}
           <div className="mt-2">
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
               <div 
                 className={`h-2 rounded-full transition-all duration-300 ${
-                  formData.puntos <= 15 ? 'bg-green-500' :
-                  formData.puntos <= 30 ? 'bg-yellow-500' :
-                  formData.puntos <= 50 ? 'bg-orange-500' : 'bg-red-500'
+                  formData.puntos <= 15 ? 'bg-success-500' :
+                  formData.puntos <= 30 ? 'bg-warning-500' :
+                  formData.puntos <= 50 ? 'bg-warning-500' : 'bg-danger-500'
                 }`}
                 style={{ width: `${Math.min((formData.puntos / 100) * 100, 100)}%` }}
               ></div>
             </div>
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <div className="flex justify-between text-xs text-neutral-500 mt-1">
               <span>Bajo (1-15)</span>
               <span>Medio (16-30)</span>
               <span>Alto (31-50)</span>
@@ -266,7 +266,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
         {/* Descripción */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Descripción (opcional)
           </label>
           <textarea
@@ -275,36 +275,36 @@ const TaskForm: React.FC<TaskFormProps> = ({
             placeholder="Instrucciones específicas, ejemplos o detalles adicionales..."
             rows={3}
             maxLength={200}
-            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none ${
+            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none ${
               errors.description 
-                ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                : 'border-gray-300 dark:border-gray-600'
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100`}
+                ? 'border-danger-500 focus:ring-danger-500 focus:border-danger-500' 
+                : 'border-neutral-300 dark:border-neutral-600'
+            } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
             disabled={isDisabled}
           />
           {errors.description && (
-            <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+            <p className="text-danger-500 text-sm mt-1">{errors.description}</p>
           )}
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
             {formData.description.length}/200 caracteres
           </p>
         </div>
 
         {/* Estado activo/inactivo */}
-        <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
           <input
             type="checkbox"
             id="isActive"
             checked={formData.isActive}
             onChange={(e) => updateField('isActive', e.target.checked)}
-            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+            className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500 focus:ring-2"
             disabled={isDisabled}
           />
           <div className="flex-1">
-            <label htmlFor="isActive" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+            <label htmlFor="isActive" className="text-sm font-medium text-neutral-700 dark:text-neutral-300 cursor-pointer">
               Tarea activa
             </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
               {formData.isActive 
                 ? 'Los hijos podrán ver y completar esta tarea'
                 : 'La tarea estará oculta y no se mostrará a los hijos'
@@ -314,37 +314,37 @@ const TaskForm: React.FC<TaskFormProps> = ({
         </div>
 
         {/* Preview de la tarea */}
-        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+        <div className="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+          <h4 className="text-sm font-medium text-primary-900 dark:text-primary-100 mb-2">
             Vista previa:
           </h4>
           <div className={`p-3 border rounded-lg ${
             formData.tipo === 'diarias' 
-              ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
-              : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'
+              ? 'bg-success-50 border-success-200 dark:bg-success-900/20 dark:border-success-800'
+              : 'bg-warning-50 border-warning-200 dark:bg-warning-900/20 dark:border-warning-800'
           }`}>
-            <h5 className="font-medium text-gray-900 dark:text-gray-100">
+            <h5 className="font-medium text-neutral-900 dark:text-neutral-100">
               {formData.nombre || 'Nombre de la tarea'}
             </h5>
             <p className={`text-sm ${
               formData.tipo === 'diarias' 
-                ? 'text-green-600 dark:text-green-400' 
-                : 'text-yellow-600 dark:text-yellow-400'
+                ? 'text-success-600 dark:text-success-400' 
+                : 'text-warning-600 dark:text-warning-400'
             }`}>
               {formData.puntos} puntos{formData.tipo === 'extra' ? ' bonus' : ''}
             </p>
             {formData.description && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                 {formData.description}
               </p>
             )}
             <span className={`inline-block text-xs px-2 py-1 rounded-full mt-2 ${
               formData.isActive 
                 ? (formData.tipo === 'diarias' 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                    ? 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200'
+                    : 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200'
                   )
-                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
             }`}>
               {formData.isActive ? 'Activa' : 'Inactiva'}
             </span>
@@ -352,11 +352,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
         </div>
 
         {/* Botones de acción */}
-        <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
           <Button
             type="button"
             onClick={onCancel}
-            className="flex-1 bg-gray-500 hover:bg-gray-600"
+            className="flex-1 bg-neutral-500 hover:bg-neutral-600"
             disabled={isDisabled}
           >
             <FontAwesomeIcon icon={faTimes} className="mr-2" />

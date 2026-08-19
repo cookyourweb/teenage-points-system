@@ -8,7 +8,7 @@ html {
 }
 
 body {
-  @apply h-full bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-50;
+  @apply h-full bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50;
   font-family: Switzer, system-ui, sans-serif;
   line-height: 1.5;
   transition: background-color 0.3s, color 0.3s;
@@ -37,7 +37,7 @@ button:hover {
 /* Clases reutilizables */
 @layer components {
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow transition-colors text-gray-900 dark:text-gray-100;
+    @apply bg-white dark:bg-neutral-800 rounded-lg shadow transition-colors text-neutral-900 dark:text-neutral-100;
   }
 
   .card-title {
@@ -45,10 +45,10 @@ button:hover {
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply text-gray-900 dark:text-gray-100;
+    @apply text-neutral-900 dark:text-neutral-100;
   }
   
   input, textarea, select {
-    @apply bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 rounded;
+    @apply bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 border-neutral-300 dark:border-neutral-600 rounded;
   }
 }

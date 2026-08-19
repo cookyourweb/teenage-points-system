@@ -14,9 +14,9 @@ const TaskTable: React.FC<TaskTableProps> = ({ tasks, onToggle, title }) => {
       <table className="min-w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-2 border-b bg-gray-100 text-left">Tareas</th>
-            <th className="p-2 border-b bg-gray-100 text-left">Puntos</th>
-            <th className="p-2 border-b bg-gray-100 text-left">Completada</th>
+            <th className="p-2 border-b bg-neutral-100 text-left">Tareas</th>
+            <th className="p-2 border-b bg-neutral-100 text-left">Puntos</th>
+            <th className="p-2 border-b bg-neutral-100 text-left">Completada</th>
           </tr>
         </thead>
         <tbody>
@@ -29,8 +29,8 @@ const TaskTable: React.FC<TaskTableProps> = ({ tasks, onToggle, title }) => {
                   onClick={() => onToggle(task.id)}
                   className={`p-2 rounded-full transition-colors ${
                     task.completada
-                      ? "bg-green-100 hover:bg-green-200"
-                      : "bg-gray-100 hover:bg-gray-200"
+                      ? "bg-success-100 hover:bg-success-200"
+                      : "bg-neutral-100 hover:bg-neutral-200"
                   }`}
                 >
                   {task.completada ? "✅" : "⬜"}

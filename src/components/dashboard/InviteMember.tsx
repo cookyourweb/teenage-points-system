@@ -42,7 +42,7 @@ const InviteMember: React.FC<InviteMemberProps> = ({ familyId, onClose }) => {
   };
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-800 rounded shadow">
+    <div className="p-6 bg-white dark:bg-neutral-800 rounded shadow">
       <h2 className="text-lg font-bold mb-4">Invitar a Nuevo Miembro</h2>
       <div>
         <label className="block text-sm font-medium mb-1">Correo Electrónico:</label>
@@ -53,19 +53,19 @@ const InviteMember: React.FC<InviteMemberProps> = ({ familyId, onClose }) => {
           className="w-full p-2 border rounded mb-2"
           placeholder="Ingresa el correo del miembro"
         />
-        {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
-        {success && <p className="text-green-600 text-sm mb-2">Invitación enviada correctamente.</p>}
+        {error && <p className="text-danger-600 text-sm mb-2">{error}</p>}
+        {success && <p className="text-success-600 text-sm mb-2">Invitación enviada correctamente.</p>}
       </div>
       <div className="flex justify-end space-x-2">
         <button
           onClick={onClose}
-          className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+          className="px-4 py-2 bg-neutral-300 text-neutral-700 rounded hover:bg-neutral-400"
         >
           Cancelar
         </button>
         <button
           onClick={handleInvite}
-          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+          className="px-4 py-2 bg-accent-600 text-white rounded hover:bg-accent-700"
         >
           Enviar Invitación
         </button>

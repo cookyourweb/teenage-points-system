@@ -138,10 +138,10 @@ const ChildView: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600 dark:text-gray-400">Cargando tus puntos...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-lg text-neutral-600 dark:text-neutral-400">Cargando tus puntos...</p>
         </div>
       </div>
     );
@@ -149,33 +149,33 @@ const ChildView: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-danger-50 to-accent-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Error al cargar</h2>
-          <p className="text-red-600">{error}</p>
+          <h2 className="text-xl font-bold text-neutral-900 mb-2">Error al cargar</h2>
+          <p className="text-danger-600">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 dark:from-neutral-900 dark:to-neutral-800">
       <ToastContainer />
       
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg">
+      <div className="bg-white dark:bg-neutral-800 shadow-lg">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="text-center">
             <div className="text-6xl mb-4">🏆</div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
               ¡Hola {childName}!
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
+            <p className="text-lg text-neutral-600 dark:text-neutral-400">
               {getMotivationalMessage()}
             </p>
             {isUpdatedByOther && (
-              <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+              <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800">
                 <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
                 Actualizando datos...
               </div>
@@ -186,7 +186,7 @@ const ChildView: React.FC = () => {
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         {/* Puntos Totales */}
-        <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+        <Card className="bg-gradient-to-r from-primary-500 to-accent-600 text-white">
           <CardContent className="text-center py-8">
             <div className="text-6xl font-bold mb-2">
               {weeklyTotal}
@@ -210,7 +210,7 @@ const ChildView: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faCheckSquare} className="text-green-500" />
+              <FontAwesomeIcon icon={faCheckSquare} className="text-success-500" />
               Mis Tareas de Hoy
             </CardTitle>
           </CardHeader>
@@ -221,14 +221,14 @@ const ChildView: React.FC = () => {
               const todayTasks = tasks[todayCapitalized];
               
               if (!todayTasks) {
-                return <p className="text-gray-500">No hay tareas para hoy</p>;
+                return <p className="text-neutral-500">No hay tareas para hoy</p>;
               }
 
               return (
                 <div className="space-y-4">
                   {/* Tareas Diarias */}
                   <div>
-                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                    <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 mb-3">
                       Tareas Diarias 📋
                     </h4>
                     <div className="grid gap-3">
@@ -237,8 +237,8 @@ const ChildView: React.FC = () => {
                           key={task.id}
                           className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
                             task.completada 
-                              ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' 
-                              : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:border-blue-300'
+                              ? 'bg-success-50 border-success-200 dark:bg-success-900/20 dark:border-success-800' 
+                              : 'bg-neutral-50 border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 hover:border-primary-300'
                           }`}
                           onClick={() => toggleTask(todayCapitalized, 'diarias', task.id)}
                         >
@@ -246,24 +246,24 @@ const ChildView: React.FC = () => {
                             <FontAwesomeIcon 
                               icon={faCheckSquare} 
                               className={`text-2xl ${
-                                task.completada ? 'text-green-600' : 'text-gray-400'
+                                task.completada ? 'text-success-600' : 'text-neutral-400'
                               }`}
                             />
                             <div>
                               <p className={`font-medium ${
                                 task.completada 
-                                  ? 'text-green-800 dark:text-green-200 line-through' 
-                                  : 'text-gray-800 dark:text-gray-200'
+                                  ? 'text-success-800 dark:text-success-200 line-through' 
+                                  : 'text-neutral-800 dark:text-neutral-200'
                               }`}>
                                 {task.nombre}
                               </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                              <p className="text-sm text-neutral-600 dark:text-neutral-400">
                                 {task.puntos} puntos
                               </p>
                             </div>
                           </div>
                           {task.completada && (
-                            <div className="text-green-600 text-xl">✨</div>
+                            <div className="text-success-600 text-xl">✨</div>
                           )}
                         </div>
                       ))}
@@ -272,7 +272,7 @@ const ChildView: React.FC = () => {
 
                   {/* Tareas Extra */}
                   <div>
-                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                    <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 mb-3">
                       Tareas Extra ⭐ (¡Puntos bonus!)
                     </h4>
                     <div className="grid gap-3">
@@ -281,8 +281,8 @@ const ChildView: React.FC = () => {
                           key={task.id}
                           className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
                             task.completada 
-                              ? 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800' 
-                              : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700 hover:border-purple-300'
+                              ? 'bg-accent-50 border-accent-200 dark:bg-accent-900/20 dark:border-accent-800' 
+                              : 'bg-warning-50 border-warning-200 dark:bg-warning-900/20 dark:border-warning-700 hover:border-accent-300'
                           }`}
                           onClick={() => toggleTask(todayCapitalized, 'extra', task.id)}
                         >
@@ -290,24 +290,24 @@ const ChildView: React.FC = () => {
                             <FontAwesomeIcon 
                               icon={faStar} 
                               className={`text-2xl ${
-                                task.completada ? 'text-purple-600' : 'text-yellow-500'
+                                task.completada ? 'text-accent-600' : 'text-warning-500'
                               }`}
                             />
                             <div>
                               <p className={`font-medium ${
                                 task.completada 
-                                  ? 'text-purple-800 dark:text-purple-200 line-through' 
-                                  : 'text-gray-800 dark:text-gray-200'
+                                  ? 'text-accent-800 dark:text-accent-200 line-through' 
+                                  : 'text-neutral-800 dark:text-neutral-200'
                               }`}>
                                 {task.nombre}
                               </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                              <p className="text-sm text-neutral-600 dark:text-neutral-400">
                                 {task.puntos} puntos bonus
                               </p>
                             </div>
                           </div>
                           {task.completada && (
-                            <div className="text-purple-600 text-xl">🌟</div>
+                            <div className="text-accent-600 text-xl">🌟</div>
                           )}
                         </div>
                       ))}
@@ -323,7 +323,7 @@ const ChildView: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faCalendarWeek} className="text-blue-500" />
+              <FontAwesomeIcon icon={faCalendarWeek} className="text-primary-500" />
               Mi Progreso de la Semana
             </CardTitle>
           </CardHeader>
@@ -340,27 +340,27 @@ const ChildView: React.FC = () => {
                     key={dia} 
                     className={`text-center p-4 rounded-lg border-2 transition-all ${
                       isToday 
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                        : 'border-gray-200 dark:border-gray-700'
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
+                        : 'border-neutral-200 dark:border-neutral-700'
                     }`}
                   >
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                    <div className="text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">
                       {dia.substring(0, 3)}
-                      {isToday && <span className="ml-1 text-blue-500">•</span>}
+                      {isToday && <span className="ml-1 text-primary-500">•</span>}
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                    <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-1">
                       {points}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-neutral-500">
                       {completed}/{total} tareas
                     </div>
                     <div className="mt-2">
                       {completed === total && total > 0 ? (
-                        <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" />
+                        <FontAwesomeIcon icon={faCheckCircle} className="text-success-500" />
                       ) : completed > 0 ? (
-                        <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
+                        <FontAwesomeIcon icon={faStar} className="text-warning-500" />
                       ) : (
-                        <FontAwesomeIcon icon={faTimesCircle} className="text-gray-400" />
+                        <FontAwesomeIcon icon={faTimesCircle} className="text-neutral-400" />
                       )}
                     </div>
                   </div>
@@ -374,7 +374,7 @@ const ChildView: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faGift} className="text-purple-500" />
+              <FontAwesomeIcon icon={faGift} className="text-accent-500" />
               Mis Privilegios Desbloqueados
             </CardTitle>
           </CardHeader>
@@ -384,21 +384,21 @@ const ChildView: React.FC = () => {
                 getAvailablePrivileges().map((privilege, index) => (
                   <div 
                     key={index}
-                    className="flex items-center gap-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
+                    className="flex items-center gap-4 p-4 bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg"
                   >
                     <div className="text-3xl">🎁</div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-green-800 dark:text-green-200">
+                      <h4 className="font-semibold text-success-800 dark:text-success-200">
                         {privilege.name}
                       </h4>
-                      <p className="text-sm text-green-600 dark:text-green-400">
+                      <p className="text-sm text-success-600 dark:text-success-400">
                         ¡Ya puedes disfrutarlo!
                       </p>
                     </div>
                     <button
                       onClick={() => setSelectedPrivilege(privilege)}
                       disabled={isRedeeming}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-4 py-2 bg-success-600 text-white rounded-lg hover:bg-success-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       {isRedeeming ? (
                         <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
@@ -409,7 +409,7 @@ const ChildView: React.FC = () => {
                   </div>
                 ))
               ) : (
-                <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="col-span-full text-center py-8 text-neutral-500 dark:text-neutral-400">
                   <div className="text-4xl mb-4">🎯</div>
                   <p>¡Sigue completando tareas para desbloquear privilegios!</p>
                 </div>
@@ -421,35 +421,35 @@ const ChildView: React.FC = () => {
         {/* Modal para canjear privilegio */}
         {selectedPrivilege && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full">
+              <h3 className="text-lg font-bold text-neutral-900 dark:text-neutral-100 mb-4">
                 🎉 ¡Canjear Privilegio!
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-neutral-600 dark:text-neutral-400 mb-4">
                 ¿Cuándo quieres disfrutar de "{selectedPrivilege.name}"?
               </p>
               <div className="space-y-3">
                 <button
                   onClick={() => handleRedeemPrivilege(selectedPrivilege, 'Hoy')}
-                  className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="w-full p-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
                 >
                   🌅 Hoy
                 </button>
                 <button
                   onClick={() => handleRedeemPrivilege(selectedPrivilege, 'Mañana')}
-                  className="w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  className="w-full p-3 bg-success-500 text-white rounded-lg hover:bg-success-600 transition-colors"
                 >
                   🌤️ Mañana
                 </button>
                 <button
                   onClick={() => handleRedeemPrivilege(selectedPrivilege, 'Este fin de semana')}
-                  className="w-full p-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                  className="w-full p-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors"
                 >
                   🎈 Este fin de semana
                 </button>
                 <button
                   onClick={() => setSelectedPrivilege(null)}
-                  className="w-full p-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  className="w-full p-3 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600 transition-colors"
                 >
                   ❌ Cancelar
                 </button>
@@ -463,34 +463,34 @@ const ChildView: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FontAwesomeIcon icon={faTrophy} className="text-yellow-500" />
+                <FontAwesomeIcon icon={faTrophy} className="text-warning-500" />
                 Mi Próximo Objetivo
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-6 rounded-lg">
+              <div className="bg-gradient-to-r from-warning-50 to-warning-50 dark:from-warning-900/20 dark:to-warning-900/20 p-6 rounded-lg">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="text-4xl">🎯</div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                       {getNextPrivilege()?.name}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-neutral-600 dark:text-neutral-400">
                       Necesitas {getNextPrivilege()?.points} puntos
                     </p>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex justify-between text-sm text-neutral-600 dark:text-neutral-400">
                     <span>Progreso</span>
                     <span>
                       {weeklyTotal} / {getNextPrivilege()?.points} puntos
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                  <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-3">
                     <div
-                      className="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-500"
+                      className="bg-gradient-to-r from-warning-400 to-warning-500 h-3 rounded-full transition-all duration-500"
                       style={{
                         width: `${Math.min(
                           (weeklyTotal / (getNextPrivilege()?.points || 1)) * 100,
@@ -499,7 +499,7 @@ const ChildView: React.FC = () => {
                       }}
                     ></div>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     ¡Solo te faltan {(getNextPrivilege()?.points || 0) - weeklyTotal} puntos más!
                   </p>
                 </div>
@@ -509,13 +509,13 @@ const ChildView: React.FC = () => {
         )}
 
         {/* Mensaje de ánimo */}
-        <Card className="bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/20 dark:to-purple-900/20">
+        <Card className="bg-gradient-to-r from-accent-100 to-accent-100 dark:from-accent-900/20 dark:to-accent-900/20">
           <CardContent className="text-center py-8">
             <div className="text-4xl mb-4">🌟</div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
               ¡Sigue así, {childName}!
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+            <p className="text-neutral-600 dark:text-neutral-400 max-w-md mx-auto">
               Cada tarea que completas te acerca más a tus objetivos. 
               ¡Tu familia está orgullosa de tu esfuerzo!
             </p>

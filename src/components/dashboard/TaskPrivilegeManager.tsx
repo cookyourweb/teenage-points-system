@@ -38,7 +38,7 @@ const TaskPrivilegeManager: React.FC<TaskPrivilegeManagerProps> = ({ childId }) 
     return (
       <div className="p-4">
         <h2 className="text-xl font-bold mb-4">Historial de Privilegios</h2>
-        <p className="text-gray-600">Cargando historial...</p>
+        <p className="text-neutral-600">Cargando historial...</p>
       </div>
     );
   }
@@ -47,7 +47,7 @@ const TaskPrivilegeManager: React.FC<TaskPrivilegeManagerProps> = ({ childId }) 
     return (
       <div className="p-4">
         <h2 className="text-xl font-bold mb-4">Historial de Privilegios</h2>
-        <p className="text-red-500">{error}</p>
+        <p className="text-danger-500">{error}</p>
       </div>
     );
   }
@@ -56,26 +56,26 @@ const TaskPrivilegeManager: React.FC<TaskPrivilegeManagerProps> = ({ childId }) 
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Historial de Privilegios</h2>
       {privilegeHistory.length === 0 ? (
-        <p className="text-gray-500">No hay privilegios redimidos aún.</p>
+        <p className="text-neutral-500">No hay privilegios redimidos aún.</p>
       ) : (
         <div className="space-y-3">
           {privilegeHistory.map((privilege, index) => (
-            <div key={index} className="p-3 border rounded-lg bg-white dark:bg-gray-800 shadow">
+            <div key={index} className="p-3 border rounded-lg bg-white dark:bg-neutral-800 shadow">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                  <h3 className="font-medium text-neutral-900 dark:text-neutral-100">
                     {privilege.privilegeName || 'Privilegio sin nombre'}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     Fecha: {privilege.dateUnlocked}
                   </p>
                 </div>
-                <span className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded-full">
+                <span className="text-xs bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200 px-2 py-1 rounded-full">
                   Redimido
                 </span>
               </div>
               {privilege.unlockedBy && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                   Redimido por: {privilege.unlockedBy}
                 </p>
               )}

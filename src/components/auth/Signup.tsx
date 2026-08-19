@@ -120,13 +120,13 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSignUp} className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h2 className="text-center text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+    <form onSubmit={handleSignUp} className="space-y-4 p-4 bg-white dark:bg-neutral-800 rounded-lg shadow-md">
+      <h2 className="text-center text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">
         Crear Cuenta Nueva
       </h2>
       
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label htmlFor="name" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
           Nombre completo
         </label>
         <input
@@ -136,13 +136,13 @@ const SignUp: React.FC = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={isLoading}
-          className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full p-3 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
           required
         />
       </div>
       
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label htmlFor="email" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
           Correo electrónico
         </label>
         <input
@@ -152,13 +152,13 @@ const SignUp: React.FC = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={isLoading}
-          className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full p-3 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
           required
         />
       </div>
       
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label htmlFor="password" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
           Contraseña
         </label>
         <input
@@ -168,15 +168,15 @@ const SignUp: React.FC = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={isLoading}
-          className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full p-3 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
           required
           minLength={6}
         />
       </div>
       
       {error && (
-        <div className="p-3 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg">
-          <p className="text-red-700 dark:text-red-400 text-sm font-medium">
+        <div className="p-3 bg-danger-100 dark:bg-danger-900/20 border border-danger-300 dark:border-danger-700 rounded-lg">
+          <p className="text-danger-700 dark:text-danger-400 text-sm font-medium">
             {error}
           </p>
         </div>
@@ -185,7 +185,7 @@ const SignUp: React.FC = () => {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full p-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+        className="w-full p-3 rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors font-medium"
       >
         {isLoading ? (
           <div className="flex items-center justify-center">
@@ -197,9 +197,9 @@ const SignUp: React.FC = () => {
         )}
       </button>
       
-      <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+      <p className="text-center text-sm text-neutral-600 dark:text-neutral-400">
         ¿Ya tienes cuenta?{" "}
-        <span className="text-blue-600 dark:text-blue-400 font-medium">
+        <span className="text-primary-600 dark:text-primary-400 font-medium">
           Usa el formulario de la izquierda para iniciar sesión
         </span>
       </p>

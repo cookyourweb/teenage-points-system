@@ -40,10 +40,10 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
   };
 
   const getPointsColor = (points: number) => {
-    if (points >= 150) return 'text-green-600';
-    if (points >= 100) return 'text-blue-600';
-    if (points >= 50) return 'text-yellow-600';
-    return 'text-gray-600';
+    if (points >= 150) return 'text-success-600';
+    if (points >= 100) return 'text-primary-600';
+    if (points >= 50) return 'text-warning-600';
+    return 'text-neutral-600';
   };
 
   const getPointsIcon = (points: number) => {
@@ -72,14 +72,14 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FontAwesomeIcon icon={faTrophy} className="text-yellow-500" />
+            <FontAwesomeIcon icon={faTrophy} className="text-warning-500" />
             Puntos de la Familia
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Cargando puntos...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto"></div>
+            <p className="mt-2 text-neutral-600">Cargando puntos...</p>
           </div>
         </CardContent>
       </Card>
@@ -91,13 +91,13 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FontAwesomeIcon icon={faTrophy} className="text-yellow-500" />
+            <FontAwesomeIcon icon={faTrophy} className="text-warning-500" />
             Puntos de la Familia
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-red-600">{error}</p>
+            <p className="text-danger-600">{error}</p>
           </div>
         </CardContent>
       </Card>
@@ -108,36 +108,36 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <FontAwesomeIcon icon={faTrophy} className="text-yellow-500" />
+          <FontAwesomeIcon icon={faTrophy} className="text-warning-500" />
           Puntos de la Familia
         </CardTitle>
       </CardHeader>
       <CardContent>
         {childrenPoints.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">No hay datos de puntos disponibles.</p>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-neutral-600">No hay datos de puntos disponibles.</p>
+            <p className="text-sm text-neutral-500 mt-2">
               Los puntos aparecerán cuando los hijos completen sus tareas.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             {/* Resumen general */}
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg">
+            <div className="bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 p-4 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">
                     Resumen Semanal
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     Semana actual • {childrenPoints.length} hijo{childrenPoints.length > 1 ? 's' : ''}
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-2xl font-bold text-primary-600">
                     {childrenPoints.reduce((total, child) => total + child.totalWeeklyPoints, 0)}
                   </div>
-                  <p className="text-xs text-gray-500">Puntos totales</p>
+                  <p className="text-xs text-neutral-500">Puntos totales</p>
                 </div>
               </div>
             </div>
@@ -147,7 +147,7 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
               {childrenPoints.map((child) => (
                 <div
                   key={child.childId}
-                  className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer bg-white dark:bg-gray-800"
+                  className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer bg-white dark:bg-neutral-800"
                   onClick={() => navigate(`/reward-tracker/${familyId}/${child.childId}`)}
                 >
                   <div className="flex items-center justify-between mb-3">
@@ -156,10 +156,10 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
                         {getPointsIcon(child.totalWeeklyPoints)}
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-800 dark:text-gray-200">
+                        <h4 className="font-semibold text-neutral-800 dark:text-neutral-200">
                           {child.childName || 'Hijo'}
                         </h4>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <div className="flex items-center gap-2 text-xs text-neutral-500">
                           <FontAwesomeIcon icon={faClock} className="w-3 h-3" />
                           {formatLastActivity(child.lastActivity)}
                         </div>
@@ -169,14 +169,14 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
                       <div className={`text-xl font-bold ${getPointsColor(child.totalWeeklyPoints)}`}>
                         {child.totalWeeklyPoints}
                       </div>
-                      <p className="text-xs text-gray-500">puntos</p>
+                      <p className="text-xs text-neutral-500">puntos</p>
                     </div>
                   </div>
 
                   {/* Barra de progreso */}
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
+                  <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-2">
                     <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                      className="bg-gradient-to-r from-primary-500 to-accent-500 h-2 rounded-full transition-all duration-500"
                       style={{ 
                         width: `${Math.min((child.totalWeeklyPoints / 200) * 100, 100)}%` 
                       }}
@@ -184,25 +184,25 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
                   </div>
 
                   {/* Próximo privilegio */}
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                  <div className="text-xs text-neutral-600 dark:text-neutral-400">
                     {getNextPrivilege(child.totalWeeklyPoints)}
                   </div>
 
                   {/* Indicador de actividad reciente */}
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-100 dark:border-neutral-700">
                     <div className="flex items-center gap-2">
-                      <FontAwesomeIcon icon={faCalendarWeek} className="w-3 h-3 text-gray-400" />
-                      <span className="text-xs text-gray-500">
+                      <FontAwesomeIcon icon={faCalendarWeek} className="w-3 h-3 text-neutral-400" />
+                      <span className="text-xs text-neutral-500">
                         Semana {child.currentWeekId}
                       </span>
                     </div>
                     <div className={`w-2 h-2 rounded-full ${
                       formatLastActivity(child.lastActivity).includes('Ahora') ||
                       formatLastActivity(child.lastActivity).includes('minuto')
-                        ? 'bg-green-400'
+                        ? 'bg-success-400'
                         : formatLastActivity(child.lastActivity).includes('hora')
-                        ? 'bg-yellow-400'
-                        : 'bg-gray-400'
+                        ? 'bg-warning-400'
+                        : 'bg-neutral-400'
                     }`}></div>
                   </div>
                 </div>
@@ -211,9 +211,9 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
 
             {/* Ranking semanal */}
             {childrenPoints.length > 1 && (
-              <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-                  <FontAwesomeIcon icon={faTrophy} className="text-yellow-500" />
+              <div className="mt-6 p-4 bg-warning-50 dark:bg-warning-900/20 rounded-lg">
+                <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 mb-3 flex items-center gap-2">
+                  <FontAwesomeIcon icon={faTrophy} className="text-warning-500" />
                   Ranking de la Semana
                 </h4>
                 <div className="space-y-2">
@@ -222,17 +222,17 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
                     .map((child, index) => (
                       <div key={child.childId} className="flex items-center gap-3">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                          index === 0 ? 'bg-yellow-400 text-yellow-900' :
-                          index === 1 ? 'bg-gray-300 text-gray-700' :
-                          index === 2 ? 'bg-orange-400 text-orange-900' :
-                          'bg-gray-200 text-gray-600'
+                          index === 0 ? 'bg-warning-400 text-warning-900' :
+                          index === 1 ? 'bg-neutral-300 text-neutral-700' :
+                          index === 2 ? 'bg-warning-400 text-warning-900' :
+                          'bg-neutral-200 text-neutral-600'
                         }`}>
                           {index + 1}
                         </div>
-                        <span className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <span className="flex-1 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                           {child.childName || 'Hijo'}
                         </span>
-                        <span className="text-sm font-bold text-gray-600 dark:text-gray-400">
+                        <span className="text-sm font-bold text-neutral-600 dark:text-neutral-400">
                           {child.totalWeeklyPoints} pts
                         </span>
                       </div>

@@ -26,7 +26,7 @@ const PrivilegeRedemptionModal: React.FC<PrivilegeRedemptionModalProps> = ({
 
   return (
     <Modal onClose={onClose} isOpen={isOpen}>
-      <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+      <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
         {childName}, ¿qué día quieres disfrutar tu privilegio {privilegeName}?
       </h2>
       <div className="mt-4 space-y-4">
@@ -36,7 +36,7 @@ const PrivilegeRedemptionModal: React.FC<PrivilegeRedemptionModalProps> = ({
           type="date" 
           value={selectedDate} 
           onChange={(e) => setSelectedDate(e.target.value)} 
-          className="w-full mt-4 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full mt-4 p-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
         <Button onClick={() => handleRedeem(selectedDate)}>Seleccionar Día</Button>
       </div>

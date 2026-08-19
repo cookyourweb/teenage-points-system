@@ -34,7 +34,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ userId, onProfileUpda
   return (
     <div className="p-4 max-w-md mx-auto">
       <h1 className="text-xl font-bold">Completa tu Perfil</h1>
-      <p className="text-gray-600">Agrega tu número de teléfono (opcional).</p>
+      <p className="text-neutral-600">Agrega tu número de teléfono (opcional).</p>
       <input
         type="tel"
         placeholder="+34 123 456 789"
@@ -42,7 +42,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({ userId, onProfileUpda
         onChange={(e) => setPhone(e.target.value)}
         className="w-full p-2 border rounded mt-4"
       />
-      {message && <p className="mt-2 text-sm text-red-500">{message}</p>}
+      {message && <p className="mt-2 text-sm text-danger-500">{message}</p>}
       <button
         onClick={handleSubmit}
         disabled={isSubmitting}

@@ -17,10 +17,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onComplete }) => {
   return (
     <div className="border p-4 rounded shadow bg-white">
       <h4 className="font-semibold">{task.name}</h4>
-      <p className="text-sm text-gray-600">Puntos: {task.points}</p>
+      <p className="text-sm text-neutral-600">Puntos: {task.points}</p>
       <button
         className={`mt-2 px-4 py-2 rounded ${
-          task.completed ? "bg-gray-300 text-gray-600" : "bg-blue-500 text-white"
+          task.completed ? "bg-neutral-300 text-neutral-600" : "bg-primary-500 text-white"
         }`}
         onClick={() => onComplete(task.id)}
         disabled={task.completed}

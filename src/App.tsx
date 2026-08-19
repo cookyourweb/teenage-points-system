@@ -14,10 +14,10 @@ const App = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600 dark:text-gray-400">Cargando aplicación...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-lg text-neutral-600 dark:text-neutral-400">Cargando aplicación...</p>
         </div>
       </div>
     );
@@ -25,18 +25,18 @@ const App = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
         <div className="text-center max-w-md">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <div className="text-danger-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
             Error de Conexión
           </h2>
-          <p className="text-red-600 dark:text-red-400 mb-4">
+          <p className="text-danger-600 dark:text-danger-400 mb-4">
             {error.message}
           </p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
           >
             Reintentar
           </button>
@@ -88,18 +88,18 @@ const App = () => {
         <Route 
           path="*" 
           element={
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
               <div className="text-center max-w-md">
-                <div className="text-gray-400 text-6xl mb-4">🔍</div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                <div className="text-neutral-400 text-6xl mb-4">🔍</div>
+                <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
                   Página no encontrada
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-neutral-600 dark:text-neutral-400 mb-4">
                   La página que buscas no existe o ha sido movida.
                 </p>
                 <button 
                   onClick={() => window.location.href = '/'}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
                 >
                   Volver al inicio
                 </button>

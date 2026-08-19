@@ -24,12 +24,12 @@ const Button: React.FC<ButtonProps> = ({
   
   // Variantes de color
   const variantClasses = {
-    primary: "bg-blue-500 hover:bg-blue-600 text-white focus:ring-blue-500 dark:bg-blue-600 dark:hover:bg-blue-700",
-    secondary: "bg-gray-500 hover:bg-gray-600 text-white focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700",
-    success: "bg-green-500 hover:bg-green-600 text-white focus:ring-green-500 dark:bg-green-600 dark:hover:bg-green-700",
-    danger: "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500 dark:bg-red-600 dark:hover:bg-red-700",
-    warning: "bg-yellow-500 hover:bg-yellow-600 text-white focus:ring-yellow-500 dark:bg-yellow-600 dark:hover:bg-yellow-700",
-    info: "bg-cyan-500 hover:bg-cyan-600 text-white focus:ring-cyan-500 dark:bg-cyan-600 dark:hover:bg-cyan-700"
+    primary: "bg-primary-500 hover:bg-primary-600 text-white focus:ring-primary-500 dark:bg-primary-600 dark:hover:bg-primary-700",
+    secondary: "bg-neutral-500 hover:bg-neutral-600 text-white focus:ring-neutral-500 dark:bg-neutral-600 dark:hover:bg-neutral-700",
+    success: "bg-success-500 hover:bg-success-600 text-white focus:ring-success-500 dark:bg-success-600 dark:hover:bg-success-700",
+    danger: "bg-danger-500 hover:bg-danger-600 text-white focus:ring-danger-500 dark:bg-danger-600 dark:hover:bg-danger-700",
+    warning: "bg-warning-500 hover:bg-warning-600 text-white focus:ring-warning-500 dark:bg-warning-600 dark:hover:bg-warning-700",
+    info: "bg-primary-500 hover:bg-primary-600 text-white focus:ring-primary-500 dark:bg-primary-600 dark:hover:bg-primary-700"
   };
   
   // Tamaños
@@ -41,7 +41,7 @@ const Button: React.FC<ButtonProps> = ({
   
   // Clases cuando está deshabilitado
   const disabledClasses = disabled || loading 
-    ? "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400 cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
+    ? "bg-neutral-300 dark:bg-neutral-600 text-neutral-600 dark:text-neutral-400 cursor-not-allowed hover:bg-neutral-300 dark:hover:bg-neutral-600"
     : variantClasses[variant];
   
   const finalClassName = `${baseClasses} ${sizeClasses[size]} ${disabledClasses} ${className}`;

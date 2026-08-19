@@ -314,14 +314,14 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FontAwesomeIcon icon={faTasks} className="text-blue-500" />
+            <FontAwesomeIcon icon={faTasks} className="text-primary-500" />
             Gestión de Tareas Personalizadas
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-blue-500 mb-4" />
-            <p className="text-gray-600">Cargando tareas personalizadas...</p>
+            <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-primary-500 mb-4" />
+            <p className="text-neutral-600">Cargando tareas personalizadas...</p>
           </div>
         </CardContent>
       </Card>
@@ -335,13 +335,13 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <FontAwesomeIcon icon={faTasks} className="text-blue-500" />
+                <FontAwesomeIcon icon={faTasks} className="text-primary-500" />
                 Gestión de Tareas Personalizadas
                 {syncing && (
-                  <FontAwesomeIcon icon={faSync} className="animate-spin text-sm text-blue-500" />
+                  <FontAwesomeIcon icon={faSync} className="animate-spin text-sm text-primary-500" />
                 )}
               </CardTitle>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                 {isPadre 
                   ? `${activeTasks.length} tareas activas (${dailyTasks.length} diarias, ${extraTasks.length} extra)`
                   : 'Solo los padres pueden gestionar las tareas'
@@ -351,7 +351,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
             <div className="flex items-center gap-2">
               <Button 
                 onClick={handleRefresh}
-                className="bg-gray-500 hover:bg-gray-600 px-3"
+                className="bg-neutral-500 hover:bg-neutral-600 px-3"
                 disabled={syncing}
               >
                 <FontAwesomeIcon icon={faSync} className={syncing ? "animate-spin" : ""} />
@@ -368,11 +368,11 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
         <CardContent>
           {customTasks.length === 0 ? (
             <div className="text-center py-12">
-              <FontAwesomeIcon icon={faTasks} className="text-4xl text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+              <FontAwesomeIcon icon={faTasks} className="text-4xl text-neutral-400 mb-4" />
+              <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-2">
                 No hay tareas personalizadas
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-neutral-600 dark:text-neutral-400 mb-6">
                 {isPadre 
                   ? 'Crea tu primera tarea personalizada para complementar las tareas base'
                   : 'Los padres pueden crear tareas personalizadas que aparecerán en tu sistema de puntos'
@@ -389,40 +389,40 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
             <div className="space-y-6">
               {/* Estadísticas rápidas */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <div className="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <FontAwesomeIcon icon={faTasks} className="text-blue-500 text-xl" />
+                    <FontAwesomeIcon icon={faTasks} className="text-primary-500 text-xl" />
                     <div>
-                      <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">
                         {customTasks.length}
                       </p>
-                      <p className="text-sm text-blue-600 dark:text-blue-400">
+                      <p className="text-sm text-primary-600 dark:text-primary-400">
                         Total tareas
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                <div className="bg-success-50 dark:bg-success-900/20 p-4 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <FontAwesomeIcon icon={faCheckSquare} className="text-green-500 text-xl" />
+                    <FontAwesomeIcon icon={faCheckSquare} className="text-success-500 text-xl" />
                     <div>
-                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      <p className="text-2xl font-bold text-success-600 dark:text-success-400">
                         {dailyTasks.length}
                       </p>
-                      <p className="text-sm text-green-600 dark:text-green-400">
+                      <p className="text-sm text-success-600 dark:text-success-400">
                         Tareas diarias
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                <div className="bg-warning-50 dark:bg-warning-900/20 p-4 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <FontAwesomeIcon icon={faStar} className="text-yellow-500 text-xl" />
+                    <FontAwesomeIcon icon={faStar} className="text-warning-500 text-xl" />
                     <div>
-                      <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                      <p className="text-2xl font-bold text-warning-600 dark:text-warning-400">
                         {extraTasks.length}
                       </p>
-                      <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                      <p className="text-sm text-warning-600 dark:text-warning-400">
                         Tareas extra
                       </p>
                     </div>
@@ -432,8 +432,8 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
 
               {/* Tareas Diarias Personalizadas */}
               <div>
-                <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-                  <FontAwesomeIcon icon={faCheckSquare} className="text-green-500" />
+                <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 mb-3 flex items-center gap-2">
+                  <FontAwesomeIcon icon={faCheckSquare} className="text-success-500" />
                   Tareas Diarias Personalizadas ({customTasks.filter(t => t.tipo === 'diarias').length})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -451,13 +451,13 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                       />
                     ))}
                   {customTasks.filter(t => t.tipo === 'diarias').length === 0 && (
-                    <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+                    <div className="col-span-full text-center py-8 text-neutral-500 dark:text-neutral-400">
                       <FontAwesomeIcon icon={faCheckSquare} className="text-2xl mb-2" />
                       <p>No hay tareas diarias personalizadas</p>
                       {isPadre && (
                         <Button 
                           onClick={handleAddTask} 
-                          className="mt-3 bg-green-500 hover:bg-green-600"
+                          className="mt-3 bg-success-500 hover:bg-success-600"
                         >
                           Crear Tarea Diaria
                         </Button>
@@ -469,8 +469,8 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
 
               {/* Tareas Extra Personalizadas */}
               <div>
-                <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-                  <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
+                <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 mb-3 flex items-center gap-2">
+                  <FontAwesomeIcon icon={faStar} className="text-warning-500" />
                   Tareas Extra Personalizadas ({customTasks.filter(t => t.tipo === 'extra').length})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -488,13 +488,13 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                       />
                     ))}
                   {customTasks.filter(t => t.tipo === 'extra').length === 0 && (
-                    <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+                    <div className="col-span-full text-center py-8 text-neutral-500 dark:text-neutral-400">
                       <FontAwesomeIcon icon={faStar} className="text-2xl mb-2" />
                       <p>No hay tareas extra personalizadas</p>
                       {isPadre && (
                         <Button 
                           onClick={handleAddTask} 
-                          className="mt-3 bg-yellow-500 hover:bg-yellow-600"
+                          className="mt-3 bg-warning-500 hover:bg-warning-600"
                         >
                           Crear Tarea Extra
                         </Button>
@@ -505,14 +505,14 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
               </div>
 
               {/* Información adicional */}
-              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="mt-6 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
                 <div className="flex items-start gap-3">
-                  <FontAwesomeIcon icon={faTasks} className="text-blue-500 mt-1" />
+                  <FontAwesomeIcon icon={faTasks} className="text-primary-500 mt-1" />
                   <div>
-                    <h5 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                    <h5 className="font-medium text-primary-900 dark:text-primary-100 mb-1">
                       Sobre las Tareas Personalizadas
                     </h5>
-                    <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                    <ul className="text-sm text-primary-700 dark:text-primary-300 space-y-1">
                       <li>• Las tareas aparecerán en el sistema de puntos junto a las tareas base</li>
                       <li>• Solo las tareas activas se muestran a los hijos</li>
                       <li>• Los cambios se sincronizan automáticamente en tiempo real</li>
@@ -530,14 +530,14 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
       {/* Modal de formulario */}
       <Modal isOpen={showModal} onClose={handleCloseModal}>
         <div className="max-w-md w-full">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-6">
             {editingTask ? 'Editar Tarea Personalizada' : 'Nueva Tarea Personalizada'}
           </h2>
 
           <form onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }} className="space-y-4">
             {/* Nombre de la tarea */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Nombre de la tarea *
               </label>
               <input
@@ -545,40 +545,40 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                 value={formData.nombre}
                 onChange={(e) => updateFormField('nombre', e.target.value)}
                 placeholder="Ej: Organizar el escritorio"
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.nombre ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                } bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100`}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                  errors.nombre ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
+                } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
                 disabled={saving}
                 maxLength={50}
               />
               {errors.nombre && (
-                <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>
+                <p className="text-danger-500 text-sm mt-1">{errors.nombre}</p>
               )}
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                 Máximo 50 caracteres
               </p>
             </div>
 
             {/* Tipo de tarea */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Tipo de tarea *
               </label>
               <select
                 value={formData.tipo}
                 onChange={(e) => updateFormField('tipo', e.target.value as 'diarias' | 'extra')}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.tipo ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                } bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100`}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                  errors.tipo ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
+                } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
                 disabled={saving}
               >
                 <option value="diarias">Tarea Diaria</option>
                 <option value="extra">Tarea Extra (Bonus)</option>
               </select>
               {errors.tipo && (
-                <p className="text-red-500 text-sm mt-1">{errors.tipo}</p>
+                <p className="text-danger-500 text-sm mt-1">{errors.tipo}</p>
               )}
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                 {formData.tipo === 'diarias' 
                   ? 'Se mostrará todos los días en el sistema de puntos'
                   : 'Tarea opcional con puntos bonus'
@@ -588,7 +588,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
 
             {/* Puntos */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Puntos que otorga *
               </label>
               <input
@@ -597,22 +597,22 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                 max="100"
                 value={formData.puntos}
                 onChange={(e) => updateFormField('puntos', parseInt(e.target.value) || 0)}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.puntos ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                } bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100`}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                  errors.puntos ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
+                } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
                 disabled={saving}
               />
               {errors.puntos && (
-                <p className="text-red-500 text-sm mt-1">{errors.puntos}</p>
+                <p className="text-danger-500 text-sm mt-1">{errors.puntos}</p>
               )}
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                 Entre 1 y 100 puntos. Tareas diarias: 5-15 pts, Tareas extra: 15-50 pts
               </p>
             </div>
 
             {/* Descripción */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Descripción (opcional)
               </label>
               <textarea
@@ -621,15 +621,15 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                 placeholder="Descripción adicional o instrucciones específicas..."
                 rows={3}
                 maxLength={200}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                } bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100`}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                  errors.description ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
+                } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
                 disabled={saving}
               />
               {errors.description && (
-                <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                <p className="text-danger-500 text-sm mt-1">{errors.description}</p>
               )}
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                 Máximo 200 caracteres ({200 - formData.description.length} restantes)
               </p>
             </div>
@@ -641,19 +641,19 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                 id="isActive"
                 checked={formData.isActive}
                 onChange={(e) => updateFormField('isActive', e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
                 disabled={saving}
               />
-              <label htmlFor="isActive" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="isActive" className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 Tarea activa (visible para los hijos)
               </label>
             </div>
 
             {/* Botones de acción */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
               <Button
                 onClick={handleCloseModal}
-                className="flex-1 bg-gray-500 hover:bg-gray-600"
+                className="flex-1 bg-neutral-500 hover:bg-neutral-600"
                 disabled={saving}
               >
                 <FontAwesomeIcon icon={faTimes} className="mr-2" />
@@ -704,16 +704,16 @@ const TaskCard: React.FC<TaskCardProps> = ({
 }) => {
   const colorClasses = tipo === 'diarias' 
     ? {
-        active: 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800',
-        inactive: 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-600 opacity-60',
-        points: 'text-green-600 dark:text-green-400',
-        badge: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+        active: 'bg-success-50 border-success-200 dark:bg-success-900/20 dark:border-success-800',
+        inactive: 'bg-neutral-50 border-neutral-200 dark:bg-neutral-800 dark:border-neutral-600 opacity-60',
+        points: 'text-success-600 dark:text-success-400',
+        badge: 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200'
       }
     : {
-        active: 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800',
-        inactive: 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-600 opacity-60',
-        points: 'text-yellow-600 dark:text-yellow-400',
-        badge: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+        active: 'bg-warning-50 border-warning-200 dark:bg-warning-900/20 dark:border-warning-800',
+        inactive: 'bg-neutral-50 border-neutral-200 dark:bg-neutral-800 dark:border-neutral-600 opacity-60',
+        points: 'text-warning-600 dark:text-warning-400',
+        badge: 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200'
       };
 
   return (
@@ -722,14 +722,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
     }`}>
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
-          <h5 className="font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
+          <h5 className="font-medium text-neutral-900 dark:text-neutral-100 line-clamp-2">
             {task.nombre}
           </h5>
           <p className={`text-sm ${colorClasses.points}`}>
             {task.puntos} puntos{tipo === 'extra' ? ' bonus' : ''}
           </p>
           {task.description && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">
               {task.description}
             </p>
           )}
@@ -738,14 +738,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
           <div className="flex gap-1 ml-2">
             <button
               onClick={() => onEdit(task)}
-              className="p-1 text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+              className="p-1 text-primary-500 hover:bg-primary-100 dark:hover:bg-primary-900 rounded transition-colors"
               title="Editar tarea"
             >
               <FontAwesomeIcon icon={faEdit} size="sm" />
             </button>
             <button
               onClick={() => onDelete(task)}
-              className="p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
+              className="p-1 text-danger-500 hover:bg-danger-100 dark:hover:bg-danger-900 rounded transition-colors"
               title="Eliminar tarea"
             >
               <FontAwesomeIcon icon={faTrash} size="sm" />
@@ -756,7 +756,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       {isPadre && (
         <div className="flex items-center justify-between">
           <span className={`text-xs px-2 py-1 rounded-full ${
-            task.isActive ? colorClasses.badge : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+            task.isActive ? colorClasses.badge : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
           }`}>
             {task.isActive ? 'Activa' : 'Inactiva'}
           </span>
@@ -764,13 +764,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
             onClick={() => onToggleStatus(task)}
             className={`text-xs px-3 py-1 rounded transition-colors flex items-center gap-1 ${
               task.isActive
-                ? 'text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-900'
-                : 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900'
+                ? 'text-warning-600 hover:bg-warning-100 dark:hover:bg-warning-900'
+                : 'text-success-600 hover:bg-success-100 dark:hover:bg-success-900'
             }`}
           >
             <FontAwesomeIcon 
               icon={task.isActive ? faToggleOn : faToggleOff} 
-              className={task.isActive ? 'text-orange-500' : 'text-gray-400'} 
+              className={task.isActive ? 'text-warning-500' : 'text-neutral-400'} 
             />
             {task.isActive ? 'Desactivar' : 'Activar'}
           </button>

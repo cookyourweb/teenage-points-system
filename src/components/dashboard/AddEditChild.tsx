@@ -106,11 +106,11 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
   };
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-800 shadow-md rounded-md transition-colors">
-      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">{childToEdit ? "Estos son los datos de tu hijo" : "Vamos a añadir a tu hijo"}</h2>
+    <div className="p-4 bg-white dark:bg-neutral-800 shadow-md rounded-md transition-colors">
+      <h2 className="text-xl font-bold mb-4 text-neutral-900 dark:text-neutral-100">{childToEdit ? "Estos son los datos de tu hijo" : "Vamos a añadir a tu hijo"}</h2>
       <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
         <div className="mb-4">
-          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
+          <label htmlFor="nombre" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Nombre</label>
           <input 
             type="text" 
             id="nombre" 
@@ -118,12 +118,12 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
             onChange={(e) => setNombre(e.target.value.replace(/\s+/g, ' '))} 
             onBlur={(e) => setNombre(e.target.value.trim())}
             required 
-            className="mt-1 block w-full p-3 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
+            className="mt-1 block w-full p-3 rounded-md border-neutral-300 dark:border-neutral-600 shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100" 
           />
         </div>
 
         <div className="mb-4">
-          <label htmlFor="edad" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Edad</label>
+          <label htmlFor="edad" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Edad</label>
           <input 
             type="number" 
             id="edad" 
@@ -131,7 +131,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
             onChange={(e) => setEdad(Math.max(0, Number(e.target.value)))} 
             min="0"
             required 
-            className="mt-1 block w-full p-3 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" 
+            className="mt-1 block w-full p-3 rounded-md border-neutral-300 dark:border-neutral-600 shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100" 
           />
         </div>
 
@@ -140,7 +140,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
             <p>Cargando preguntas...</p>
           ) : categoria ? (
             <div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Tipos de Adolescente</h3>
+              <h3 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Tipos de Adolescente</h3>
               <div className="mt-2">
                 {categoria.preguntas.map((pregunta) => {
                   const isChecked = tipoExiste(pregunta.titulo, tiposAdolescente);
@@ -154,7 +154,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
                           onChange={() => handleTipoChange(pregunta.id)} 
                           className="mr-2" 
                         />
-                        <span className="flex items-center text-gray-900 dark:text-gray-100">
+                        <span className="flex items-center text-neutral-900 dark:text-neutral-100">
                           {pregunta.titulo}
                           <button 
                             type="button" 
@@ -179,7 +179,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
         </div>
 
         <div className="flex justify-end space-x-2">
-          <Button onClick={onCancel} className="bg-gray-300">Cancelar</Button>
+          <Button onClick={onCancel} className="bg-neutral-300">Cancelar</Button>
           <Button onClick={handleSave}>{childToEdit ? "Guardar Cambios" : "Guardar"}</Button>
         </div>
       </form>

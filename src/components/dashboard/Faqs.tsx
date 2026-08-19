@@ -20,10 +20,10 @@ const Faqs: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+    <div className="p-6 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
       <h2 className="text-2xl font-bold mb-4">FAQs</h2>
       {categorias.length === 0 ? (
-        <p className="text-gray-500 dark:text-gray-400">No hay FAQs disponibles.</p>
+        <p className="text-neutral-500 dark:text-neutral-400">No hay FAQs disponibles.</p>
       ) : (
         <ul className="space-y-4">
           {categorias.map((categoria) => (
@@ -31,20 +31,20 @@ const Faqs: React.FC = () => {
               <p className="card-title">
                 <strong>Categoría:</strong> {categoria.titulo}
               </p>
-              <p className="text-gray-600 dark:text-gray-400 italic">
+              <p className="text-neutral-600 dark:text-neutral-400 italic">
                 Definición: {categoria.definicion}
               </p>
               <ul className="mt-2 space-y-2 ml-4">
                 {categoria.preguntas.map((pregunta) => (
                   <li
                     key={pregunta.id}
-                    className="border p-3 rounded bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100"
+                    className="border p-3 rounded bg-neutral-50 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-100"
                   >
                     <p className="font-semibold">Título: {pregunta.titulo}</p>
                     <strong>Soluciones:</strong>
                     <ul className="ml-4 list-disc">
                       {pregunta.soluciones.length === 0 ? (
-                        <li className="text-gray-500 dark:text-gray-400">Sin soluciones</li>
+                        <li className="text-neutral-500 dark:text-neutral-400">Sin soluciones</li>
                       ) : (
                         pregunta.soluciones.map((solucion) => (
                           <li key={solucion.id}>{solucion.texto}</li>

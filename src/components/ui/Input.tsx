@@ -32,9 +32,9 @@ const Input: React.FC<InputProps> = ({
     <div className={`w-full ${className}`}>
       {/* Label */}
       {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
           {label}
-          {required && <span className="text-red-500"> *</span>}
+          {required && <span className="text-danger-500"> *</span>}
         </label>
       )}
       {/* Input field */}
@@ -47,17 +47,17 @@ const Input: React.FC<InputProps> = ({
         disabled={disabled}
         className={`w-full p-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 transition-colors ${
           errorMessage
-            ? "border-red-500 focus:ring-red-500"
-            : "border-gray-300 dark:border-gray-600 focus:ring-primary-500"
+            ? "border-danger-500 focus:ring-danger-500"
+            : "border-neutral-300 dark:border-neutral-600 focus:ring-primary-500"
         } ${
           disabled 
-            ? "bg-gray-100 dark:bg-gray-700 cursor-not-allowed" 
-            : "bg-white dark:bg-gray-800"
-        } text-gray-900 dark:text-gray-100`}
+            ? "bg-neutral-100 dark:bg-neutral-700 cursor-not-allowed" 
+            : "bg-white dark:bg-neutral-800"
+        } text-neutral-900 dark:text-neutral-100`}
       />
       {/* Error message */}
       {errorMessage && (
-        <p className="text-sm text-red-500 mt-1">{errorMessage}</p>
+        <p className="text-sm text-danger-500 mt-1">{errorMessage}</p>
       )}
     </div>
   );

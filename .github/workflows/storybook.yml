@@ -1,0 +1,65 @@
+# Publica el design system en GitHub Pages.
+#
+# La URL queda en:
+#   https://cookyourweb.github.io/teenage-points-system/
+#
+# ANTES DE QUE FUNCIONE hay que hacer una cosa a mano, una sola vez:
+#   Settings > Pages > Build and deployment > Source: "GitHub Actions"
+#
+# Se dispara al empujar a main, y tambien a mano desde la pestana Actions.
+name: Storybook
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Permisos minimos: solo lo que hace falta para publicar en Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Si se empuja dos veces seguidas, se cancela el despliegue viejo en vez de
+# encolarlo. Evita que una version antigua adelante a la nueva.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Se comprueba antes de publicar. Un design system que se publica roto
+      # es peor que uno que no se publica.
+      - name: Comprobar tipos
+        run: npm run typecheck
+
+      - name: Pasar los tests
+        run: npx vitest run
+
+      - name: Construir el Storybook
+        run: npm run build-storybook
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: storybook-static
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

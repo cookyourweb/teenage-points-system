@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "storybook/test";
 import { useState } from "react";
 import Tabs from "./Tabs";
 
@@ -53,6 +54,33 @@ export const Navegacion: Story = {
         <p className="py-6 text-content">Contenido de la seccion: {activa}</p>
       </Tabs>
     );
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step("Solo la pestana activa es tabulable", async () => {
+      await expect(canvas.getByRole("tab", { name: "Vista General" })).toHaveAttribute("tabindex", "0");
+      await expect(canvas.getByRole("tab", { name: "Gestion de Hijos" })).toHaveAttribute("tabindex", "-1");
+    });
+
+    await step("Un solo Tab entra en la barra", async () => {
+      await userEvent.tab();
+      await expect(canvas.getByRole("tab", { name: "Vista General" })).toHaveFocus();
+    });
+
+    await step("La flecha derecha pasa a la siguiente", async () => {
+      await userEvent.keyboard("{ArrowRight}");
+      await expect(canvas.getByRole("tab", { name: "Gestion de Hijos" })).toHaveAttribute("aria-selected", "true");
+    });
+
+    await step("Fin salta a la ultima", async () => {
+      await userEvent.keyboard("{End}");
+      await expect(canvas.getByRole("tab", { name: "Privilegios" })).toHaveAttribute("aria-selected", "true");
+    });
+
+    await step("El panel se anuncia con el nombre de su pestana", async () => {
+      await expect(canvas.getByRole("tabpanel", { name: "Privilegios" })).toBeInTheDocument();
+    });
   },
 };
 

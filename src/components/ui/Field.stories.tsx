@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { fn } from "storybook/test";
+import { expect, fn, userEvent, within } from "storybook/test";
 import Field from "./Field";
 
 const meta = {
@@ -40,6 +40,19 @@ export const Basico: Story = {};
  */
 export const ConAyuda: Story = {
   args: { hint: "Maximo 50 caracteres", maxLength: 50 },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    const control = canvas.getByLabelText(/Nombre de la tarea/);
+
+    await step("La ayuda se anuncia junto al campo, no es decoracion", async () => {
+      await expect(control).toHaveAccessibleDescription(/Maximo 50 caracteres/);
+    });
+
+    await step("Se escribe y el valor llega", async () => {
+      await userEvent.type(control, "Recoger la habitacion");
+      await expect(control).toHaveValue("Recoger la habitacion");
+    });
+  },
 };
 
 /**
@@ -55,6 +68,22 @@ export const ConAyuda: Story = {
  */
 export const ConError: Story = {
   args: { error: "Este campo no puede estar vacio", value: "" },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    const control = canvas.getByLabelText(/Nombre de la tarea/);
+
+    await step("El control se declara invalido", async () => {
+      await expect(control).toHaveAttribute("aria-invalid", "true");
+    });
+
+    await step("Y ademas dice POR QUE, no solo que esta mal", async () => {
+      await expect(control).toHaveAccessibleDescription(/no puede estar vacio/);
+    });
+
+    await step("El mensaje es una alerta, para que se anuncie al aparecer", async () => {
+      await expect(canvas.getByRole("alert")).toBeInTheDocument();
+    });
+  },
 };
 
 /** Error y ayuda juntos: se anuncian los dos, en ese orden. */

@@ -58,28 +58,47 @@ export const Navegacion: Story = {
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
 
-    await step("Solo la pestana activa es tabulable", async () => {
-      await expect(canvas.getByRole("tab", { name: "Vista General" })).toHaveAttribute("tabindex", "0");
-      await expect(canvas.getByRole("tab", { name: "Gestion de Hijos" })).toHaveAttribute("tabindex", "-1");
+    // NADA de dar por hecho en que pestana empieza. Al pulsar RUNS, Storybook
+    // vuelve a ejecutar el guion SIN volver a montar el componente, asi que el
+    // estado se queda donde lo dejo la vez anterior. Un test que solo pasa la
+    // primera vez esta roto.
+    const pestanas = () => canvas.getAllByRole("tab");
+    const activa = () => pestanas().find((t) => t.getAttribute("aria-selected") === "true")!;
+    const nombre = (t: HTMLElement) => t.textContent?.trim();
+
+    await step("Solo la activa es tabulable, las demas no", async () => {
+      for (const t of pestanas()) {
+        const esperado = t === activa() ? "0" : "-1";
+        await expect(t).toHaveAttribute("tabindex", esperado);
+      }
     });
 
-    await step("Un solo Tab entra en la barra", async () => {
+    await step("Un solo Tab entra en la barra, y cae en la activa", async () => {
+      (document.activeElement as HTMLElement | null)?.blur();
       await userEvent.tab();
-      await expect(canvas.getByRole("tab", { name: "Vista General" })).toHaveFocus();
+      await expect(activa()).toHaveFocus();
     });
 
-    await step("La flecha derecha pasa a la siguiente", async () => {
+    await step("La flecha derecha pasa a la SIGUIENTE, sea cual sea", async () => {
+      const antes = pestanas();
+      const i = antes.indexOf(activa());
+      const siguiente = nombre(antes[(i + 1) % antes.length]);
+
       await userEvent.keyboard("{ArrowRight}");
-      await expect(canvas.getByRole("tab", { name: "Gestion de Hijos" })).toHaveAttribute("aria-selected", "true");
+
+      await expect(nombre(activa())).toBe(siguiente);
     });
 
-    await step("Fin salta a la ultima", async () => {
+    await step("Inicio va a la primera y Fin a la ultima", async () => {
       await userEvent.keyboard("{End}");
-      await expect(canvas.getByRole("tab", { name: "Privilegios" })).toHaveAttribute("aria-selected", "true");
+      await expect(nombre(activa())).toBe(nombre(pestanas().at(-1)!));
+
+      await userEvent.keyboard("{Home}");
+      await expect(nombre(activa())).toBe(nombre(pestanas()[0]));
     });
 
     await step("El panel se anuncia con el nombre de su pestana", async () => {
-      await expect(canvas.getByRole("tabpanel", { name: "Privilegios" })).toBeInTheDocument();
+      await expect(canvas.getByRole("tabpanel", { name: nombre(activa())! })).toBeInTheDocument();
     });
   },
 };

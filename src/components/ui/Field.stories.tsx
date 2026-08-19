@@ -49,6 +49,9 @@ export const ConAyuda: Story = {
     });
 
     await step("Se escribe y el valor llega", async () => {
+      // Se limpia primero: userEvent.type ACUMULA, y al reejecutar el guion sin
+      // remontar el campo ya traia el texto de la vez anterior.
+      await userEvent.clear(control);
       await userEvent.type(control, "Recoger la habitacion");
       await expect(control).toHaveValue("Recoger la habitacion");
     });

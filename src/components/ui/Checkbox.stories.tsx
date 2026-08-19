@@ -55,18 +55,18 @@ export const PulsarElTextoTambienFunciona: Story = {
   args: { description: "Prueba a pulsar sobre esta frase, no sobre el cuadrado" },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
-    const casilla = canvas.getByRole("checkbox");
+    const casilla = canvas.getByRole("checkbox") as HTMLInputElement;
 
-    await step("La casilla empieza sin marcar", async () => {
-      await expect(casilla).not.toBeChecked();
-    });
+    // Se apunta como estaba en vez de suponer que empieza sin marcar: al pulsar
+    // RUNS, Storybook reejecuta el guion SIN volver a montar el componente.
+    const antes = casilla.checked;
 
     await step("Se pulsa el TEXTO de la etiqueta, no el cuadrado", async () => {
       await userEvent.click(canvas.getByText("Tarea activa"));
     });
 
-    await step("La casilla queda marcada", async () => {
-      await expect(casilla).toBeChecked();
+    await step("La casilla ha cambiado de estado", async () => {
+      await expect(casilla.checked).toBe(!antes);
     });
   },
 };
@@ -93,10 +93,14 @@ export const DosCasillasNoChocan: Story = {
       await expect(primera.id).not.toBe(segunda.id);
     });
 
-    await step("Pulsar el texto de la SEGUNDA marca la segunda", async () => {
+    await step("Pulsar el texto de la SEGUNDA solo mueve la segunda", async () => {
+      const primeraAntes = (primera as HTMLInputElement).checked;
+      const segundaAntes = (segunda as HTMLInputElement).checked;
+
       await userEvent.click(canvas.getByText("Activa en privilegios"));
-      await expect(segunda).toBeChecked();
-      await expect(primera).not.toBeChecked();
+
+      await expect((segunda as HTMLInputElement).checked).toBe(!segundaAntes);
+      await expect((primera as HTMLInputElement).checked).toBe(primeraAntes);
     });
   },
 };

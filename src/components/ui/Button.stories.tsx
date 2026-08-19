@@ -77,9 +77,14 @@ export const Estados: Story = {
     const canvas = within(canvasElement);
     const [normal, , cargando] = canvas.getAllByRole("button");
 
+    // El espia acumula llamadas entre reejecuciones del guion, asi que se
+    // pone a cero antes de contar. Si no, a la segunda vuelta hay dos.
+    const alPulsar = args.onClick!;
+    alPulsar.mockClear();
+
     await step("El normal responde", async () => {
       await userEvent.click(normal);
-      await expect(args.onClick).toHaveBeenCalledOnce();
+      await expect(alPulsar).toHaveBeenCalledOnce();
     });
 
     await step("El que carga se anuncia ocupado, no solo gira", async () => {
@@ -88,7 +93,7 @@ export const Estados: Story = {
 
     await step("Y no se puede pulsar dos veces por error", async () => {
       await userEvent.click(cargando);
-      await expect(args.onClick).toHaveBeenCalledOnce();
+      await expect(alPulsar).toHaveBeenCalledOnce();
     });
   },
 };

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Field from "../ui/Field";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../firebase";
@@ -110,37 +111,29 @@ const Signin = () => {
         Iniciar Sesión
       </h2>
       
-      <div>
-        <label htmlFor="signin-email" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Correo electrónico
-        </label>
-        <input
-          id="signin-email"
-          type="email"
-          placeholder="tu@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={isLoading}
-          className="w-full p-3 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          required
-        />
-      </div>
+      <Field
+        label="Correo electrónico"
+        name="email"
+        type="email"
+        autoComplete="email"
+        placeholder="tu@email.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={isLoading}
+        required
+      />
       
-      <div>
-        <label htmlFor="signin-password" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Contraseña
-        </label>
-        <input
-          id="signin-password"
-          type="password"
-          placeholder="Tu contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={isLoading}
-          className="w-full p-3 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          required
-        />
-      </div>
+      <Field
+        label="Contraseña"
+        name="password"
+        type="password"
+        autoComplete="current-password"
+        placeholder="Tu contraseña"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        disabled={isLoading}
+        required
+      />
       
       {error && (
         <div className="p-3 bg-danger-100 dark:bg-danger-900/20 border border-danger-300 dark:border-danger-700 rounded-lg">

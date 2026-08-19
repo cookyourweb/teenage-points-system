@@ -2,6 +2,7 @@ import { auth, db } from "../../firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { setDoc, doc } from "firebase/firestore";
 import { useState } from "react";
+import Field from "../ui/Field";
 import { addFamily } from "../../services/familyService";
 
 const SignUp: React.FC = () => {
@@ -124,56 +125,43 @@ const SignUp: React.FC = () => {
       <h2 className="text-center text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">
         Crear Cuenta Nueva
       </h2>
-      
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Nombre completo
-        </label>
-        <input
-          id="name"
-          type="text"
-          placeholder="Tu nombre completo"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          disabled={isLoading}
-          className="w-full p-3 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          required
-        />
-      </div>
-      
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Correo electrónico
-        </label>
-        <input
-          id="email"
-          type="email"
-          placeholder="tu@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={isLoading}
-          className="w-full p-3 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          required
-        />
-      </div>
-      
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-          Contraseña
-        </label>
-        <input
-          id="password"
-          type="password"
-          placeholder="Mínimo 6 caracteres"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={isLoading}
-          className="w-full p-3 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          required
-          minLength={6}
-        />
-      </div>
-      
+      <Field
+        label="Nombre completo"
+        name="name"
+        type="text"
+        autoComplete="name"
+        placeholder="Tu nombre completo"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        disabled={isLoading}
+        required
+      />
+
+      <Field
+        label="Correo electrónico"
+        name="email"
+        type="email"
+        autoComplete="email"
+        placeholder="tu@email.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={isLoading}
+        required
+      />
+
+      <Field
+        label="Contraseña"
+        name="password"
+        type="password"
+        autoComplete="new-password"
+        placeholder="Mínimo 6 caracteres"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        disabled={isLoading}
+        required
+        minLength={6}
+        hint="Mínimo 6 caracteres"
+      />
       {error && (
         <div className="p-3 bg-danger-100 dark:bg-danger-900/20 border border-danger-300 dark:border-danger-700 rounded-lg">
           <p className="text-danger-700 dark:text-danger-400 text-sm font-medium">

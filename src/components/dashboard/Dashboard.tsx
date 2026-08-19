@@ -23,6 +23,7 @@ import PrivilegeManagement from "./PrivilegeManagement";
 
 import Button from "../ui/Button";
 import Modal from "../ui/Modal";
+import Tabs from "../ui/Tabs";
 import ThemeToggle from "../ui/ThemeToggle";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { Child } from "../../types/familyTypes";
@@ -550,70 +551,36 @@ const Dashboard: React.FC = () => {
         </div>
       </header>
 
-      {/* Navigation Tabs */}
+      {/* Navegacion. El patron Tabs vive en ui/Tabs: roles de ARIA, flechas
+          y tabindex movil. Antes eran cuatro <button> sueltos sin nada de eso
+          (hallazgos C9 y F7 de la auditoria de accesibilidad). */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <div className="border-b border-neutral-200 dark:border-neutral-700">
-          <nav className="-mb-px flex space-x-8 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                activeTab === 'overview'
-                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                  : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
-              }`}
-            >
-              <FontAwesomeIcon icon={faChartLine} className="mr-2" />
-              Vista General
-            </button>
-            <button
-              onClick={() => setActiveTab('children')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                activeTab === 'children'
-                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                  : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
-              }`}
-            >
-              <FontAwesomeIcon icon={faUsers} className="mr-2" />
-              Gestión de Hijos
-            </button>
-            <button
-              onClick={() => setActiveTab('tasks')}
-              disabled={!isPadre}
-              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                activeTab === 'tasks'
-                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                  : isPadre 
-                    ? 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
-                    : 'border-transparent text-neutral-400 cursor-not-allowed'
-              }`}
-            >
-              <FontAwesomeIcon icon={faTasks} className="mr-2" />
-              Tareas Personalizadas
-              {!isPadre && <span className="ml-1 text-xs">🔒</span>}
-            </button>
-            <button
-              onClick={() => setActiveTab('privileges')}
-              disabled={!isPadre}
-              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                activeTab === 'privileges'
-                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                  : isPadre 
-                    ? 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-300'
-                    : 'border-transparent text-neutral-400 cursor-not-allowed'
-              }`}
-            >
-              <FontAwesomeIcon icon={faGift} className="mr-2" />
-              Privilegios Personalizados
-              {!isPadre && <span className="ml-1 text-xs">🔒</span>}
-            </button>
-          </nav>
-        </div>
+        <Tabs
+          label="Secciones del panel familiar"
+          active={activeTab}
+          onChange={(id) => setActiveTab(id as typeof activeTab)}
+          tabs={[
+            { id: 'overview', label: 'Vista General', icon: <FontAwesomeIcon icon={faChartLine} /> },
+            { id: 'children', label: 'Gestión de Hijos', icon: <FontAwesomeIcon icon={faUsers} /> },
+            {
+              id: 'tasks',
+              label: 'Tareas Personalizadas',
+              icon: <FontAwesomeIcon icon={faTasks} />,
+              disabled: !isPadre,
+              disabledReason: 'solo disponible para padres',
+            },
+            {
+              id: 'privileges',
+              label: 'Privilegios Personalizados',
+              icon: <FontAwesomeIcon icon={faGift} />,
+              disabled: !isPadre,
+              disabledReason: 'solo disponible para padres',
+            },
+          ]}
+        >
+          <main className="py-8">{renderTabContent()}</main>
+        </Tabs>
       </div>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {renderTabContent()}
-      </main>
 
       {/* Modals */}
       {isAddingChild && (

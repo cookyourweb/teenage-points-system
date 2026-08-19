@@ -139,9 +139,9 @@ describe('las variantes son intenciones, no colores', () => {
     expect(otras).not.toContain(mia);
   });
 
-  it('todas cumplen la zona tactil minima de 44 px', () => {
-    // WCAG 2.2, criterio 2.5.8. En movil, un boton mas pequeno se falla al
-    // pulsarlo, y este producto lo usan adolescentes en el telefono.
+  it('todas cumplen 44 px de alto', () => {
+    // El minimo exigible es 24 px (2.5.8, AA). 44 es el 2.5.5, que es AAA, y
+    // es el que se elige: en movil la diferencia se nota al pulsar.
     (['sm', 'md', 'lg'] as const).forEach((size) => {
       const { unmount } = render(<Button size={size}>X</Button>);
       expect(screen.getByRole('button').className).toMatch(/min-h-(11|12)\b/);

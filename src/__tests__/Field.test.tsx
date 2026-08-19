@@ -171,3 +171,57 @@ describe('Field no conoce ni un color', () => {
     expect(fuente).not.toMatch(/dark:/);
   });
 });
+
+describe('Field cubre los tipos que hay de verdad en el repo', () => {
+  /**
+   * Inventario MEDIDO de los 40 controles crudos que quedaban:
+   *   text 19, number 7, checkbox 4, date 3, textarea 3, select 2, tel 1, email 1
+   *
+   * Los checkbox NO entran aqui: van en `ui/Checkbox`, porque la etiqueta va
+   * despues del control y el estado se lleva en `checked`. Los otros 36 si.
+   *
+   * Este test existe para que la respuesta a "¿estan todos contemplados?" sea
+   * una comprobacion y no una opinion. `ui/Input` murio justo por no cubrir
+   * los casos reales.
+   */
+  it.each(['text', 'number', 'date', 'tel', 'email'])('acepta type="%s"', (tipo) => {
+    render(<Field label="Campo" name="campo" type={tipo} />);
+
+    expect(screen.getByLabelText(/Campo/)).toHaveAttribute('type', tipo);
+  });
+
+  it('un numero acepta min y max', () => {
+    render(<Field label="Puntos" name="puntos" type="number" min={0} max={100} />);
+
+    const control = screen.getByLabelText(/Puntos/);
+    expect(control).toHaveAttribute('min', '0');
+    expect(control).toHaveAttribute('max', '100');
+  });
+
+  it('deja pasar onBlur y onKeyDown, que los usan los formularios', async () => {
+    const alSalir = vi.fn();
+    const alTeclear = vi.fn();
+    render(<Field label="Nombre" name="nombre" onBlur={alSalir} onKeyDown={alTeclear} />);
+
+    const control = screen.getByLabelText(/Nombre/);
+    await userEvent.type(control, 'a');
+    await userEvent.tab();
+
+    expect(alTeclear).toHaveBeenCalled();
+    expect(alSalir).toHaveBeenCalledOnce();
+  });
+
+  it('acepta defaultValue para formularios no controlados', () => {
+    render(<Field label="Nombre" name="nombre" defaultValue="Hola" />);
+
+    expect(screen.getByLabelText(/Nombre/)).toHaveValue('Hola');
+  });
+
+  it('el id lo pone Field, aunque le pasen uno', () => {
+    // Field necesita mandar en el id para poder asociar la etiqueta. Si un
+    // sitio dependia de un id escrito a mano, hay que mirarlo al migrarlo.
+    render(<Field label="Nombre" name="nombre" id="mio" />);
+
+    expect(screen.getByLabelText(/Nombre/).id).not.toBe('mio');
+  });
+});

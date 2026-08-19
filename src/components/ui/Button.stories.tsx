@@ -45,9 +45,10 @@ export const Variantes: Story = {
 /**
  * Los tres tamanos. Todos cumplen 44 px de alto minimo.
  *
- * No es estetica: es el criterio 2.5.8 de WCAG 2.2. Por debajo de 44 px, un
- * objetivo tactil se falla al pulsarlo. Y este producto lo usan adolescentes
- * en el movil, que es donde mas se nota.
+ * El minimo que exige WCAG 2.2 son 24 px (criterio 2.5.8, nivel AA). Los 44
+ * son el 2.5.5, que es AAA, y coinciden con las guias de Apple y Google. Se
+ * elige el de 44 a proposito, porque esto se usa en el movil y ahi la
+ * diferencia entre 24 y 44 se nota al pulsar.
  */
 export const Tamanos: Story = {
   render: (args) => (

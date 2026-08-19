@@ -63,8 +63,12 @@ const VARIANTE: Record<ButtonVariant, string> = {
 };
 
 /**
- * min-h-11 son 44 px, la zona tactil minima de WCAG 2.2 (criterio 2.5.8).
- * No es un capricho: este producto lo usan adolescentes en el movil.
+ * min-h-11 son 44 px.
+ *
+ * El minimo que EXIGE WCAG 2.2 es 24 px (criterio 2.5.8, nivel AA). Los 44
+ * son el criterio 2.5.5, que es AAA, y coinciden con las guias de Apple y de
+ * Google. Se elige el de 44 a proposito: este producto lo usan adolescentes
+ * en el movil, y ahi la diferencia entre 24 y 44 se nota al pulsar.
  */
 const TAMANO: Record<ButtonSize, string> = {
   sm: 'min-h-11 px-3 text-sm',

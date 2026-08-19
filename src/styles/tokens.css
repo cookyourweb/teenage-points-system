@@ -1,0 +1,242 @@
+/* ==========================================================================
+   TOKENS EN TRES NIVELES
+   ==========================================================================
+
+   La regla que ordena todo: un componente nunca nombra un color, nombra un rol.
+
+     Nivel 1  PRIMITIVO    --tps-brand-600: #2563eb              "que color es"
+     Nivel 2  SEMANTICO    --tps-action: var(--tps-brand-600)    "para que sirve"
+     Nivel 3  COMPONENTE   --tps-btn-primary-bg: var(--tps-action) "quien lo usa"
+
+   Un componente solo toca el nivel 3. Una pantalla solo toca el nivel 2. El
+   nivel 1 no lo toca nadie fuera de este fichero.
+
+   Consecuencia practica: el modo oscuro y el tono adolescente son REDEFINIR EL
+   NIVEL 2. No se reescribe ni un componente.
+
+   Las guardas de esta disciplina viven en src/__tests__/tokens.test.ts.
+   ========================================================================== */
+
+:root {
+  /* ---------- NIVEL 1: PRIMITIVOS ----------
+     Son los hex que ya usaba el proyecto, renombrados. La migracion es
+     visualmente invisible: lo unico que cambia es que ahora hay UN nombre
+     por color en vez de veintitres azules y veintiocho grises. */
+
+  /* Neutros. El esqueleto: superficies, texto y bordes. */
+  --tps-neutral-0:   #ffffff;
+  --tps-neutral-50:  #f9fafb;
+  --tps-neutral-100: #f3f4f6;
+  --tps-neutral-200: #e5e7eb;
+  --tps-neutral-300: #d1d5db;
+  --tps-neutral-400: #9ca3af;
+  --tps-neutral-500: #6b7280;
+  --tps-neutral-600: #4b5563;
+  --tps-neutral-700: #374151;
+  --tps-neutral-800: #1f2937;
+  --tps-neutral-900: #111827;
+
+  /* Marca. El azul ya era la identidad de facto. */
+  --tps-brand-50:  #eff6ff;
+  --tps-brand-100: #dbeafe;
+  --tps-brand-500: #3b82f6;
+  --tps-brand-600: #2563eb;
+  --tps-brand-700: #1d4ed8;
+  --tps-brand-900: #1e3a8a;
+
+  /* Acento. El morado es la energia del lado adolescente: privilegios. */
+  --tps-accent-50:  #faf5ff;
+  --tps-accent-500: #a855f7;
+  --tps-accent-600: #9333ea;
+  --tps-accent-700: #7e22ce;
+
+  /* Positivo. Tarea hecha, puntos ganados. */
+  --tps-positive-50:  #f0fdf4;
+  --tps-positive-500: #22c55e;
+  --tps-positive-600: #16a34a;
+  --tps-positive-700: #15803d;
+
+  /* Atencion. AMBER, no yellow: yellow-500 con texto blanco da 1,92:1 y no
+     pasa AA. Amber-600 con blanco da 4,6:1 y dice exactamente lo mismo. */
+  --tps-caution-50:  #fffbeb;
+  --tps-caution-500: #f59e0b;
+  --tps-caution-600: #d97706;
+  --tps-caution-700: #b45309;
+
+  /* Negativo. Borrar, error, lo que no se deshace. */
+  --tps-negative-50:  #fef2f2;
+  --tps-negative-500: #ef4444;
+  --tps-negative-600: #dc2626;
+  --tps-negative-700: #b91c1c;
+
+
+  /* ---------- NIVEL 2: SEMANTICOS ----------
+     Por defecto = tono PADRES. Aqui es donde padres y adolescentes se separan
+     sin duplicar ni un primitivo. */
+
+  /* Superficies */
+  --tps-bg-page:    var(--tps-neutral-50);
+  --tps-bg-surface: var(--tps-neutral-0);
+  --tps-bg-sunken:  var(--tps-neutral-100);
+  --tps-bg-overlay: rgb(0 0 0 / 0.5);
+
+  /* Bordes */
+  --tps-border:        var(--tps-neutral-200);
+  --tps-border-strong: var(--tps-neutral-300);
+
+  /* Texto. Ojo con --tps-text-muted: es neutral-500, que da 4,83:1 sobre
+     blanco. NUNCA neutral-400, que da 2,54:1 y es un fallo de contraste. */
+  --tps-text:         var(--tps-neutral-900);
+  --tps-text-muted:   var(--tps-neutral-500);
+  --tps-text-inverse: var(--tps-neutral-0);
+
+  /* Accion principal */
+  --tps-action:       var(--tps-brand-600);
+  --tps-action-hover: var(--tps-brand-700);
+  --tps-action-fg:    var(--tps-neutral-0);
+
+  /* Accion secundaria. Mata los cuatro grises distintos de "Cancelar". */
+  --tps-neutral-action:       var(--tps-neutral-100);
+  --tps-neutral-action-hover: var(--tps-neutral-200);
+  --tps-neutral-action-fg:    var(--tps-neutral-800);
+
+  /* Estados. Cada uno con su color de texto y su fondo suave. */
+  --tps-positive:       var(--tps-positive-600);
+  --tps-positive-hover: var(--tps-positive-700);
+  --tps-positive-bg:    var(--tps-positive-50);
+  --tps-caution:        var(--tps-caution-600);
+  --tps-caution-hover:  var(--tps-caution-700);
+  --tps-caution-bg:     var(--tps-caution-50);
+  --tps-negative:       var(--tps-negative-600);
+  --tps-negative-hover: var(--tps-negative-700);
+  --tps-negative-bg:    var(--tps-negative-50);
+
+  /* Foco. Un solo anillo en toda la aplicacion. */
+  --tps-focus-ring: var(--tps-brand-500);
+
+  /* Deshabilitado. neutral-500 sobre neutral-200 da 5,13:1, pasa AA. */
+  --tps-disabled-bg: var(--tps-neutral-200);
+  --tps-disabled-fg: var(--tps-neutral-500);
+
+  /* Ritmo visual. Los padres quieren densidad. */
+  --tps-radius:        0.5rem;
+  --tps-radius-pill:   9999px;
+  --tps-density:       1;
+  --tps-shadow:        0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --tps-shadow-raised: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+
+  /* ---------- NIVEL 3: COMPONENTE ----------
+     Parece redundante y es deliberado. Es la capa que deja decir "los botones
+     primarios de esta app son un punto mas oscuros" sin tocar el sistema de
+     acciones entero.
+
+     Regla: el nivel 3 SIEMPRE apunta al nivel 2, nunca a un primitivo. Si
+     apunta a un primitivo se salta el nivel 2 y el modo oscuro deja de
+     afectarle. Hay un test que lo comprueba. */
+
+  --tps-btn-primary-bg:       var(--tps-action);
+  --tps-btn-primary-bg-hover: var(--tps-action-hover);
+  --tps-btn-primary-fg:       var(--tps-action-fg);
+
+  --tps-btn-neutral-bg:       var(--tps-neutral-action);
+  --tps-btn-neutral-bg-hover: var(--tps-neutral-action-hover);
+  --tps-btn-neutral-fg:       var(--tps-neutral-action-fg);
+
+  --tps-btn-danger-bg:        var(--tps-negative);
+  --tps-btn-danger-bg-hover:  var(--tps-negative-hover);
+  --tps-btn-danger-fg:        var(--tps-text-inverse);
+
+  --tps-card-bg:     var(--tps-bg-surface);
+  --tps-card-border: var(--tps-border);
+  --tps-card-shadow: var(--tps-shadow);
+
+  --tps-field-bg:           var(--tps-bg-surface);
+  --tps-field-border:       var(--tps-border-strong);
+  --tps-field-border-focus: var(--tps-focus-ring);
+  --tps-field-border-error: var(--tps-negative);
+}
+
+
+/* ==========================================================================
+   MODO OSCURO
+   ==========================================================================
+
+   Veinte declaraciones en lugar de las 521 clases `dark:` repartidas por 25
+   ficheros que hoy no se pintan nunca, porque nadie ponia la clase.
+
+   Se redefine SOLO el nivel 2. Ningun primitivo cambia aqui: --tps-brand-600
+   sigue siendo el mismo azul en claro y en oscuro. Lo que cambia es QUE ROL
+   ocupa cada color, no el color.
+
+   La clase la pone useTheme() sobre <html>, que es donde vive :root.
+   ========================================================================== */
+
+:root.dark {
+  --tps-bg-page:    var(--tps-neutral-900);
+  --tps-bg-surface: var(--tps-neutral-800);
+  --tps-bg-sunken:  var(--tps-neutral-900);
+
+  --tps-border:        var(--tps-neutral-700);
+  --tps-border-strong: var(--tps-neutral-600);
+
+  /* El texto atenuado sube de 500 a 300. Sobre fondo oscuro, neutral-500 se
+     queda en 4,1:1 y no llega a AA. */
+  --tps-text:       var(--tps-neutral-50);
+  --tps-text-muted: var(--tps-neutral-300);
+
+  /* La accion se aclara un punto: sobre fondo oscuro, brand-600 pesa. */
+  --tps-action:       var(--tps-brand-500);
+  --tps-action-hover: var(--tps-brand-600);
+
+  --tps-neutral-action:       var(--tps-neutral-700);
+  --tps-neutral-action-hover: var(--tps-neutral-600);
+  --tps-neutral-action-fg:    var(--tps-neutral-100);
+
+  /* Los fondos de estado pasan de un tono solido a un velo translucido: sobre
+     oscuro, positive-50 seria un bloque casi blanco. */
+  --tps-positive-bg: rgb(34 197 94 / 0.15);
+  --tps-caution-bg:  rgb(245 158 11 / 0.15);
+  --tps-negative-bg: rgb(239 68 68 / 0.15);
+
+  --tps-disabled-bg: var(--tps-neutral-700);
+  --tps-disabled-fg: var(--tps-neutral-400);
+
+  --tps-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.5);
+}
+
+
+/* ==========================================================================
+   TONO ADOLESCENTE
+   ==========================================================================
+
+   Misma marca, otro tono. Se activa con un atributo en la raiz de la ruta, no
+   con clases sueltas por componente.
+
+   Con esto, el gradiente azul-morado de ChildView y el amarillo-naranja de la
+   barra de progreso dejan de ser decisiones de un componente y pasan a ser el
+   tono de una AUDIENCIA, definido en un solo sitio.
+   ========================================================================== */
+
+[data-audience='teen'] {
+  /* La marca es la misma. Lo que cambia es quien manda: en el lado adolescente
+     el acento sube a accion principal. */
+  --tps-action:       var(--tps-accent-600);
+  --tps-action-hover: var(--tps-accent-700);
+
+  /* Fondo calido en vez de gris administrativo. */
+  --tps-bg-page: linear-gradient(160deg, var(--tps-brand-50), var(--tps-accent-50));
+
+  /* Mas aire y mas redondeo: es movil y son sesiones de diez segundos. */
+  --tps-radius:  0.75rem;
+  --tps-density: 1.15;
+
+  /* El progreso es LO que vienen a ver: se le da su propio rol. */
+  --tps-progress-track: var(--tps-neutral-200);
+  --tps-progress-fill:  linear-gradient(90deg, var(--tps-caution-500), var(--tps-accent-500));
+}
+
+[data-audience='teen'].dark,
+:root.dark [data-audience='teen'] {
+  --tps-bg-page: linear-gradient(160deg, var(--tps-neutral-900), var(--tps-accent-700));
+}

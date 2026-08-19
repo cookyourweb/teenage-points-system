@@ -1,3 +1,7 @@
+/* Los tokens van ANTES que Tailwind: cuando las directivas emiten su CSS, las
+   variables ya tienen que existir para las capas base y components. */
+@import './styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -43,6 +43,41 @@ const palette = {
   },
 };
 
+// ROLES. La capa semantica, enganchada a los tokens de src/styles/tokens.css.
+//
+// Esto es lo que hace que el modo oscuro funcione sin una sola clase `dark:`:
+// `bg-surface` resuelve a var(--tps-bg-surface), y esa variable vale una cosa
+// en :root y otra en :root.dark. La clase es la misma, el valor cambia solo.
+//
+// Convive con `palette`: `bg-primary-500` sigue existiendo. Se migra pantalla a
+// pantalla, y cuando no quede ninguna referencia cruda se borra `palette`.
+const roles = {
+  surface: {
+    DEFAULT: 'var(--tps-bg-surface)',
+    page: 'var(--tps-bg-page)',
+    sunken: 'var(--tps-bg-sunken)',
+    overlay: 'var(--tps-bg-overlay)',
+  },
+  content: {
+    DEFAULT: 'var(--tps-text)',
+    muted: 'var(--tps-text-muted)',
+    inverse: 'var(--tps-text-inverse)',
+  },
+  line: {
+    DEFAULT: 'var(--tps-border)',
+    strong: 'var(--tps-border-strong)',
+  },
+  action: {
+    DEFAULT: 'var(--tps-action)',
+    hover: 'var(--tps-action-hover)',
+    fg: 'var(--tps-action-fg)',
+  },
+  positive: { DEFAULT: 'var(--tps-positive)', bg: 'var(--tps-positive-bg)' },
+  caution: { DEFAULT: 'var(--tps-caution)', bg: 'var(--tps-caution-bg)' },
+  negative: { DEFAULT: 'var(--tps-negative)', bg: 'var(--tps-negative-bg)' },
+  disabled: { DEFAULT: 'var(--tps-disabled-bg)', fg: 'var(--tps-disabled-fg)' },
+};
+
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
@@ -55,6 +90,24 @@ export default {
       white: '#ffffff',
       black: '#000000',
       ...palette,
+      ...roles,
+    },
+    extend: {
+      // El hueco entre el elemento y el anillo pasa a seguir la superficie. En
+      // claro vale lo mismo que antes (#ffffff), asi que no cambia nada; en
+      // oscuro deja de dibujar un halo blanco sobre fondo oscuro.
+      ringOffsetColor: { DEFAULT: 'var(--tps-bg-surface)' },
+
+      // OJO, aqui NO va `ringColor: { DEFAULT: 'var(--tps-focus-ring)' }`.
+      //
+      // Tailwind construye el anillo por defecto con
+      // withAlphaValue(ringColor.DEFAULT, ringOpacity.DEFAULT) y NO sabe
+      // aplicar una opacidad del 50% a un var(): se rinde y cae a su valor de
+      // emergencia, rgb(147 197 253 / 0.5), que es mas CLARO que el actual.
+      // O sea: tokenizar el anillo asi empeora la visibilidad del foco.
+      //
+      // El anillo se tokeniza al endurecer los componentes, con una clase
+      // explicita (ring-action) en vez de tocando el valor por defecto.
     },
   },
   plugins: [],

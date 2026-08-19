@@ -23,11 +23,16 @@ const ThemeToggle: React.FC = () => {
       type="button"
       onClick={alternar}
       aria-pressed={esOscuro}
-      title={esOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+      title={esOscuro ? 'Modo oscuro. Pulsa para cambiar a claro' : 'Modo claro. Pulsa para cambiar a oscuro'}
       className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-sunken text-content-muted transition-colors hover:bg-line hover:text-content"
     >
-      <FontAwesomeIcon icon={esOscuro ? faSun : faMoon} />
-      <span className="sr-only">{esOscuro ? 'Modo claro' : 'Modo oscuro'}</span>
+      {/* El icono dice EN QUE MODO ESTAS, no a cual vas: de dia un sol, de
+          noche una luna. La otra convencion (ensenar el destino) obliga a
+          pensarlo, y un conmutador no se piensa, se mira. */}
+      <FontAwesomeIcon icon={esOscuro ? faMoon : faSun} aria-hidden="true" />
+      <span className="sr-only">
+        {esOscuro ? 'Modo oscuro activado. Cambiar a claro' : 'Modo claro activado. Cambiar a oscuro'}
+      </span>
     </button>
   );
 };

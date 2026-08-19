@@ -1,0 +1,131 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Fundamentos/El sistema" />
+
+# El design system
+
+Esto no es una carpeta de componentes bonitos. Es un conjunto de **reglas que no
+se pueden saltar**, y esa diferencia es todo el punto.
+
+---
+
+## De dónde viene
+
+El proyecto tenía **163 tokens de color distintos** en `src/`. Veintitrés azules.
+Veintiocho grises. Y un componente `Button` con seis variantes que **se usaba
+seis veces en todo el código**, mientras que el color se escribía a mano por
+`className` **treinta veces**.
+
+Es decir: la API existía y nadie la usaba. No por dejadez, sino porque
+`className` la pisaba y era más cómodo escribir el color a mano.
+
+De ahí sale la regla que ordena todo lo demás:
+
+> Un componente nunca nombra un color. Nombra un rol.
+
+---
+
+## Los tres niveles
+
+```
+Nivel 1  PRIMITIVO    --tps-brand-600: #2563eb                  "qué color es"
+Nivel 2  SEMÁNTICO    --tps-action: var(--tps-brand-600)        "para qué sirve"
+Nivel 3  COMPONENTE   --tps-btn-primary-bg: var(--tps-action)   "quién lo usa"
+```
+
+Un componente solo toca el **nivel 3**. Una pantalla solo toca el **nivel 2**. El
+nivel 1 no lo toca nadie fuera de `tokens.css`.
+
+La consecuencia práctica es la que paga el trabajo: **el modo oscuro y el tono
+adolescente son redefinir el nivel 2**. No se reescribe ni un componente.
+
+Veinte declaraciones sustituyen a las 521 clases `dark:` que había repartidas
+por 25 ficheros y que **no se pintaban nunca**, porque nadie ponía la clase.
+
+---
+
+## Por qué Sass no vale para esto
+
+No es que sea viejo. Es **cuándo se resuelve la variable**:
+
+| | Cuándo se resuelve | ¿Existe en el navegador? |
+|---|---|---|
+| `$color` (Sass) | En compilación | **No.** Queda el hexadecimal y la variable desaparece |
+| `--color` (CSS) | En ejecución | **Sí.** Se redefine por selector y se lee desde JS |
+
+Con Sass, cuando el usuario pulsa el interruptor de modo oscuro la variable ya
+no existe. Por eso obliga a escribir la variante en cada clase. Con custom
+properties, cambias el valor y todo lo que lo usa cambia solo.
+
+---
+
+## Cada estado se diseña, y se mide
+
+Un botón no es un color: son **cinco estados** (reposo, hover, foco, activo,
+deshabilitado) **por dos modos**. Cada uno se diseña y cada uno se mide.
+
+Lo aprendimos rompiéndolo. En modo oscuro el hover se iba a un tono *más
+oscuro*, que es lo correcto sobre fondo claro y lo contrario de lo que hace
+falta sobre fondo oscuro. Se quedaba en **2,84:1**, por debajo incluso del
+mínimo de 3:1.
+
+Dos cosas más que salieron de medir y no de mirar:
+
+- **En oscuro, ningún azul sirve para un botón sólido con texto blanco.** O el
+  blanco se lee y el botón no se distingue de la tarjeta, o al revés. La salida
+  es invertirlo: fondo claro con texto oscuro.
+- **El verde y el ámbar no admiten texto blanco**: 3,30:1 y 3,19:1. Con texto
+  oscuro dan 5,38 y 5,57. El rojo sí lo admite. Por eso cada relleno declara su
+  propio color de texto en vez de dar el blanco por supuesto.
+
+Todo eso está congelado en `src/__tests__/contraste.test.ts`: veintiún estados
+por dos modos. **Un estado que no esté en esa tabla es un estado que nadie ha
+diseñado.**
+
+---
+
+## La puerta cerrada
+
+`Button` y `Field` no aceptan `className` ni `style`:
+
+```ts
+Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style'>
+```
+
+Esa línea convierte el sistema de **convención en regla**. Ya no es algo que
+alguien tenga que recordar en la revisión: es que **no compila**.
+
+Lo mismo pasa en `tailwind.config.js`, donde se **sustituye** `theme.colors` en
+vez de extenderlo. `bg-blue-500` y `text-gray-400` dejan de existir. Ya no es
+una norma que se vigila, es una clase que no está.
+
+---
+
+## Lo que no arregla un robot
+
+El panel **Accessibility** ejecuta `axe-core` y da un número. Está bien, y no es
+suficiente.
+
+Axe comprueba lo mecánico: que exista una etiqueta, que el contraste dé la
+cifra, que no haya identificadores repetidos. **No sabe si la etiqueta dice algo
+útil, si el orden del foco tiene sentido, ni si tu mensaje de error ayuda a
+alguien a arreglar el problema.**
+
+Un campo con `label="Campo 1"` pasa la auditoría con nota. Y no sirve para nada.
+
+**Cero violaciones no significa accesible.**
+
+---
+
+## Cómo se lee este Storybook
+
+- **Fundamentos** — la paleta y esta página
+- **UI** — las piezas del sistema: `Button`, `Field`, `Checkbox`, `Tabs`, `ThemeToggle`
+- **Producto** — piezas que ya saben de tareas y puntos
+
+En las stories con el panel **Interactions** hay funciones `play`: guiones que
+manejan el componente como si fueras tú, paso a paso, con pausa y rebobinado.
+Son **tests que se pueden mirar**.
+
+Empieza por `UI/Tabs > Navegacion`. Lo que hace ahí el teclado es justo lo que
+no se ve en una captura.

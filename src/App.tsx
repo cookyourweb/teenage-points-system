@@ -8,7 +8,7 @@ import RewardTracker from "./components/dashboard/RewardTracker";
 import ChildView from "./components/dashboard/ChildView";
 import FaqAdmin from "./components/dashboard/FaqAdmin";
 import RutaSoloAdmin from "./components/RutaSoloAdmin";
-import Faqs from "./components/dashboard/Faqs";
+import PaginaFaqs from "./components/PaginaFaqs";
 
 const App = () => {
   const [user, loading, error] = useAuthState(auth);
@@ -76,7 +76,7 @@ const App = () => {
         {/* FAQs públicas (NO requiere autenticación) */}
         <Route 
           path="/faqs" 
-          element={<Faqs />} 
+          element={<PaginaFaqs />} 
         />
         
         {/* Administración de FAQs. SOLO administradores.

@@ -12,7 +12,8 @@ import {
 
   faTasks,
   faGift,
-  faChartLine
+  faChartLine,
+  faCircleQuestion
 } from "@fortawesome/free-solid-svg-icons";
 import AddEditChild from "./AddEditChild";
 import InviteMember from "./InviteMember";
@@ -26,6 +27,7 @@ import Modal from "../ui/Modal";
 import Tabs from "../ui/Tabs";
 import ThemeToggle from "../ui/ThemeToggle";
 import Footer from "../Footer";
+import Faqs from "./Faqs";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { Child } from "../../types/familyTypes";
 import { useUserRole } from "../../hooks/useUserRole";
@@ -48,7 +50,7 @@ const Dashboard: React.FC = () => {
   const [childToEdit, setChildToEdit] = useState<Child | null>(null);
   
   // Estados de UI - Pestañas principales
-  const [activeTab, setActiveTab] = useState<'overview' | 'children' | 'tasks' | 'privileges'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'children' | 'tasks' | 'privileges' | 'faqs'>('overview');
   
   // Estados de modales
   const [isInviting, setIsInviting] = useState(false);
@@ -439,6 +441,9 @@ const Dashboard: React.FC = () => {
           </div>
         );
 
+      case 'faqs':
+        return <Faqs headingLevel={3} />;
+
       case 'privileges':
         return (
           <div className="space-y-6">
@@ -535,15 +540,6 @@ const Dashboard: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Las FAQs existian en /faqs y no habia ni un enlace en toda la
-                  aplicacion: solo se llegaba escribiendo la URL. */}
-              <Link
-                to="/faqs"
-                className="rounded-lg px-3 py-2 text-sm text-content-muted underline-offset-4 transition-colors hover:bg-surface-sunken hover:text-content hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-2"
-              >
-                Preguntas frecuentes
-              </Link>
-
               {isAdmin && (
                 <Link
                   to="/admin/faqs"
@@ -595,6 +591,7 @@ const Dashboard: React.FC = () => {
               disabled: !isPadre,
               disabledReason: 'solo disponible para padres',
             },
+            { id: 'faqs', label: 'Preguntas frecuentes', icon: <FontAwesomeIcon icon={faCircleQuestion} /> },
           ]}
         >
           <main className="py-8">{renderTabContent()}</main>

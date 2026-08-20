@@ -1,82 +1,112 @@
-//Faqs.tsx
-import React, { useEffect, useState } from "react";
-import { fetchCategorias } from "../../services/faqsService";
-import { Categoria } from "../../types/faqsTypes";
-import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import Footer from "../Footer";
+import React, { useEffect, useState } from 'react';
 
-const Faqs: React.FC = () => {
+import Accordion from '../ui/Accordion';
+import Tabs from '../ui/Tabs';
+import { fetchCategorias } from '../../services/faqsService';
+import { Categoria } from '../../types/faqsTypes';
+
+/**
+ * Las preguntas frecuentes.
+ *
+ * Es un COMPONENTE, no una pagina: se puede incrustar donde haga falta. Antes
+ * era una pantalla suelta en /faqs a la que ademas no llevaba ningun enlace.
+ *
+ * LA ESTRUCTURA, y por que es esta.
+ *
+ * Los datos tienen tres niveles: categoria -> pregunta -> soluciones. Cada
+ * nivel pide un patron distinto y mezclarlos es lo que hace que un FAQ se use
+ * mal:
+ *
+ *   CATEGORIAS -> pestañas. Elegir categoria es "enseñame este panel", que es
+ *   literalmente para lo que existen las pestañas. Y `ui/Tabs` ya trae el
+ *   teclado resuelto.
+ *
+ *   PREGUNTAS -> acordeon. Aqui se quiere abrir VARIAS a la vez para
+ *   compararlas. Con pestañas solo se ve una, y eso en unas FAQs estorba.
+ *
+ *   SOLUCIONES -> una lista de verdad. Con parrafos sueltos, un lector de
+ *   pantalla no dice cuantos consejos hay ni por cual va.
+ */
+
+export interface FaqsProps {
+  /**
+   * Nivel del encabezado de cada pregunta. Depende de lo que haya encima donde
+   * se incruste: un encabezado en el nivel equivocado rompe el esquema del
+   * documento.
+   */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
+}
+
+const Faqs: React.FC<FaqsProps> = ({ headingLevel = 3 }) => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [activa, setActiva] = useState<string>('');
 
   useEffect(() => {
-    const loadCategorias = async () => {
-      try {
-        const data = await fetchCategorias();
-        setCategorias(data);
-      } catch (err) {
-        console.error("Error al cargar las categorías:", err);
-      }
-    };
-
-    loadCategorias();
+    fetchCategorias()
+      .then((datos) => {
+        setCategorias(datos);
+        if (datos.length > 0) setActiva(datos[0].id);
+      })
+      .catch((err) => console.error('Error al cargar las categorías:', err))
+      .finally(() => setCargando(false));
   }, []);
 
+  if (cargando) {
+    return (
+      <p role="status" className="text-content-muted">
+        Cargando preguntas…
+      </p>
+    );
+  }
+
+  if (categorias.length === 0) {
+    return <p className="text-content-muted">Todavía no hay preguntas publicadas.</p>;
+  }
+
+  const categoria = categorias.find((c) => c.id === activa) ?? categorias[0];
+
   return (
-    <div className="flex min-h-screen flex-col bg-surface text-content">
-      <main className="mx-auto w-full max-w-4xl flex-1 p-6">
-        {/* Sin esto, /faqs era un callejon sin salida: se entraba y no habia
-            forma de volver mas que con el boton de atras del navegador. */}
-        <Link
-          to="/dashboard"
-          className="mb-4 inline-flex items-center gap-2 text-link underline-offset-4 hover:text-link-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-2"
-        >
-          <FontAwesomeIcon icon={faArrowLeft} aria-hidden="true" />
-          Volver al panel
-        </Link>
+    <Tabs
+      label="Categorías de preguntas"
+      active={categoria.id}
+      onChange={setActiva}
+      tabs={categorias.map((c) => ({ id: c.id, label: c.titulo }))}
+    >
+      <div className="py-6">
+        {categoria.definicion && (
+          <p className="mb-4 text-content-muted">{categoria.definicion}</p>
+        )}
 
-      <h1 className="text-2xl font-bold mb-4">Preguntas frecuentes</h1>
-      {categorias.length === 0 ? (
-        <p className="text-content-muted">No hay FAQs disponibles.</p>
-      ) : (
-        <ul className="space-y-4">
-          {categorias.map((categoria) => (
-            <li key={categoria.id} className="card">
-              <p className="card-title">
-                <strong>Categoría:</strong> {categoria.titulo}
-              </p>
-              <p className="italic text-content-muted">
-                Definición: {categoria.definicion}
-              </p>
-              <ul className="mt-2 space-y-2 ml-4">
-                {categoria.preguntas.map((pregunta) => (
-                  <li
-                    key={pregunta.id}
-                    className="border p-3 rounded bg-neutral-50 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-100"
-                  >
-                    <p className="font-semibold">Título: {pregunta.titulo}</p>
-                    <strong>Soluciones:</strong>
-                    <ul className="ml-4 list-disc">
-                      {pregunta.soluciones.length === 0 ? (
-                        <li className="text-content-muted">Sin soluciones</li>
-                      ) : (
-                        pregunta.soluciones.map((solucion) => (
-                          <li key={solucion.id}>{solucion.texto}</li>
-                        ))
-                      )}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      )}
-      </main>
+        {categoria.preguntas.length === 0 ? (
+          <p className="text-content-muted">Esta categoría todavía no tiene preguntas.</p>
+        ) : (
+          <Accordion
+            headingLevel={headingLevel}
+            items={categoria.preguntas.map((pregunta) => ({
+              id: pregunta.id,
+              titulo: pregunta.titulo,
+              contenido: (
+                <div className="flex flex-col gap-3">
+                  {pregunta.definicion && <p>{pregunta.definicion}</p>}
 
-      <Footer />
-    </div>
+                  {pregunta.soluciones.length > 0 && (
+                    <div>
+                      <p className="mb-1 font-medium text-content">Cómo tratarlo</p>
+                      <ul className="flex list-disc flex-col gap-1 pl-5">
+                        {pregunta.soluciones.map((sol) => (
+                          <li key={sol.id}>{sol.texto}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ),
+            }))}
+          />
+        )}
+      </div>
+    </Tabs>
   );
 };
 

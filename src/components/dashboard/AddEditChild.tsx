@@ -185,8 +185,11 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
       </form>
 
       {showModal && selectedPregunta && (
-        <Modal onClose={() => setShowModal(false)} isOpen={showModal}>
-          <h2 className="text-lg font-bold">Consejos para tratar a estos adolescentes</h2>
+        <Modal
+          onClose={() => setShowModal(false)}
+          isOpen={showModal}
+          title="Consejos para tratar a estos adolescentes"
+        >
           <p><strong>Definición:</strong> {selectedPregunta.definicion}</p>
           <p><strong>Soluciones:</strong></p>
           {selectedPregunta.soluciones.map(sol => (

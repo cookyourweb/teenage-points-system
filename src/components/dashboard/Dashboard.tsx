@@ -584,7 +584,11 @@ const Dashboard: React.FC = () => {
 
       {/* Modals */}
       {isAddingChild && (
-        <Modal onClose={handleCloseAddChild} isOpen={isAddingChild}>
+        <Modal
+          onClose={handleCloseAddChild}
+          isOpen={isAddingChild}
+          title={childToEdit ? "Editar hijo" : "Añadir hijo"}
+        >
           <AddEditChild
             childToEdit={childToEdit || undefined}
             familyId={familyId}
@@ -595,13 +599,21 @@ const Dashboard: React.FC = () => {
       )}
 
       {isInviting && (
-        <Modal onClose={() => setIsInviting(false)} isOpen={isInviting}>
+        <Modal
+          onClose={() => setIsInviting(false)}
+          isOpen={isInviting}
+          title="Invitar a un miembro de la familia"
+        >
           <InviteMember familyId={familyId} onClose={() => setIsInviting(false)} />
         </Modal>
       )}
 
       {showCompleteProfile && user && (
-        <Modal onClose={() => setShowCompleteProfile(false)} isOpen={showCompleteProfile}>
+        <Modal
+          onClose={() => setShowCompleteProfile(false)}
+          isOpen={showCompleteProfile}
+          title="Completar perfil"
+        >
           <CompleteProfile userId={user.uid} onProfileUpdated={handleProfileUpdated} />
         </Modal>
       )}

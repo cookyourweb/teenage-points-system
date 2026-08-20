@@ -70,12 +70,13 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
         Compartir
       </Button>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Compartir Sistema de Puntos"
+      >
         <div className="space-y-6 max-w-2xl">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
-              Compartir Sistema de Puntos
-            </h2>
             <p className="text-neutral-600 dark:text-neutral-400">
               Comparte el progreso de {child.nombre} con diferentes niveles de acceso
             </p>

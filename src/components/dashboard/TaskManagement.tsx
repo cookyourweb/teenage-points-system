@@ -525,11 +525,12 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
       </Card>
 
       {/* Modal de formulario */}
-      <Modal isOpen={showModal} onClose={handleCloseModal}>
+      <Modal
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        title={editingTask ? 'Editar Tarea Personalizada' : 'Nueva Tarea Personalizada'}
+      >
         <div className="max-w-md w-full">
-          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-6">
-            {editingTask ? 'Editar Tarea Personalizada' : 'Nueva Tarea Personalizada'}
-          </h2>
 
           <form onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }} className="space-y-4">
             {/* Nombre de la tarea */}

@@ -25,10 +25,11 @@ const PrivilegeRedemptionModal: React.FC<PrivilegeRedemptionModalProps> = ({
   };
 
   return (
-    <Modal onClose={onClose} isOpen={isOpen}>
-      <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
-        {childName}, ¿qué día quieres disfrutar tu privilegio {privilegeName}?
-      </h2>
+    <Modal
+      onClose={onClose}
+      isOpen={isOpen}
+      title={`${childName}, ¿qué día quieres disfrutar tu privilegio ${privilegeName ?? ''}?`}
+    >
       <div className="mt-4 space-y-4">
         <Button onClick={() => handleRedeem('Hoy')}>Hoy</Button>
         <Button onClick={() => handleRedeem('Mañana')}>Mañana</Button>

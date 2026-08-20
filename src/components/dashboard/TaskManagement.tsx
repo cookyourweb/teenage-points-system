@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
+import Field from '../ui/Field';
+import Checkbox from '../ui/Checkbox';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faPlus, 
@@ -534,119 +536,75 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
         <div className="max-w-md w-full">
 
           <form onSubmit={(e) => { e.preventDefault(); handleSaveTask(); }} className="space-y-4">
-            {/* Nombre de la tarea */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Nombre de la tarea *
-              </label>
-              <input
-                type="text"
-                value={formData.nombre}
-                onChange={(e) => updateFormField('nombre', e.target.value)}
-                placeholder="Ej: Organizar el escritorio"
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                  errors.nombre ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
-                } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
-                disabled={saving}
-                maxLength={50}
-              />
-              {errors.nombre && (
-                <p className="text-danger-500 text-sm mt-1">{errors.nombre}</p>
-              )}
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                Máximo 50 caracteres
-              </p>
-            </div>
+            <Field
+              label="Nombre de la tarea"
+              name="nombre"
+              value={formData.nombre}
+              onChange={(e) => updateFormField('nombre', e.target.value)}
+              placeholder="Ej: Organizar el escritorio"
+              maxLength={50}
+              required
+              disabled={saving}
+              error={errors.nombre}
+              hint={`Máximo 50 caracteres (${50 - formData.nombre.length} restantes)`}
+            />
 
-            {/* Tipo de tarea */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Tipo de tarea *
-              </label>
-              <select
-                value={formData.tipo}
-                onChange={(e) => updateFormField('tipo', e.target.value as 'diarias' | 'extra')}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                  errors.tipo ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
-                } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
-                disabled={saving}
-              >
-                <option value="diarias">Tarea Diaria</option>
-                <option value="extra">Tarea Extra (Bonus)</option>
-              </select>
-              {errors.tipo && (
-                <p className="text-danger-500 text-sm mt-1">{errors.tipo}</p>
-              )}
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                {formData.tipo === 'diarias' 
+            <Field
+              as="select"
+              label="Tipo de tarea"
+              name="tipo"
+              value={formData.tipo}
+              onChange={(e) => updateFormField('tipo', e.target.value as 'diarias' | 'extra')}
+              required
+              disabled={saving}
+              error={errors.tipo}
+              hint={
+                formData.tipo === 'diarias'
                   ? 'Se mostrará todos los días en el sistema de puntos'
                   : 'Tarea opcional con puntos bonus'
-                }
-              </p>
-            </div>
+              }
+              options={[
+                { value: 'diarias', label: 'Tarea Diaria' },
+                { value: 'extra', label: 'Tarea Extra (Bonus)' },
+              ]}
+            />
 
-            {/* Puntos */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Puntos que otorga *
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="100"
-                value={formData.puntos}
-                onChange={(e) => updateFormField('puntos', parseInt(e.target.value) || 0)}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                  errors.puntos ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
-                } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
-                disabled={saving}
-              />
-              {errors.puntos && (
-                <p className="text-danger-500 text-sm mt-1">{errors.puntos}</p>
-              )}
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                Entre 1 y 100 puntos. Tareas diarias: 5-15 pts, Tareas extra: 15-50 pts
-              </p>
-            </div>
+            <Field
+              label="Puntos que otorga"
+              name="puntos"
+              type="number"
+              min={1}
+              max={100}
+              value={formData.puntos}
+              onChange={(e) => updateFormField('puntos', parseInt(e.target.value) || 0)}
+              required
+              disabled={saving}
+              error={errors.puntos}
+              hint="Entre 1 y 100. Las diarias suelen ir de 5 a 15, las extra de 15 a 50"
+            />
 
-            {/* Descripción */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Descripción (opcional)
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => updateFormField('description', e.target.value)}
-                placeholder="Descripción adicional o instrucciones específicas..."
-                rows={3}
-                maxLength={200}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                  errors.description ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
-                } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
-                disabled={saving}
-              />
-              {errors.description && (
-                <p className="text-danger-500 text-sm mt-1">{errors.description}</p>
-              )}
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                Máximo 200 caracteres ({200 - formData.description.length} restantes)
-              </p>
-            </div>
+            <Field
+              as="textarea"
+              label="Descripción"
+              name="description"
+              value={formData.description}
+              onChange={(e) => updateFormField('description', e.target.value)}
+              placeholder="Instrucciones o detalles, si hacen falta"
+              rows={3}
+              maxLength={200}
+              disabled={saving}
+              error={errors.description}
+              hint={`Opcional. Máximo 200 caracteres (${200 - formData.description.length} restantes)`}
+            />
 
-            {/* Estado activo/inactivo */}
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="isActive"
-                checked={formData.isActive}
-                onChange={(e) => updateFormField('isActive', e.target.checked)}
-                className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
-                disabled={saving}
-              />
-              <label htmlFor="isActive" className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                Tarea activa (visible para los hijos)
-              </label>
-            </div>
+            <Checkbox
+              name="isActive"
+              label="Tarea activa"
+              description="Si la desmarcas, tus hijos dejan de verla"
+              checked={formData.isActive}
+              onChange={(e) => updateFormField('isActive', e.target.checked)}
+              disabled={saving}
+            />
 
             {/* Botones de acción */}
             <div className="flex gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">

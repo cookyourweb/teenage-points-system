@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
+import Field from '../ui/Field';
+import Checkbox from '../ui/Checkbox';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faPlus, 
@@ -525,54 +527,34 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
         <div className="max-w-md w-full">
 
           <form onSubmit={(e) => { e.preventDefault(); handleSavePrivilege(); }} className="space-y-4">
-            {/* Nombre del privilegio */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Nombre del privilegio *
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => updateFormField('name', e.target.value)}
-                placeholder="Ej: Elegir restaurante para cenar"
-                maxLength={60}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 transition-colors ${
-                  errors.name ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
-                } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
-                disabled={saving}
-              />
-              {errors.name && (
-                <p className="text-danger-500 text-sm mt-1">{errors.name}</p>
-              )}
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                {formData.name.length}/60 caracteres
-              </p>
-            </div>
+            <Field
+              label="Nombre del privilegio"
+              name="name"
+              value={formData.name}
+              onChange={(e) => updateFormField('name', e.target.value)}
+              placeholder="Ej: Elegir restaurante para cenar"
+              maxLength={60}
+              required
+              disabled={saving}
+              error={errors.name}
+              hint={`${formData.name.length}/60 caracteres`}
+            />
 
             {/* Puntos necesarios */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Puntos necesarios *
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="1"
-                  max="500"
-                  value={formData.points}
-                  onChange={(e) => updateFormField('points', parseInt(e.target.value) || 0)}
-                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 transition-colors ${
-                    errors.points ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
-                  } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
-                  disabled={saving}
-                />
-                <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                  <span className="text-neutral-500 text-sm">pts</span>
-                </div>
-              </div>
-              {errors.points && (
-                <p className="text-danger-500 text-sm mt-1">{errors.points}</p>
-              )}
+              <Field
+                label="Puntos necesarios"
+                name="points"
+                type="number"
+                min={1}
+                max={500}
+                value={formData.points}
+                onChange={(e) => updateFormField('points', parseInt(e.target.value) || 0)}
+                required
+                disabled={saving}
+                error={errors.points}
+                hint="Recomendado: entre 30 y 80 para privilegios especiales"
+              />
               
               {/* Indicador visual de dificultad */}
               <div className="mt-2">
@@ -605,51 +587,33 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
               </p>
             </div>
 
-            {/* Descripción */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Descripción (opcional)
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => updateFormField('description', e.target.value)}
-                placeholder="Detalles adicionales, condiciones especiales o instrucciones..."
-                rows={3}
-                maxLength={300}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 transition-colors resize-none ${
-                  errors.description ? 'border-danger-500' : 'border-neutral-300 dark:border-neutral-600'
-                } bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100`}
-                disabled={saving}
-              />
-              {errors.description && (
-                <p className="text-danger-500 text-sm mt-1">{errors.description}</p>
-              )}
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                {formData.description.length}/300 caracteres
-              </p>
-            </div>
+            <Field
+              as="textarea"
+              label="Descripción"
+              name="description"
+              value={formData.description}
+              onChange={(e) => updateFormField('description', e.target.value)}
+              placeholder="Detalles, condiciones o instrucciones"
+              rows={3}
+              maxLength={300}
+              disabled={saving}
+              error={errors.description}
+              hint={`Opcional. ${formData.description.length}/300 caracteres`}
+            />
 
-            {/* Estado desbloqueado */}
-            <div className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-              <input
-                type="checkbox"
-                id="unlocked"
+            <div className="rounded-lg bg-surface-sunken px-3">
+              <Checkbox
+                name="unlocked"
+                label="Privilegio desbloqueado por defecto"
+                description={
+                  formData.unlocked
+                    ? 'Los hijos pueden canjearlo sin restricciones'
+                    : 'Los hijos necesitan alcanzar los puntos para desbloquearlo'
+                }
                 checked={formData.unlocked}
                 onChange={(e) => updateFormField('unlocked', e.target.checked)}
-                className="w-4 h-4 text-accent-600 border-neutral-300 rounded focus:ring-accent-500 focus:ring-2"
                 disabled={saving}
               />
-              <div className="flex-1">
-                <label htmlFor="unlocked" className="text-sm font-medium text-neutral-700 dark:text-neutral-300 cursor-pointer">
-                  Privilegio desbloqueado por defecto
-                </label>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                  {formData.unlocked 
-                    ? 'Los hijos pueden canjear este privilegio sin restricciones'
-                    : 'Los hijos necesitan alcanzar los puntos requeridos para desbloquearlo'
-                  }
-                </p>
-              </div>
             </div>
 
             {/* Preview del privilegio */}

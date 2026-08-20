@@ -127,11 +127,58 @@ porque lo que se prueba ahí son las reglas de negocio y no que Mongo sepa guard
 
 ---
 
+## El design system
+
+La interfaz tiene ocho piezas propias y **ninguna acepta `className`**. La regla
+que ordena todo es que un componente nunca nombra un color, nombra un rol, y la
+consecuencia es que el modo oscuro son veinte declaraciones en vez de las 521
+clases `dark:` que había escritas a mano.
+
+La accesibilidad no es una capa encima: está dentro de los componentes. `Field`
+obliga a poner etiqueta en el tipo, `Modal` trae trampa de foco, y el contraste
+**se mide en los tests**, 21 estados por dos modos.
+
+**290 tests**, de tres clases: comportamiento, contraste y guardas de
+arquitectura que impiden que vuelvan a entrar controles crudos.
+
+Todo está documentado en Storybook, con once funciones `play` que son tests que
+se pueden mirar:
+
+```bash
+npm run storybook
+```
+
+---
+
+## Cómo levantarlo
+
+Son **tres piezas**, y con menos la aplicación se ve pero no funciona: crear
+tareas no guarda. Está explicado paso a paso, con sus trampas, en
+[`docs/LEVANTAR-EN-LOCAL.md`](docs/LEVANTAR-EN-LOCAL.md).
+
+---
+
 ## Qué falta
 
+- **Nadie comprueba de qué familia eres**: cambiando el identificador de la URL
+  se entra en los puntos de otra familia. Es lo más urgente, y está en
+  [`docs/PENDIENTES-ADMIN.md`](docs/PENDIENTES-ADMIN.md)
 - Autenticación en el backend, que hoy está abierto
 - Los dominios de privilegios, familias y recompensas
 - Migrar los datos existentes
 - Desplegar
 
-El plan de mejoras de interfaz está en [`docs/TODO-UI.md`](docs/TODO-UI.md).
+---
+
+## Los documentos
+
+| | |
+|---|---|
+| [`ARQUITECTURA.md`](docs/ARQUITECTURA.md) | cómo está montado, con las cifras medidas |
+| [`LEVANTAR-EN-LOCAL.md`](docs/LEVANTAR-EN-LOCAL.md) | las tres piezas y sus trampas |
+| [`MIGRACION-A-JAVA.md`](docs/MIGRACION-A-JAVA.md) | el plan de salida de Firebase |
+| [`DESIGN-SYSTEM-PROPUESTA.md`](docs/DESIGN-SYSTEM-PROPUESTA.md) | el diagnóstico del que salió el sistema |
+| [`AUDITORIA-ACCESIBILIDAD.md`](docs/AUDITORIA-ACCESIBILIDAD.md) | los 54 hallazgos y su estado |
+| [`MODELO-DE-ROLES.md`](docs/MODELO-DE-ROLES.md) | por qué el rol actual no da para lo que hace falta |
+| [`PENDIENTES-ADMIN.md`](docs/PENDIENTES-ADMIN.md) | el agujero de propiedad entre familias |
+| [`TODO-UI.md`](docs/TODO-UI.md) | el plan de mejoras de interfaz |

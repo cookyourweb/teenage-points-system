@@ -35,3 +35,6 @@ backend/target/
 
 *storybook.log
 storybook-static
+
+# Registro de la CLI de Firebase, se regenera solo
+firebase-debug.log

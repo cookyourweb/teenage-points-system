@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShare, faCopy, faQrcode, faEye } from '@fortawesome/free-solid-svg-icons';
 import Button from './ui/Button';
+import Field from './ui/Field';
 import Modal from './ui/Modal';
 import { Child } from '../types/familyTypes';
 
@@ -97,12 +98,16 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
             
             <div className="space-y-3">
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={childViewLink}
-                  readOnly
-                  className="flex-1 p-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-                />
+                <div className="flex-1">
+                  <Field
+                    label="Enlace de la vista del hijo"
+                    labelHidden
+                    name="childviewlink"
+                    type="text"
+                    value={childViewLink}
+                    readOnly
+                  />
+                </div>
                 <Button
                   variant="primary"
                   onClick={() => copyToClipboard(childViewLink)}
@@ -154,12 +159,16 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
             
             <div className="space-y-3">
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={adminLink}
-                  readOnly
-                  className="flex-1 p-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-                />
+                <div className="flex-1">
+                  <Field
+                    label="Enlace de administración"
+                    labelHidden
+                    name="adminlink"
+                    type="text"
+                    value={adminLink}
+                    readOnly
+                  />
+                </div>
                 <Button
                   variant="primary"
                   onClick={() => copyToClipboard(adminLink)}

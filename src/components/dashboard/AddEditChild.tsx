@@ -6,6 +6,7 @@ import { Categoria, Pregunta } from "../../types/faqsTypes";
 import { familyService } from "../../services/familyService";
 import Modal from "../ui/Modal";
 import Checkbox from "../ui/Checkbox";
+import Field from "../ui/Field";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
 
@@ -113,28 +114,26 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
       <h2 className="text-xl font-bold mb-4 text-neutral-900 dark:text-neutral-100">{childToEdit ? "Estos son los datos de tu hijo" : "Vamos a añadir a tu hijo"}</h2>
       <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
         <div className="mb-4">
-          <label htmlFor="nombre" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Nombre</label>
-          <input 
-            type="text" 
-            id="nombre" 
-            value={nombre} 
-            onChange={(e) => setNombre(e.target.value.replace(/\s+/g, ' '))} 
+          <Field
+            label="Nombre"
+            name="nombre"
+            type="text"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value.replace(/\s+/g, ' '))}
             onBlur={(e) => setNombre(e.target.value.trim())}
-            required 
-            className="mt-1 block w-full p-3 rounded-md border-neutral-300 dark:border-neutral-600 shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100" 
+            required
           />
         </div>
 
         <div className="mb-4">
-          <label htmlFor="edad" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Edad</label>
-          <input 
-            type="number" 
-            id="edad" 
-            value={edad} 
-            onChange={(e) => setEdad(Math.max(0, Number(e.target.value)))} 
+          <Field
+            label="Edad"
+            name="edad"
+            type="number"
+            value={edad}
+            onChange={(e) => setEdad(Math.max(0, Number(e.target.value)))}
             min="0"
-            required 
-            className="mt-1 block w-full p-3 rounded-md border-neutral-300 dark:border-neutral-600 shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100" 
+            required
           />
         </div>
 

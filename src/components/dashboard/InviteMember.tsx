@@ -1,5 +1,7 @@
 //InviteMember.tsx
 import React, { useState } from "react";
+import Button from '../ui/Button';
+import Field from '../ui/Field';
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 
@@ -42,33 +44,33 @@ const InviteMember: React.FC<InviteMemberProps> = ({ familyId, onClose }) => {
   };
 
   return (
-    <div className="p-6 bg-white dark:bg-neutral-800 rounded shadow">
-      <h2 className="text-lg font-bold mb-4">Invitar a Nuevo Miembro</h2>
-      <div>
-        <label className="block text-sm font-medium mb-1">Correo Electrónico:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border rounded mb-2"
-          placeholder="Ingresa el correo del miembro"
-        />
-        {error && <p className="text-danger-600 text-sm mb-2">{error}</p>}
-        {success && <p className="text-success-600 text-sm mb-2">Invitación enviada correctamente.</p>}
-      </div>
-      <div className="flex justify-end space-x-2">
-        <button
-          onClick={onClose}
-          className="px-4 py-2 bg-neutral-300 text-neutral-700 rounded hover:bg-neutral-400"
-        >
+    <div className="flex flex-col gap-4 rounded bg-surface p-6 shadow">
+      <h2 className="text-lg font-bold text-content">Invitar a un miembro de la familia</h2>
+
+      <Field
+        label="Correo electrónico"
+        name="correo-invitacion"
+        type="email"
+        autoComplete="email"
+        placeholder="nombre@ejemplo.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        error={error ?? undefined}
+      />
+
+      {/* role="status" para que se anuncie al aparecer. Sin el, quien no ve la
+          pantalla no se entera de que la invitacion ha salido. Hallazgo F1. */}
+      {success && (
+        <p role="status" className="text-sm text-positive-text">
+          Invitación enviada correctamente.
+        </p>
+      )}
+
+      <div className="flex justify-end gap-3">
+        <Button variant="neutral" onClick={onClose}>
           Cancelar
-        </button>
-        <button
-          onClick={handleInvite}
-          className="px-4 py-2 bg-accent-600 text-white rounded hover:bg-accent-700"
-        >
-          Enviar Invitación
-        </button>
+        </Button>
+        <Button onClick={handleInvite}>Enviar invitación</Button>
       </div>
     </div>
   );

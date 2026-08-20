@@ -1,5 +1,7 @@
- //CompletProfile.tsx
 import React, { useState } from "react";
+
+import Button from "../ui/Button";
+import Field from "../ui/Field";
 import { updatePhoneNumber } from "../../services/usersService";
 
 interface CompleteProfileProps {
@@ -10,46 +12,66 @@ interface CompleteProfileProps {
 const CompleteProfile: React.FC<CompleteProfileProps> = ({ userId, onProfileUpdated }) => {
   const [phone, setPhone] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [message, setMessage] = useState<string | null>(null);
+
+  // Antes esto era un solo `message` que servia para el error Y para el exito,
+  // y se pintaba siempre en rojo. Asi que "actualizado con exito" salia como
+  // si hubiera fallado. Son dos cosas distintas y se guardan aparte.
+  const [error, setError] = useState<string | null>(null);
+  const [exito, setExito] = useState<string | null>(null);
 
   const handleSubmit = async () => {
+    setError(null);
+    setExito(null);
+
     if (!phone.trim()) {
-      setMessage("Por favor, ingresa un número de teléfono válido.");
+      setError("Escribe un número de teléfono.");
       return;
     }
 
     setIsSubmitting(true);
     try {
       await updatePhoneNumber(userId, phone);
-      setMessage("Número de teléfono actualizado con éxito.");
-      onProfileUpdated(); // Notificar al componente padre que se completó el perfil
-    } catch (error) {
-      setMessage("Hubo un error al actualizar tu número de teléfono.");
-      console.error(error);
+      setExito("Número de teléfono actualizado.");
+      onProfileUpdated();
+    } catch (err) {
+      setError("No se ha podido actualizar tu número. Inténtalo de nuevo.");
+      console.error(err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h1 className="text-xl font-bold">Completa tu Perfil</h1>
-      <p className="text-neutral-600">Agrega tu número de teléfono (opcional).</p>
-      <input
+    <div className="mx-auto flex max-w-md flex-col gap-4 p-4">
+      <div>
+        <h1 className="text-xl font-bold text-content">Completa tu perfil</h1>
+        <p className="text-content-muted">Añade tu número de teléfono. Es opcional.</p>
+      </div>
+
+      <Field
+        label="Número de teléfono"
+        name="telefono"
         type="tel"
+        autoComplete="tel"
         placeholder="+34 123 456 789"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
-        className="w-full p-2 border rounded mt-4"
-      />
-      {message && <p className="mt-2 text-sm text-danger-500">{message}</p>}
-      <button
-        onClick={handleSubmit}
+        error={error ?? undefined}
         disabled={isSubmitting}
-        className="mt-4 bg-primary-600 text-white py-2 px-4 rounded disabled:opacity-50 hover:bg-primary-700 transition-colors"
-      >
-        {isSubmitting ? "Guardando..." : "Guardar"}
-      </button>
+      />
+
+      {/* role="status" hace que un lector de pantalla lo anuncie al aparecer.
+          Sin el, quien no ve la pantalla no se entera de que ha salido bien y
+          se queda esperando. Es el hallazgo F1 de la auditoria. */}
+      {exito && (
+        <p role="status" className="text-sm text-positive-text">
+          {exito}
+        </p>
+      )}
+
+      <Button onClick={handleSubmit} loading={isSubmitting}>
+        {isSubmitting ? "Guardando" : "Guardar"}
+      </Button>
     </div>
   );
 };

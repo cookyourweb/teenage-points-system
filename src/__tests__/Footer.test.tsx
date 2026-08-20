@@ -53,10 +53,17 @@ describe('Footer firma quien lo ha hecho', () => {
   it('enlaza a wunjocreations.com', () => {
     montar();
 
-    expect(screen.getByRole('link', { name: /WunjoCreations/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /WunjoCreations\.com/i })).toHaveAttribute(
       'href',
       'https://wunjocreations.com',
     );
+  });
+
+  it('el texto visible es "By WunjoCreations.com"', () => {
+    montar();
+
+    expect(screen.getByText(/^By$/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^WunjoCreations\.com/ })).toBeInTheDocument();
   });
 
   it('el enlace externo no deja la puerta abierta a la pestana de origen', () => {

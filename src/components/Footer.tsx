@@ -27,7 +27,7 @@ const Footer: React.FC = () => (
       </Link>
 
       <p className="text-content-muted">
-        Hecho por{' '}
+        By{' '}
         <a
           href="https://wunjocreations.com"
           target="_blank"
@@ -37,7 +37,7 @@ const Footer: React.FC = () => (
           rel="noopener noreferrer"
           className="text-link underline-offset-4 hover:text-link-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-2"
         >
-          WunjoCreations
+          WunjoCreations.com
           {/* Quien no ve la pantalla no percibe que el enlace abre otra
               pestana. Si no se dice, el boton de atras deja de funcionar y no
               se entiende por que. */}

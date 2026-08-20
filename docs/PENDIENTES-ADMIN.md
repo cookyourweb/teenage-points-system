@@ -76,8 +76,12 @@ Como mínimo:
   repositorio: hasta hoy vivía solo en la consola de Firebase, sin historial ni
   revisión posible.
 
-**PENDIENTE Y OBLIGATORIO:** las reglas no protegen nada hasta que se
-despliegan.
+**Desplegadas el 20-ago-2026** en el proyecto `sistema-puntos`. Compiladas y
+publicadas sin errores, así que la protección está activa en el servidor, no
+solo en el navegador.
+
+Cuando se cambien, hay que volver a desplegarlas: el fichero por sí solo no
+hace nada.
 
 ```bash
 firebase deploy --only firestore:rules
@@ -134,8 +138,8 @@ un fichero que nadie usa no protege de nada y confunde al que llega.
 
 1. ~~**La guarda de rol** (punto 2)~~. **HECHO** el 20-ago: `RutaSoloAdmin`,
    con 6 tests. Deniega por defecto y no decide mientras carga el rol.
-   Pendiente: que **el servidor** lo compruebe también. La guarda del navegador
-   es comodidad, no seguridad.
+   Y **el servidor también lo comprueba** desde el 20-ago: la regla de
+   `categorias` en `firestore.rules` exige rol de administrador para escribir.
 1-bis. **La comprobación de propiedad** (punto 3-bis). Es el agujero que queda,
    y es más gordo que el anterior porque afecta a los datos de otras familias.
 2. **La puerta** (punto 1). Es media hora y desbloquea una pantalla que ya

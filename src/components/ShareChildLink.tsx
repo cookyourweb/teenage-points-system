@@ -103,11 +103,12 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
                   readOnly
                   className="flex-1 p-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 />
-                <Button variant="primary"
+                <Button
+                  variant="primary"
                   onClick={() => copyToClipboard(childViewLink)}
-                >
-                  <FontAwesomeIcon icon={faCopy} />
-                </Button>
+                  iconOnly={<FontAwesomeIcon icon={faCopy} />}
+                  label="Copiar el enlace de la vista del hijo"
+                />
               </div>
               
               <div className="flex gap-2">
@@ -117,11 +118,12 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
                   <FontAwesomeIcon icon={faShare} className="mr-2" />
                   Compartir Enlace
                 </Button>
-                <Button variant="primary"
+                <Button
+                  variant="primary"
                   onClick={() => window.open(childViewLink, '_blank')}
-                >
-                  <FontAwesomeIcon icon={faEye} />
-                </Button>
+                  iconOnly={<FontAwesomeIcon icon={faEye} />}
+                  label="Abrir la vista del hijo en una pestaña nueva"
+                />
               </div>
 
               {/* QR Code para el hijo */}
@@ -158,11 +160,12 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
                   readOnly
                   className="flex-1 p-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 />
-                <Button variant="primary"
+                <Button
+                  variant="primary"
                   onClick={() => copyToClipboard(adminLink)}
-                >
-                  <FontAwesomeIcon icon={faCopy} />
-                </Button>
+                  iconOnly={<FontAwesomeIcon icon={faCopy} />}
+                  label="Copiar el enlace de administración"
+                />
               </div>
               
               <Button variant="primary" size="sm" layout="full"

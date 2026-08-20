@@ -37,14 +37,29 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
  */
 export type ButtonLayout = 'auto' | 'full' | 'grow';
 
-export interface ButtonProps
+interface ButtonBase
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style'> {
-  children: ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
   layout?: ButtonLayout;
   loading?: boolean;
 }
+
+/**
+ * O hay texto visible, o hay `label`. No hay tercera opcion.
+ *
+ * Hallazgo C5 de la auditoria: habia tres botones cuyo unico contenido era un
+ * icono. Para un lector de pantalla se anuncian como "boton" y nada mas, sin
+ * forma de saber si copian, abren o borran.
+ *
+ * Los tipos no pueden cazarlo del todo, porque un icono es un `ReactNode`
+ * valido y cabe en `children`. Lo que si hacen es abrir un camino corto para
+ * hacerlo bien. El camino de hacerlo mal lo cierra una guarda en
+ * Button.test.tsx que recorre el repo.
+ */
+export type ButtonProps =
+  | (ButtonBase & { children: ReactNode; iconOnly?: never; label?: never })
+  | (ButtonBase & { iconOnly: ReactNode; label: string; children?: never });
 
 const BASE = [
   'inline-flex items-center justify-center gap-2',
@@ -76,6 +91,13 @@ const TAMANO: Record<ButtonSize, string> = {
   lg: 'min-h-12 px-6 text-lg',
 };
 
+/** Para los botones de solo icono: cuadrados, sin depender del texto. */
+const CUADRADO: Record<ButtonSize, string> = {
+  sm: 'min-h-11 w-11',
+  md: 'min-h-11 w-11',
+  lg: 'min-h-12 w-12',
+};
+
 const DISPOSICION: Record<ButtonLayout, string> = {
   auto: '',
   full: 'w-full',
@@ -84,6 +106,8 @@ const DISPOSICION: Record<ButtonLayout, string> = {
 
 const Button: React.FC<ButtonProps> = ({
   children,
+  iconOnly,
+  label,
   variant = 'primary',
   size = 'md',
   layout = 'auto',
@@ -108,7 +132,15 @@ const Button: React.FC<ButtonProps> = ({
       // aria-busy es lo que hace que un lector de pantalla anuncie que esta
       // ocupado. Sin el, para alguien ciego el boton solo deja de responder.
       aria-busy={loading || undefined}
-      className={[BASE, TAMANO[size], DISPOSICION[layout], inactivo ? '' : VARIANTE[variant]]
+      aria-label={label}
+      className={[
+        BASE,
+        // Sin texto, el ancho no lo da nadie: hay que forzar el cuadrado o
+        // queda un objetivo de 24 px de ancho.
+        iconOnly ? CUADRADO[size] : TAMANO[size],
+        DISPOSICION[layout],
+        inactivo ? '' : VARIANTE[variant],
+      ]
         .filter(Boolean)
         .join(' ')}
     >
@@ -127,7 +159,7 @@ const Button: React.FC<ButtonProps> = ({
           />
         </svg>
       )}
-      {children}
+      {iconOnly ?? children}
     </button>
   );
 };

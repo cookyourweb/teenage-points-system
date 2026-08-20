@@ -2,10 +2,10 @@
 // Rutas Firebase: /weeklyTasks/{familyId}_{childId}_{weekId}, /privilegios/{privilegeId}, /familias/{familyId}
 import React, { useState, useEffect } from "react";
 import PrivilegeRedeemDialog from './PrivilegeRedeemDialog';
+import TaskDayCell from './TaskDayCell';
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/Card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
-  faCheckSquare, 
   faArrowLeft, 
   faSync, 
   faEdit, 
@@ -519,24 +519,14 @@ const RewardTracker: React.FC = () => {
                       </td>
                       {diasSemana.map(dia => (
                         <td key={`${dia}-${tarea.id}`} className="p-3 border text-center">
-                          <button
-                            onClick={() => toggleTarea(dia, 'diarias', tarea.id)}
+                          <TaskDayCell
+                            dia={dia}
+                            nombre={tarea.nombre}
+                            tipo="diaria"
+                            completada={!!tasks[dia]?.diarias.find(t => t.id === tarea.id)?.completada}
                             disabled={syncing}
-                            className={`p-3 rounded-full transition-colors disabled:opacity-50 ${
-                              tasks[dia]?.diarias.find(t => t.id === tarea.id)?.completada
-                                ? "bg-success-100 hover:bg-success-200 dark:bg-success-900 dark:hover:bg-success-800"
-                                : "bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-700 dark:hover:bg-neutral-600"
-                            }`}
-                          >
-                            <FontAwesomeIcon 
-                              icon={faCheckSquare} 
-                              className={`w-6 h-6 ${
-                                tasks[dia]?.diarias.find(t => t.id === tarea.id)?.completada
-                                  ? "text-success-600 dark:text-success-400"
-                                  : "text-neutral-400 dark:text-neutral-500"
-                              }`}
-                            />
-                          </button>
+                            onToggle={() => toggleTarea(dia, 'diarias', tarea.id)}
+                          />
                         </td>
                       ))}
                     </tr>
@@ -553,24 +543,14 @@ const RewardTracker: React.FC = () => {
                       </td>
                       {diasSemana.map(dia => (
                         <td key={`${dia}-${tarea.id}`} className="p-3 border text-center">
-                          <button
-                            onClick={() => toggleTarea(dia, 'extra', tarea.id)}
+                          <TaskDayCell
+                            dia={dia}
+                            nombre={tarea.nombre}
+                            tipo="extra"
+                            completada={!!tasks[dia]?.extra.find(t => t.id === tarea.id)?.completada}
                             disabled={syncing}
-                            className={`p-3 rounded-full transition-colors disabled:opacity-50 ${
-                              tasks[dia]?.extra.find(t => t.id === tarea.id)?.completada
-                                ? "bg-primary-100 hover:bg-primary-200 dark:bg-primary-800 dark:hover:bg-primary-700"
-                                : "bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-700 dark:hover:bg-neutral-600"
-                            }`}
-                          >
-                            <FontAwesomeIcon 
-                              icon={faCheckSquare} 
-                              className={`w-6 h-6 ${
-                                tasks[dia]?.extra.find(t => t.id === tarea.id)?.completada
-                                  ? "text-primary-600 dark:text-primary-400"
-                                  : "text-neutral-400 dark:text-neutral-500"
-                              }`}
-                            />
-                          </button>
+                            onToggle={() => toggleTarea(dia, 'extra', tarea.id)}
+                          />
                         </td>
                       ))}
                     </tr>

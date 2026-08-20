@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { render, screen } from '@testing-library/react';
@@ -147,5 +147,86 @@ describe('las variantes son intenciones, no colores', () => {
       expect(screen.getByRole('button').className).toMatch(/min-h-(11|12)\b/);
       unmount();
     });
+  });
+});
+
+describe('un boton de solo icono no puede quedarse sin nombre', () => {
+  /**
+   * Hallazgo C5 de la auditoria. En `ShareChildLink` habia tres botones cuyo
+   * unico contenido era un `<FontAwesomeIcon>`. Para un lector de pantalla se
+   * anuncian como "boton" y nada mas: no hay forma de saber si copian, abren o
+   * borran.
+   *
+   * La API abre un camino corto para hacerlo bien (`iconOnly` + `label`), y el
+   * test de mas abajo cierra el camino de hacerlo mal.
+   */
+  it('con iconOnly y label, el nombre accesible es la label', () => {
+    render(<Button iconOnly={<span aria-hidden="true">X</span>} label="Copiar enlace" />);
+
+    expect(screen.getByRole('button', { name: 'Copiar enlace' })).toBeInTheDocument();
+  });
+
+  it('un boton de solo icono es cuadrado y llega a 44 px', () => {
+    // Con `children` el ancho lo da el texto. Sin texto hay que forzarlo, o
+    // queda un objetivo de 24 px de ancho.
+    render(<Button iconOnly={<span aria-hidden="true">X</span>} label="Copiar" />);
+
+    expect(screen.getByRole('button').className).toMatch(/w-11|w-12/);
+  });
+});
+
+describe('guarda: ningun <Button> del repo se queda sin nombre accesible', () => {
+  it('no hay botones cuyo contenido sea solo un icono', () => {
+    // Los tipos no pueden cazarlo: `children` es ReactNode y un icono es un
+    // ReactNode perfectamente valido. Asi que lo caza esta guarda, igual que
+    // las de tokens.test.ts.
+    const raiz = join(__dirname, '..');
+
+    const ficheros = (dir: string): string[] =>
+      readdirSync(dir).flatMap((e) => {
+        const ruta = join(dir, e);
+        if (statSync(ruta).isDirectory()) return e === '__tests__' ? [] : ficheros(ruta);
+        return e.endsWith('.tsx') && !e.endsWith('.stories.tsx') ? [ruta] : [];
+      });
+
+    const infractores: string[] = [];
+
+    for (const ruta of ficheros(raiz)) {
+      const codigo = readFileSync(ruta, 'utf8').replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
+
+      // OJO: aqui NO vale un regex tipo /<Button\b([^>]*)>/.
+      //
+      // Se come el tag en el primer `>`, y en `onClick={() => f()}` ese `>` es
+      // el de la flecha. Los tres botones de ShareChildLink se colaban por ahi.
+      // Hay que llevar la cuenta de llaves para saber donde acaba el tag.
+      let i = 0;
+      while ((i = codigo.indexOf('<Button', i)) !== -1) {
+        let j = i + 7;
+        let llaves = 0;
+        while (j < codigo.length) {
+          const c = codigo[j];
+          if (c === '{') llaves += 1;
+          else if (c === '}') llaves -= 1;
+          else if (c === '>' && llaves === 0) break;
+          j += 1;
+        }
+
+        const atributos = codigo.slice(i, j);
+        const cierre = codigo.indexOf('</Button>', j);
+        const contenido = cierre === -1 ? '' : codigo.slice(j + 1, cierre);
+
+        const soloIcono = /^\s*<FontAwesomeIcon[\s\S]*?\/>\s*$/.test(contenido);
+        const tieneNombre = /aria-label=|label=/.test(atributos);
+
+        if (soloIcono && !tieneNombre) {
+          infractores.push(
+            `${ruta.slice(raiz.length + 1)}:${codigo.slice(0, i).split('\n').length}`,
+          );
+        }
+        i = j;
+      }
+    }
+
+    expect(infractores).toEqual([]);
   });
 });

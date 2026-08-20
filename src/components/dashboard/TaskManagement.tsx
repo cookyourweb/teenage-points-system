@@ -349,12 +349,13 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="neutral" 
+              <Button
+                variant="neutral"
                 onClick={handleRefresh}
                 disabled={syncing}
-              >
-                <FontAwesomeIcon icon={faSync} className={syncing ? "animate-spin" : ""} />
-              </Button>
+                iconOnly={<FontAwesomeIcon icon={faSync} className={syncing ? "animate-spin" : ""} />}
+                label={syncing ? "Actualizando" : "Actualizar la lista"}
+              />
               {isPadre && (
                 <Button onClick={handleAddTask}>
                   <FontAwesomeIcon icon={faPlus} />

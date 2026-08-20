@@ -34,10 +34,10 @@ type Story = StoryObj<typeof meta>;
 export const Variantes: Story = {
   render: (args) => (
     <div className="flex flex-wrap gap-3">
-      <Button {...args} variant="primary">La accion que quieres</Button>
-      <Button {...args} variant="neutral">Cancelar</Button>
-      <Button {...args} variant="danger">Borrar</Button>
-      <Button {...args} variant="ghost">Terciaria</Button>
+      <Button onClick={args.onClick} variant="primary">La accion que quieres</Button>
+      <Button onClick={args.onClick} variant="neutral">Cancelar</Button>
+      <Button onClick={args.onClick} variant="danger">Borrar</Button>
+      <Button onClick={args.onClick} variant="ghost">Terciaria</Button>
     </div>
   ),
 };
@@ -53,9 +53,9 @@ export const Variantes: Story = {
 export const Tamanos: Story = {
   render: (args) => (
     <div className="flex items-center gap-3">
-      <Button {...args} size="sm">Pequeno</Button>
-      <Button {...args} size="md">Mediano</Button>
-      <Button {...args} size="lg">Grande</Button>
+      <Button onClick={args.onClick} size="sm">Pequeno</Button>
+      <Button onClick={args.onClick} size="md">Mediano</Button>
+      <Button onClick={args.onClick} size="lg">Grande</Button>
     </div>
   ),
 };
@@ -68,9 +68,9 @@ export const Tamanos: Story = {
 export const Estados: Story = {
   render: (args) => (
     <div className="flex flex-wrap gap-3">
-      <Button {...args}>Normal</Button>
-      <Button {...args} disabled>Deshabilitado</Button>
-      <Button {...args} loading>Cargando</Button>
+      <Button onClick={args.onClick}>Normal</Button>
+      <Button onClick={args.onClick} disabled>Deshabilitado</Button>
+      <Button onClick={args.onClick} loading>Cargando</Button>
     </div>
   ),
   play: async ({ args, canvasElement, step }) => {
@@ -108,10 +108,10 @@ export const Estados: Story = {
 export const Disposicion: Story = {
   render: (args) => (
     <div className="flex w-80 flex-col gap-3">
-      <Button {...args} layout="full">Ancho completo</Button>
+      <Button onClick={args.onClick} layout="full">Ancho completo</Button>
       <div className="flex gap-3">
-        <Button {...args} layout="grow">Crece</Button>
-        <Button {...args} variant="neutral" layout="grow">Crece</Button>
+        <Button onClick={args.onClick} layout="grow">Crece</Button>
+        <Button onClick={args.onClick} variant="neutral" layout="grow">Crece</Button>
       </div>
     </div>
   ),
@@ -152,9 +152,9 @@ export const AntesYDespues: Story = {
   render: (args) => (
     <div className="flex max-w-md flex-col gap-4">
       <div className="flex flex-wrap gap-3">
-        <Button {...args} variant="neutral">Cancelar</Button>
-        <Button {...args} variant="neutral">Cerrar</Button>
-        <Button {...args} variant="neutral">Volver</Button>
+        <Button onClick={args.onClick} variant="neutral">Cancelar</Button>
+        <Button onClick={args.onClick} variant="neutral">Cerrar</Button>
+        <Button onClick={args.onClick} variant="neutral">Volver</Button>
       </div>
       <p className="text-sm text-content-muted">
         Estos tres llevaban <code>bg-neutral-500</code>,{" "}

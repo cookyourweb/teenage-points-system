@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { useFamilyPoints } from '../../hooks/usePointsManagement';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrophy, faCalendarWeek, faClock } from '@fortawesome/free-solid-svg-icons';
 
@@ -11,7 +11,6 @@ interface FamilyPointsOverviewProps {
 
 const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId }) => {
   const { childrenPoints, loading, error } = useFamilyPoints(familyId);
-  const navigate = useNavigate();
 
   const formatLastActivity = (
     timestamp: Date | { toDate: () => Date } | string | number | null | undefined
@@ -142,13 +141,23 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
               </div>
             </div>
 
-            {/* Lista de hijos */}
+            {/* Lista de hijos.
+
+                Hallazgo C2: cada tarjeta era un <div onClick> que navegaba. La
+                accion es NAVEGAR, asi que pide un enlace y no un boton: con un
+                boton se pierden el clic derecho, el clic central y abrir en
+                pestana nueva.
+
+                El patron es el del ENLACE ESTIRADO: el enlace es el nombre del
+                hijo, y su zona de clic se extiende con after:inset-0 hasta
+                cubrir la tarjeta entera. Asi sigue siendo toda pulsable y el
+                nombre accesible queda limpio, en vez de ser el muro de texto de
+                la tarjeta completa. */}
             <div className="grid gap-4 md:grid-cols-2">
               {childrenPoints.map((child) => (
                 <div
                   key={child.childId}
-                  className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer bg-white dark:bg-neutral-800"
-                  onClick={() => navigate(`/reward-tracker/${familyId}/${child.childId}`)}
+                  className="relative border rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-neutral-800 focus-within:ring-2 focus-within:ring-action focus-within:ring-offset-2"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -157,7 +166,16 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
                       </div>
                       <div>
                         <h4 className="font-semibold text-neutral-800 dark:text-neutral-200">
-                          {child.childName || 'Hijo'}
+                          <Link
+                            to={`/reward-tracker/${familyId}/${child.childId}`}
+                            className="after:absolute after:inset-0 focus-visible:outline-none"
+                          >
+                            {child.childName || 'Hijo'}
+                            {/* El texto visible es el principio del nombre
+                                accesible, que es lo que pide WCAG 2.5.3. Con
+                                aria-label se perderia. */}
+                            <span className="sr-only">, ver su seguimiento de puntos</span>
+                          </Link>
                         </h4>
                         <div className="flex items-center gap-2 text-xs text-neutral-500">
                           <FontAwesomeIcon icon={faClock} className="w-3 h-3" />

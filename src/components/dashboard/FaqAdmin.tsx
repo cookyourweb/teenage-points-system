@@ -1,5 +1,6 @@
 //FaqAdmin.tsx
 import React, { useEffect, useState } from "react";
+import Field from '../ui/Field';
 import {
   fetchCategorias,
   addCategoria,
@@ -150,21 +151,17 @@ const FaqAdmin: React.FC = () => {
       {/* Agregar categoría */}
       <div className="mb-6 space-y-2">
         <h2 className="text-xl font-semibold">Categorías</h2>
-        <label className="block font-medium">Título de la categoría:</label>
-        <input
-          type="text"
+        <Field
+          label="Título de la categoría"
+          name="nueva-categoria-titulo"
           value={newCategoriaTitulo}
           onChange={(e) => setNewCategoriaTitulo(e.target.value)}
-          placeholder="Título de la categoría"
-          className="border p-2 rounded w-full"
         />
-        <label className="block font-medium">Definición de la categoría:</label>
-        <input
-          type="text"
+        <Field
+          label="Definición de la categoría"
+          name="nueva-categoria-definicion"
           value={newCategoriaDefinicion}
           onChange={(e) => setNewCategoriaDefinicion(e.target.value)}
-          placeholder="Definición de la categoría"
-          className="border p-2 rounded w-full"
         />
         <Button onClick={handleAddCategoria}>Agregar Categoría</Button>
       </div>
@@ -174,23 +171,21 @@ const FaqAdmin: React.FC = () => {
           <li key={cat.id} className="p-4 bg-neutral-100 rounded shadow">
             {editMode[cat.id] ? (
               <div>
-                <label className="block font-medium">Editar Título:</label>
-                <input
-                  type="text"
+                <Field
+                  label="Título"
+                  name={`editar-titulo-${cat.id}`}
                   value={editCategoriaTitulo[cat.id] || ""}
                   onChange={(e) =>
                     setEditCategoriaTitulo((prev) => ({ ...prev, [cat.id]: e.target.value }))
                   }
-                  className="border p-2 rounded w-full"
                 />
-                <label className="block font-medium">Editar Definición:</label>
-                <input
-                  type="text"
+                <Field
+                  label="Definición"
+                  name={`editar-definicion-${cat.id}`}
                   value={editCategoriaDefinicion[cat.id] || ""}
                   onChange={(e) =>
                     setEditCategoriaDefinicion((prev) => ({ ...prev, [cat.id]: e.target.value }))
                   }
-                  className="border p-2 rounded w-full"
                 />
                 <div className="flex space-x-2 mt-2">
 <Button onClick={() => handleUpdateCategoria(cat.id)}>Guardar Cambios</Button>
@@ -214,21 +209,17 @@ const FaqAdmin: React.FC = () => {
 
             <div className="mt-4 space-y-2 border-t pt-4">
               <h3 className="font-medium">Agregar Pregunta a {cat.titulo}:</h3>
-              <label className="block font-medium">Título de la pregunta:</label>
-              <input
-                type="text"
+              <Field
+                label="Título de la pregunta"
+                name={`nueva-pregunta-titulo-${cat.id}`}
                 value={newPreguntaTitulo[cat.id] || ""}
                 onChange={(e) => setNewPreguntaTitulo((prev) => ({ ...prev, [cat.id]: e.target.value }))}
-                placeholder="Título de la pregunta"
-                className="border p-2 rounded w-full"
               />
-              <label className="block font-medium">Definición de la pregunta:</label>
-              <input
-                type="text"
+              <Field
+                label="Definición de la pregunta"
+                name={`nueva-pregunta-definicion-${cat.id}`}
                 value={newPreguntaDefinicion[cat.id] || ""}
                 onChange={(e) => setNewPreguntaDefinicion((prev) => ({ ...prev, [cat.id]: e.target.value }))}
-                placeholder="Definición de la pregunta"
-                className="border p-2 rounded w-full"
               />
               <Button onClick={() => handleAddPreguntaClick(cat.id)}>Agregar Pregunta</Button>
 
@@ -248,13 +239,11 @@ const FaqAdmin: React.FC = () => {
                       </div>
 
                       {/* Agregar solución */}
-                      <label className="block font-medium">Nueva solución:</label>
-                      <input
-                        type="text"
+                      <Field
+                        label="Nueva solución"
+                        name={`nueva-solucion-${cat.id}-${preg.id}`}
                         value={newSolucionTexto[`${cat.id}-${preg.id}`] || ""}
                         onChange={(e) => setNewSolucionTexto((prev) => ({ ...prev, [`${cat.id}-${preg.id}`]: e.target.value }))}
-                        placeholder="Nueva solución"
-                        className="border p-2 rounded w-full"
                       />
                       <Button onClick={() => handleAddSolucionClick(cat.id, preg)}>
                         Agregar Solución

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import PrivilegeRedeemDialog from './PrivilegeRedeemDialog';
 import TaskDayCell from './TaskDayCell';
+import Field from '../ui/Field';
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/Card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
@@ -607,27 +608,27 @@ const RewardTracker: React.FC = () => {
             {isPadre && isAddingPrivilege && (
               <div className="mb-6 p-4 border-2 border-dashed border-success-300 rounded-lg bg-success-50 dark:bg-success-900/20">
                 <h4 className="font-semibold mb-3">Añadir Nuevo Privilegio</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <input
-                    type="text"
-                    placeholder="Nombre del privilegio"
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <Field
+                    label="Nombre del privilegio"
+                    name="nuevo-privilegio-nombre"
                     value={newPrivilege.name}
                     onChange={(e) => setNewPrivilege(prev => ({ ...prev, name: e.target.value }))}
-                    className="p-2 border rounded-lg"
                   />
-                  <input
+                  <Field
+                    label="Puntos necesarios"
+                    name="nuevo-privilegio-puntos"
                     type="number"
-                    placeholder="Puntos necesarios"
+                    min={1}
                     value={newPrivilege.points}
                     onChange={(e) => setNewPrivilege(prev => ({ ...prev, points: parseInt(e.target.value) || 0 }))}
-                    className="p-2 border rounded-lg"
                   />
-                  <input
-                    type="text"
-                    placeholder="Descripción (opcional)"
+                  <Field
+                    label="Descripción"
+                    name="nuevo-privilegio-descripcion"
                     value={newPrivilege.description}
                     onChange={(e) => setNewPrivilege(prev => ({ ...prev, description: e.target.value }))}
-                    className="p-2 border rounded-lg"
+                    hint="Opcional"
                   />
                 </div>
                 <div className="flex gap-2 mt-3">
@@ -690,24 +691,30 @@ const RewardTracker: React.FC = () => {
                       
                       {isEditing ? (
                         <div className="space-y-2 mb-4">
-                          <input
-                            type="text"
+                          {/* OJO: estos tres NO GUARDAN NADA. Al pulsar Intro
+                              sacan un toast que dice "actualizado" y cierran la
+                              edicion, pero no llaman a ningun servicio. Son los
+                              privilegios INICIALES, que estan en codigo. El
+                              mensaje de exito es mentira y conviene arreglarlo
+                              o quitar la edicion. */}
+                          <Field
+                            label="Nombre del privilegio"
+                            labelHidden
+                            name={`editar-inicial-nombre-${privilege.id}`}
                             defaultValue={privilege.name}
-                            placeholder="Nombre del privilegio"
-                            className="w-full p-2 text-center font-semibold text-lg border rounded focus:ring-2 focus:ring-primary-500"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
-                                // Actualizar privilegio inicial (solo visual por ahora)
                                 toast.success(`Privilegio "${privilege.name}" actualizado localmente`);
                                 setEditingPrivilege(null);
                               }
                             }}
                           />
-                          <input
+                          <Field
+                            label="Puntos necesarios"
+                            labelHidden
+                            name={`editar-inicial-puntos-${privilege.id}`}
                             type="number"
                             defaultValue={privilege.points}
-                            placeholder="Puntos necesarios"
-                            className="w-full p-2 text-center border rounded focus:ring-2 focus:ring-primary-500"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 toast.success(`Puntos actualizados para "${privilege.name}"`);
@@ -715,10 +722,11 @@ const RewardTracker: React.FC = () => {
                               }
                             }}
                           />
-                          <input
-                            type="text"
+                          <Field
+                            label="Descripción"
+                            labelHidden
+                            name={`editar-inicial-descripcion-${privilege.id}`}
                             placeholder="Descripción (opcional)"
-                            className="w-full p-2 text-center border rounded text-sm focus:ring-2 focus:ring-primary-500"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 setEditingPrivilege(null);
@@ -830,24 +838,28 @@ const RewardTracker: React.FC = () => {
                       
                       {isEditing ? (
                         <div className="space-y-2 mb-4">
-                          <input
-                            type="text"
+                          <Field
+                            label="Nombre del privilegio"
+                            labelHidden
+                            name={`editar-nombre-${privilege.id}`}
                             defaultValue={privilege.name}
                             onBlur={(e) => handleUpdatePrivilege(privilege.id, { name: e.target.value })}
-                            className="w-full p-2 text-center font-semibold text-lg border rounded"
                           />
-                          <input
+                          <Field
+                            label="Puntos necesarios"
+                            labelHidden
+                            name={`editar-puntos-${privilege.id}`}
                             type="number"
                             defaultValue={privilege.points}
                             onBlur={(e) => handleUpdatePrivilege(privilege.id, { points: parseInt(e.target.value) || 0 })}
-                            className="w-full p-2 text-center border rounded"
                           />
-                          <input
-                            type="text"
+                          <Field
+                            label="Descripción"
+                            labelHidden
+                            name={`editar-descripcion-${privilege.id}`}
                             defaultValue={privilege.description || ''}
                             placeholder="Descripción (opcional)"
                             onBlur={(e) => handleUpdatePrivilege(privilege.id, { description: e.target.value })}
-                            className="w-full p-2 text-center border rounded text-sm"
                           />
                         </div>
                       ) : (

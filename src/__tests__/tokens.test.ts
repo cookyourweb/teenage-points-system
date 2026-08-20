@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -129,5 +129,38 @@ describe('ninguna regla global pinta todos los botones', () => {
     );
 
     expect(reglasDeBoton).toEqual([]);
+  });
+});
+
+describe('guarda: los formularios pasan por el sistema', () => {
+  /**
+   * Se empezo con 41 controles crudos y 16 de ellos sin `<label>` cerca. Son
+   * los hallazgos E1, E2, E3 y E5 de la auditoria de accesibilidad.
+   *
+   * No se arreglaron uno a uno: se sustituyeron por `ui/Field` y `ui/Checkbox`,
+   * que resuelven la etiqueta, el error y la obligatoriedad POR CONSTRUCCION.
+   * Un campo sin etiqueta ya no compila, porque `label` es obligatoria.
+   *
+   * Esta guarda existe para que no vuelvan a entrar por la puerta de atras.
+   */
+  it('no queda ningun input, select o textarea crudo fuera de ui/', () => {
+    const componentes = join(SRC, 'components');
+
+    const ficheros = (dir: string): string[] =>
+      readdirSync(dir).flatMap((e) => {
+        const ruta = join(dir, e);
+        if (statSync(ruta).isDirectory()) return ficheros(ruta);
+        return e.endsWith('.tsx') && !e.endsWith('.stories.tsx') ? [ruta] : [];
+      });
+
+    // Field y Checkbox SON los que pintan los controles: son la excepcion.
+    const permitidos = ['ui/Field.tsx', 'ui/Checkbox.tsx'];
+
+    const infractores = ficheros(componentes)
+      .filter((ruta) => !permitidos.some((p) => ruta.endsWith(p)))
+      .filter((ruta) => /<(input|select|textarea)[\s>]/.test(readFileSync(ruta, 'utf8')))
+      .map((ruta) => ruta.slice(componentes.length + 1));
+
+    expect(infractores).toEqual([]);
   });
 });

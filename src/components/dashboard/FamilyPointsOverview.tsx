@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { useFamilyPoints } from '../../hooks/usePointsManagement';
 import { Link } from 'react-router-dom';
+import { textoDeLaSemana } from '../../utils/semana';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrophy, faCalendarWeek, faClock } from '@fortawesome/free-solid-svg-icons';
 
@@ -210,9 +211,9 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-100 dark:border-neutral-700">
                     <div className="flex items-center gap-2">
                       <FontAwesomeIcon icon={faCalendarWeek} className="w-3 h-3 text-neutral-400" />
-                      <span className="text-xs text-neutral-500">
-                        Semana {child.currentWeekId}
-                      </span>
+                      {/* Antes ponia "Semana 2026-W34", que es el identificador
+                          interno. A un padre no le dice nada. */}
+                      <span className="text-xs text-content-muted">{textoDeLaSemana()}</span>
                     </div>
                     <div className={`w-2 h-2 rounded-full ${
                       formatLastActivity(child.lastActivity).includes('Ahora') ||

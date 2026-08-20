@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import PrivilegeRedeemDialog from './PrivilegeRedeemDialog';
 import TaskDayCell from './TaskDayCell';
+import { comoAtributoFecha, rangoDeLaSemana, textoDeLaSemana } from '../../utils/semana';
 import Field from '../ui/Field';
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/Card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -492,8 +493,18 @@ const RewardTracker: React.FC = () => {
             <CardTitle align="center">
               Sistema de Puntos Semanal
             </CardTitle>
+            {/* Aqui se enseñaba la ruta interna de Firestore, con "[semana]"
+                como texto fijo que no resolvia nada. Ni le decia nada al
+                usuario ni le importa como esta montada la base de datos. Lo
+                que si necesita saber es DE QUE SEMANA son estos datos.
+
+                Va en un <time>, que es el elemento para una fecha: asi la
+                entienden los lectores de pantalla y los buscadores, no solo
+                quien la lee. */}
             <p className="text-center text-sm text-content-muted">
-              Datos guardados en: /weeklyTasks/{familyId}_{childId}_[semana]
+              <time dateTime={comoAtributoFecha(rangoDeLaSemana().lunes)}>
+                {textoDeLaSemana()}
+              </time>
             </p>
           </CardHeader>
           <CardContent>
@@ -929,7 +940,7 @@ const RewardTracker: React.FC = () => {
           <CardHeader>
             <CardTitle>📜 Historial de Privilegios</CardTitle>
             <p className="text-sm text-content-muted">
-              Historial guardado en: /weeklyTasks/{familyId}_{childId}_[semana]
+              Los privilegios que ya se han canjeado.
             </p>
           </CardHeader>
           <CardContent>

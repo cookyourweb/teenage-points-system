@@ -44,8 +44,22 @@ jobs:
       - name: Comprobar tipos
         run: npm run typecheck
 
+      # `src/firebase.ts` lee import.meta.env al cargar el modulo, e
+      # `initializeApp` revienta con "auth/invalid-api-key" si la clave viene
+      # vacia. En local no se nota porque hay un .env; aqui no lo hay.
+      #
+      # Los valores son FALSOS a proposito: ningun test habla con Firebase,
+      # solo necesitan que la inicializacion no reviente. Y asi los tests no
+      # pueden tocar la base de datos de verdad, que es como tiene que ser.
       - name: Pasar los tests
         run: npx vitest run
+        env:
+          VITE_FIREBASE_API_KEY: clave-de-prueba
+          VITE_FIREBASE_AUTH_DOMAIN: prueba.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: proyecto-de-prueba
+          VITE_FIREBASE_STORAGE_BUCKET: prueba.appspot.com
+          VITE_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+          VITE_FIREBASE_APP_ID: "1:000000000000:web:0000000000000000000000"
 
       - name: Construir el Storybook
         run: npm run build-storybook

@@ -289,7 +289,7 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle>
             <FontAwesomeIcon icon={faGift} className="text-accent-500" />
             Gestión de Privilegios Personalizados
           </CardTitle>
@@ -310,7 +310,7 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle>
                 <FontAwesomeIcon icon={faGift} className="text-accent-500" />
                 Gestión de Privilegios Personalizados
                 {syncing && (

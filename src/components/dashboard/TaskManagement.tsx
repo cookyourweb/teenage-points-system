@@ -315,7 +315,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle>
             <FontAwesomeIcon icon={faTasks} className="text-primary-500" />
             Gestión de Tareas Personalizadas
           </CardTitle>
@@ -336,7 +336,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle>
                 <FontAwesomeIcon icon={faTasks} className="text-primary-500" />
                 Gestión de Tareas Personalizadas
                 {syncing && (

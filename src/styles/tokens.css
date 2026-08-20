@@ -165,6 +165,15 @@
   --tps-reward-fg:   var(--tps-text-inverse);
   --tps-reward-bg:   var(--tps-accent-50);
 
+  /* DESTACADO. La tarjeta que corona una pantalla: los puntos totales del
+     hijo. Va de la marca a la recompensa, que es el viaje que cuenta el
+     producto: esfuerzo -> premio.
+
+     Es un degradado, asi que no cabe en `colors` de tailwind: se engancha en
+     `backgroundImage` y sale como `bg-featured`. */
+  --tps-featured-bg: linear-gradient(to right, var(--tps-brand-600), var(--tps-accent-600));
+  --tps-featured-fg: var(--tps-neutral-0);
+
   /* Foco. Un solo anillo en toda la aplicacion. */
   --tps-focus-ring: var(--tps-brand-500);
 

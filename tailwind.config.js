@@ -112,6 +112,8 @@ const roles = {
     bg: 'var(--tps-negative-bg)',
   },
   disabled: { DEFAULT: 'var(--tps-disabled-bg)', fg: 'var(--tps-disabled-fg)' },
+  // Solo el color de texto: el fondo es un degradado y va en backgroundImage.
+  featured: { fg: 'var(--tps-featured-fg)' },
 
   // NIVEL 3, el de componente. Existe para poder decir "los botones de esta
   // app son un punto mas oscuros" sin tocar el sistema de acciones entero.
@@ -155,6 +157,9 @@ export default {
       ...roles,
     },
     extend: {
+      // Un degradado no cabe en `colors`, que espera un color plano.
+      backgroundImage: { featured: 'var(--tps-featured-bg)' },
+
       // El hueco entre el elemento y el anillo pasa a seguir la superficie. En
       // claro vale lo mismo que antes (#ffffff), asi que no cambia nada; en
       // oscuro deja de dibujar un halo blanco sobre fondo oscuro.

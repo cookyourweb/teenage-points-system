@@ -145,6 +145,12 @@ const ESTADOS: Array<[string, string, string, number]> = [
   ['Texto positivo sobre su fondo', '--tps-positive-text', '--tps-positive-bg', TEXTO],
   ['Texto de aviso sobre su fondo', '--tps-caution-text', '--tps-caution-bg', TEXTO],
   ['Texto negativo sobre su fondo', '--tps-negative-text', '--tps-negative-bg', TEXTO],
+  // El degradado destacado va de brand-600 a accent-600. El texto va encima
+  // de TODO el recorrido, asi que los DOS extremos tienen que aguantarlo. Se
+  // miden los extremos, que es donde esta el peor caso.
+  ['Texto destacado, extremo de marca', '--tps-featured-fg', '--tps-brand-600', TEXTO],
+  ['Texto destacado, extremo de recompensa', '--tps-featured-fg', '--tps-accent-600', TEXTO],
+
   // Recompensa: el papel del morado, privilegios y premios.
   ['Relleno de recompensa con su texto', '--tps-reward-fg', '--tps-reward', TEXTO],
   ['Texto de recompensa sobre su fondo', '--tps-reward-text', '--tps-reward-bg', TEXTO],

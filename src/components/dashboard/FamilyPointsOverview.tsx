@@ -70,7 +70,7 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle>
             <FontAwesomeIcon icon={faTrophy} className="text-warning-500" />
             Puntos de la Familia
           </CardTitle>
@@ -89,7 +89,7 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle>
             <FontAwesomeIcon icon={faTrophy} className="text-warning-500" />
             Puntos de la Familia
           </CardTitle>
@@ -106,7 +106,7 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle>
           <FontAwesomeIcon icon={faTrophy} className="text-warning-500" />
           Puntos de la Familia
         </CardTitle>

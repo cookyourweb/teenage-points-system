@@ -188,8 +188,8 @@ const ChildView: React.FC = () => {
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         {/* Puntos Totales */}
-        <Card className="bg-gradient-to-r from-primary-500 to-accent-600 text-white">
-          <CardContent className="text-center py-8">
+        <Card tone="featured">
+          <CardContent align="center" padding="lg">
             <div className="text-6xl font-bold mb-2">
               {weeklyTotal}
             </div>
@@ -211,7 +211,7 @@ const ChildView: React.FC = () => {
         {/* Tareas Interactivas - Solo para hoy */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle>
               <FontAwesomeIcon icon={faCheckSquare} className="text-success-500" />
               Mis Tareas de Hoy
             </CardTitle>
@@ -274,7 +274,7 @@ const ChildView: React.FC = () => {
         {/* Progreso Semanal */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle>
               <FontAwesomeIcon icon={faCalendarWeek} className="text-primary-500" />
               Mi Progreso de la Semana
             </CardTitle>
@@ -325,7 +325,7 @@ const ChildView: React.FC = () => {
         {/* Privilegios Disponibles - Interactivos */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle>
               <FontAwesomeIcon icon={faGift} className="text-accent-500" />
               Mis Privilegios Desbloqueados
             </CardTitle>
@@ -386,7 +386,7 @@ const ChildView: React.FC = () => {
         {getNextPrivilege() && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle>
                 <FontAwesomeIcon icon={faTrophy} className="text-warning-500" />
                 Mi Próximo Objetivo
               </CardTitle>
@@ -433,8 +433,8 @@ const ChildView: React.FC = () => {
         )}
 
         {/* Mensaje de ánimo */}
-        <Card className="bg-gradient-to-r from-accent-100 to-accent-100 dark:from-accent-900/20 dark:to-accent-900/20">
-          <CardContent className="text-center py-8">
+        <Card tone="reward">
+          <CardContent align="center" padding="lg">
             <div className="text-4xl mb-4">🌟</div>
             <h3 className="text-xl font-semibold mb-2 text-content">
               ¡Sigue así, {childName}!

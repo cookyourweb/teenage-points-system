@@ -222,7 +222,7 @@ const Dashboard: React.FC = () => {
           <div className="space-y-6">
             {/* Introducción */}
             <Card>
-              <CardContent className="pt-6">
+              <CardContent padding="md">
                 <div className="text-center">
                   <h2 className="text-lg font-semibold mb-2 text-content">
                     Sistema de Puntos para Adolescentes
@@ -281,7 +281,7 @@ const Dashboard: React.FC = () => {
             {children.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle>
                     <FontAwesomeIcon icon={faChartLine} className="text-primary-500" />
                     Resumen Familiar
                   </CardTitle>
@@ -334,7 +334,7 @@ const Dashboard: React.FC = () => {
 
             {children.length === 0 ? (
               <Card>
-                <CardContent className="text-center py-12">
+                <CardContent align="center" padding="lg">
                   <div className="text-neutral-400 mb-4">
                     <FontAwesomeIcon icon={faUsers} size="3x" />
                   </div>
@@ -352,8 +352,8 @@ const Dashboard: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {children.map((child) => (
-                  <Card key={child.id} className="hover:shadow-lg transition-shadow">
-                    <CardContent className="pt-6">
+                  <Card key={child.id} interactive>
+                    <CardContent padding="md">
                       <div className="text-center mb-4">
                         <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-3">
                           <span className="text-2xl">👤</span>
@@ -423,7 +423,7 @@ const Dashboard: React.FC = () => {
           <div className="space-y-6">
             {!isPadre ? (
               <Card>
-                <CardContent className="text-center py-12">
+                <CardContent align="center" padding="lg">
                   <div className="text-neutral-400 mb-4">
                     <FontAwesomeIcon icon={faTasks} size="3x" />
                   </div>
@@ -449,7 +449,7 @@ const Dashboard: React.FC = () => {
           <div className="space-y-6">
             {!isPadre ? (
               <Card>
-                <CardContent className="text-center py-12">
+                <CardContent align="center" padding="lg">
                   <div className="text-neutral-400 mb-4">
                     <FontAwesomeIcon icon={faGift} size="3x" />
                   </div>

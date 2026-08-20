@@ -437,7 +437,7 @@ const RewardTracker: React.FC = () => {
       <ToastContainer />
       
       {/* Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <button
@@ -487,9 +487,9 @@ const RewardTracker: React.FC = () => {
         </div>
 
         {/* Sistema de Puntos Semanal */}
-        <Card className="mb-8">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">
+            <CardTitle align="center">
               Sistema de Puntos Semanal
             </CardTitle>
             <p className="text-center text-sm text-content-muted">
@@ -583,11 +583,11 @@ const RewardTracker: React.FC = () => {
         </Card>
 
         {/* Privilegios Disponibles */}
-        <Card className="mb-8">
+        <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-xl font-bold">🏆 Privilegios Disponibles</CardTitle>
+                <CardTitle>🏆 Privilegios Disponibles</CardTitle>
                 <p className="text-sm text-content-muted">
                   Privilegios guardados en: /privilegios/[privilegeId]
                 </p>

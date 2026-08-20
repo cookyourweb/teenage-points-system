@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import TaskToggle from './TaskToggle';
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { initialPrivileges } from '../../config/rewardConfig';
@@ -233,39 +234,14 @@ const ChildView: React.FC = () => {
                     </h4>
                     <div className="grid gap-3">
                       {todayTasks.diarias.map(task => (
-                        <div 
+                        <TaskToggle
                           key={task.id}
-                          className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                            task.completada 
-                              ? 'bg-success-50 border-success-200 dark:bg-success-900/20 dark:border-success-800' 
-                              : 'bg-neutral-50 border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 hover:border-primary-300'
-                          }`}
-                          onClick={() => toggleTask(todayCapitalized, 'diarias', task.id)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <FontAwesomeIcon 
-                              icon={faCheckSquare} 
-                              className={`text-2xl ${
-                                task.completada ? 'text-success-600' : 'text-neutral-400'
-                              }`}
-                            />
-                            <div>
-                              <p className={`font-medium ${
-                                task.completada 
-                                  ? 'text-success-800 dark:text-success-200 line-through' 
-                                  : 'text-neutral-800 dark:text-neutral-200'
-                              }`}>
-                                {task.nombre}
-                              </p>
-                              <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                                {task.puntos} puntos
-                              </p>
-                            </div>
-                          </div>
-                          {task.completada && (
-                            <div className="text-success-600 text-xl">✨</div>
-                          )}
-                        </div>
+                          tipo="diaria"
+                          nombre={task.nombre}
+                          puntos={task.puntos}
+                          completada={task.completada}
+                          onToggle={() => toggleTask(todayCapitalized, 'diarias', task.id)}
+                        />
                       ))}
                     </div>
                   </div>
@@ -277,39 +253,14 @@ const ChildView: React.FC = () => {
                     </h4>
                     <div className="grid gap-3">
                       {todayTasks.extra.map(task => (
-                        <div 
+                        <TaskToggle
                           key={task.id}
-                          className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                            task.completada 
-                              ? 'bg-accent-50 border-accent-200 dark:bg-accent-900/20 dark:border-accent-800' 
-                              : 'bg-warning-50 border-warning-200 dark:bg-warning-900/20 dark:border-warning-700 hover:border-accent-300'
-                          }`}
-                          onClick={() => toggleTask(todayCapitalized, 'extra', task.id)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <FontAwesomeIcon 
-                              icon={faStar} 
-                              className={`text-2xl ${
-                                task.completada ? 'text-accent-600' : 'text-warning-500'
-                              }`}
-                            />
-                            <div>
-                              <p className={`font-medium ${
-                                task.completada 
-                                  ? 'text-accent-800 dark:text-accent-200 line-through' 
-                                  : 'text-neutral-800 dark:text-neutral-200'
-                              }`}>
-                                {task.nombre}
-                              </p>
-                              <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                                {task.puntos} puntos bonus
-                              </p>
-                            </div>
-                          </div>
-                          {task.completada && (
-                            <div className="text-accent-600 text-xl">🌟</div>
-                          )}
-                        </div>
+                          tipo="extra"
+                          nombre={task.nombre}
+                          puntos={task.puntos}
+                          completada={task.completada}
+                          onToggle={() => toggleTask(todayCapitalized, 'extra', task.id)}
+                        />
                       ))}
                     </div>
                   </div>

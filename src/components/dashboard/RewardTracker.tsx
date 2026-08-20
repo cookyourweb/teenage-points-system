@@ -533,7 +533,7 @@ const RewardTracker: React.FC = () => {
                     </tr>
                   ))}
                   {initialTasks.Lunes.extra.map(tarea => (
-                    <tr key={tarea.id} className="bg-primary-50 dark:bg-primary-900/20">
+                    <tr key={tarea.id} className="bg-action-bg">
                       <td className="p-3 border">
                         <div>
                           <div className="font-medium">{tarea.nombre}</div>
@@ -982,7 +982,7 @@ const RewardTracker: React.FC = () => {
 
         {/* Información de sincronización */}
         <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-lg">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-bg text-link">
             <div className={`w-2 h-2 rounded-full ${syncing ? 'bg-warning-500 animate-pulse' : 'bg-success-500'}`}></div>
             <span className="text-sm">
               {syncing ? "Sincronizando con Firebase /weeklyTasks..." : "Conectado y sincronizado"}

@@ -72,6 +72,16 @@ const roles = {
     DEFAULT: 'var(--tps-action)',
     hover: 'var(--tps-action-hover)',
     fg: 'var(--tps-action-fg)',
+    bg: 'var(--tps-action-bg)',
+  },
+  // RECOMPENSA: privilegios y premios. Se llama `reward` y no `accent` porque
+  // `accent` ya es el nombre de la FAMILIA de color, y un rol con el mismo
+  // nombre la pisaria al mezclarse en `colors`.
+  reward: {
+    DEFAULT: 'var(--tps-reward)',
+    fg: 'var(--tps-reward-fg)',
+    text: 'var(--tps-reward-text)',
+    bg: 'var(--tps-reward-bg)',
   },
   // Accion como TEXTO: enlaces y pestanas. `text-link`, `hover:text-link-hover`.
   // Es otro token y no `action` porque las dos necesidades son opuestas: el

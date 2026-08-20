@@ -285,7 +285,7 @@ const Dashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+                    <div className="text-center p-4 rounded-lg bg-action-bg">
                       <div className="text-2xl font-bold text-link">
                         {children.length}
                       </div>
@@ -301,11 +301,11 @@ const Dashboard: React.FC = () => {
                         Tareas base disponibles
                       </p>
                     </div>
-                    <div className="text-center p-4 bg-accent-50 dark:bg-accent-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-accent-600 dark:text-accent-400">
+                    <div className="text-center p-4 rounded-lg bg-reward-bg">
+                      <div className="text-2xl font-bold text-reward-text">
                         10
                       </div>
-                      <p className="text-sm text-accent-600 dark:text-accent-400">
+                      <p className="text-sm text-reward-text">
                         Privilegios disponibles
                       </p>
                     </div>
@@ -373,7 +373,7 @@ const Dashboard: React.FC = () => {
                               child.tiposAdolescente.map((tipo, index) => (
                                 <span
                                   key={index}
-                                  className="inline-block bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200 text-xs px-2 py-1 rounded-full"
+                                  className="inline-block bg-primary-100 dark:bg-primary-900 text-xs px-2 py-1 rounded-full text-link"
                                 >
                                   {tipo}
                                 </span>

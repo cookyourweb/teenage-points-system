@@ -84,7 +84,7 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
           </div>
 
           {/* Vista para el Hijo */}
-          <div className="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg">
+          <div className="p-4 rounded-lg bg-action-bg">
             <div className="flex items-center gap-3 mb-3">
               <FontAwesomeIcon icon={faEye} className="text-primary-500" />
               <h3 className="text-lg font-semibold text-content">

@@ -391,7 +391,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
             <div className="space-y-6">
               {/* Estadísticas rápidas */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg">
+                <div className="p-4 rounded-lg bg-action-bg">
                   <div className="flex items-center gap-3">
                     <FontAwesomeIcon icon={faTasks} className="text-primary-500 text-xl" />
                     <div>
@@ -505,14 +505,14 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
               </div>
 
               {/* Información adicional */}
-              <div className="mt-6 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+              <div className="mt-6 p-4 rounded-lg bg-action-bg">
                 <div className="flex items-start gap-3">
                   <FontAwesomeIcon icon={faTasks} className="text-primary-500 mt-1" />
                   <div>
                     <h5 className="font-medium text-primary-900 dark:text-primary-100 mb-1">
                       Sobre las Tareas Personalizadas
                     </h5>
-                    <ul className="text-sm text-primary-700 dark:text-primary-300 space-y-1">
+                    <ul className="text-sm space-y-1 text-link">
                       <li>• Las tareas aparecerán en el sistema de puntos junto a las tareas base</li>
                       <li>• Solo las tareas activas se muestran a los hijos</li>
                       <li>• Los cambios se sincronizan automáticamente en tiempo real</li>
@@ -668,7 +668,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         active: 'border-warning-200 dark:border-warning-800 bg-caution-bg',
         inactive: 'border-neutral-200 dark:border-neutral-600 opacity-60 bg-surface-sunken',
         points: 'text-caution-text',
-        badge: 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200'
+        badge: 'bg-warning-100 dark:bg-warning-900 text-caution-text'
       };
 
   return (

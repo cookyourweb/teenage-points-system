@@ -365,14 +365,14 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
             <div className="space-y-6">
               {/* Estadísticas */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-accent-50 dark:bg-accent-900/20 p-4 rounded-lg">
+                <div className="p-4 rounded-lg bg-reward-bg">
                   <div className="flex items-center gap-3">
                     <FontAwesomeIcon icon={faTrophy} className="text-accent-500 text-xl" />
                     <div>
-                      <p className="text-2xl font-bold text-accent-600 dark:text-accent-400">
+                      <p className="text-2xl font-bold text-reward-text">
                         {privileges.length}
                       </p>
-                      <p className="text-sm text-accent-600 dark:text-accent-400">
+                      <p className="text-sm text-reward-text">
                         Total privilegios
                       </p>
                     </div>
@@ -445,9 +445,9 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
                               </span>
                               <span className={`text-xs px-2 py-1 rounded-full ${
                                 privilege.points <= 50 ? 'bg-success-100 dark:bg-success-900 text-positive-text' :
-                                privilege.points <= 100 ? 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200' :
-                                privilege.points <= 200 ? 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200' :
-                                'bg-danger-100 text-danger-800 dark:bg-danger-900 dark:text-danger-200'
+                                privilege.points <= 100 ? 'bg-warning-100 dark:bg-warning-900 text-caution-text' :
+                                privilege.points <= 200 ? 'bg-warning-100 dark:bg-warning-900 text-caution-text' :
+                                'bg-danger-100 dark:bg-danger-900 text-negative-text'
                               }`}>
                                 {getPointsLabel(privilege.points)}
                               </span>
@@ -496,14 +496,14 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
               </div>
 
               {/* Información adicional */}
-              <div className="mt-6 p-4 bg-accent-50 dark:bg-accent-900/20 rounded-lg">
+              <div className="mt-6 p-4 rounded-lg bg-reward-bg">
                 <div className="flex items-start gap-3">
                   <FontAwesomeIcon icon={faGift} className="text-accent-500 mt-1" />
                   <div>
-                    <h5 className="font-medium text-accent-900 dark:text-accent-100 mb-1">
+                    <h5 className="font-medium mb-1 text-reward-text">
                       Sobre los Privilegios Personalizados
                     </h5>
-                    <ul className="text-sm text-accent-700 dark:text-accent-300 space-y-1">
+                    <ul className="text-sm space-y-1 text-reward-text">
                       <li>• Los privilegios aparecerán junto a los privilegios base del sistema</li>
                       <li>• Los hijos podrán canjearlos cuando tengan suficientes puntos</li>
                       <li>• Puedes crear privilegios únicos para situaciones especiales</li>
@@ -617,18 +617,18 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
             </div>
 
             {/* Preview del privilegio */}
-            <div className="p-4 bg-accent-50 dark:bg-accent-900/20 rounded-lg">
-              <h4 className="text-sm font-medium text-accent-900 dark:text-accent-100 mb-2">
+            <div className="p-4 rounded-lg bg-reward-bg">
+              <h4 className="text-sm font-medium mb-2 text-reward-text">
                 Vista previa:
               </h4>
-              <div className="p-4 border border-accent-200 dark:border-accent-800 rounded-lg bg-surface">
+              <div className="p-4 border rounded-lg bg-surface border-reward">
                 <div className="flex items-center gap-2 mb-2">
                   <FontAwesomeIcon icon={faGift} className="text-accent-500" />
                   <h5 className="font-semibold text-content">
                     {formData.name || 'Nombre del privilegio'}
                   </h5>
                 </div>
-                <p className="text-sm text-accent-600 dark:text-accent-400 mb-2">
+                <p className="text-sm mb-2 text-reward-text">
                   {formData.points} puntos necesarios
                 </p>
                 {formData.description && (
@@ -639,9 +639,9 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
                 <div className="flex items-center justify-between">
                   <span className={`text-xs px-2 py-1 rounded-full ${
                     formData.points <= 50 ? 'bg-success-100 dark:bg-success-900 text-positive-text' :
-                    formData.points <= 100 ? 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200' :
-                    formData.points <= 200 ? 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200' :
-                    'bg-danger-100 text-danger-800 dark:bg-danger-900 dark:text-danger-200'
+                    formData.points <= 100 ? 'bg-warning-100 dark:bg-warning-900 text-caution-text' :
+                    formData.points <= 200 ? 'bg-warning-100 dark:bg-warning-900 text-caution-text' :
+                    'bg-danger-100 dark:bg-danger-900 text-negative-text'
                   }`}>
                     {getPointsLabel(formData.points)}
                   </span>

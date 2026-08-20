@@ -50,6 +50,7 @@
 
   /* Acento. El morado es la energia del lado adolescente: privilegios. */
   --tps-accent-50:  #faf5ff;
+  --tps-accent-400: #c084fc;
   --tps-accent-500: #a855f7;
   --tps-accent-600: #9333ea;
   --tps-accent-700: #7e22ce;
@@ -147,6 +148,22 @@
   --tps-negative-fg:    var(--tps-neutral-0);
   --tps-negative-text:  var(--tps-negative-700);
   --tps-negative-bg:    var(--tps-negative-50);
+
+  /* Fondo suave de marca: el aviso informativo, el bloque destacado. Es el
+     hermano de --tps-positive-bg y compania, que faltaba. */
+  --tps-action-bg: var(--tps-brand-50);
+
+  /* RECOMPENSA. Es el papel del morado: privilegios y premios, lo que
+     distingue este producto.
+
+     Se llama `reward` y no `accent` a proposito: `accent` ya es el nombre de
+     la FAMILIA de color en tailwind.config.js, y si el rol se llamara igual lo
+     pisaria al mezclarse en `colors`, cargandose bg-accent-500 y compania. Un
+     rol nunca se llama como una familia. */
+  --tps-reward:      var(--tps-accent-600);
+  --tps-reward-text: var(--tps-accent-700);
+  --tps-reward-fg:   var(--tps-text-inverse);
+  --tps-reward-bg:   var(--tps-accent-50);
 
   /* Foco. Un solo anillo en toda la aplicacion. */
   --tps-focus-ring: var(--tps-brand-500);
@@ -258,6 +275,12 @@
   --tps-caution-text:  var(--tps-caution-400);
   --tps-negative-bg:   rgb(239 68 68 / 0.15);
   --tps-negative-text: var(--tps-negative-400);
+
+  /* En oscuro, los fondos suaves pasan a velo translucido y el texto sube de
+     tono, por lo mismo que los estados. */
+  --tps-action-bg:   rgb(59 130 246 / 0.15);
+  --tps-reward-bg:   rgb(168 85 247 / 0.15);
+  --tps-reward-text: var(--tps-accent-400);
 
   --tps-disabled-bg: var(--tps-neutral-700);
   --tps-disabled-fg: var(--tps-neutral-400);

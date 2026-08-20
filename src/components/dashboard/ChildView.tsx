@@ -292,7 +292,7 @@ const ChildView: React.FC = () => {
                     key={dia} 
                     className={`text-center p-4 rounded-lg border-2 transition-all ${
                       isToday 
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
+                        ? 'border-primary-500 bg-action-bg' 
                         : 'border-line'
                     }`}
                   >

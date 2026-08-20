@@ -145,6 +145,13 @@ const ESTADOS: Array<[string, string, string, number]> = [
   ['Texto positivo sobre su fondo', '--tps-positive-text', '--tps-positive-bg', TEXTO],
   ['Texto de aviso sobre su fondo', '--tps-caution-text', '--tps-caution-bg', TEXTO],
   ['Texto negativo sobre su fondo', '--tps-negative-text', '--tps-negative-bg', TEXTO],
+  // Recompensa: el papel del morado, privilegios y premios.
+  ['Relleno de recompensa con su texto', '--tps-reward-fg', '--tps-reward', TEXTO],
+  ['Texto de recompensa sobre su fondo', '--tps-reward-text', '--tps-reward-bg', TEXTO],
+  // Fondo suave de marca: el aviso informativo
+  ['Texto sobre el fondo suave de marca', '--tps-text', '--tps-action-bg', TEXTO],
+  ['Enlace sobre el fondo suave de marca', '--tps-link', '--tps-action-bg', TEXTO],
+
   // Cada relleno con SU texto. Asumir blanco es lo que fallaba en verde y ambar.
   ['Relleno positivo con su texto', '--tps-positive-fg', '--tps-positive', TEXTO],
   ['Relleno de aviso con su texto', '--tps-caution-fg', '--tps-caution', TEXTO],

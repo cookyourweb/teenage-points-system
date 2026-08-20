@@ -3,19 +3,19 @@ import Signup from "./Signup";
 
 const AuthPage = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-900 transition-colors duration-300">
+    <div className="flex min-h-screen items-center justify-center transition-colors duration-300 bg-surface-page">
       <div className="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-8 p-4">
         {/* Formulario de Iniciar Sesión */}
-        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-md transition-colors duration-300">
-          <h2 className="text-center text-3xl font-extrabold text-neutral-900 dark:text-neutral-100 mb-6">
+        <div className="p-6 rounded-lg shadow-md transition-colors duration-300 bg-surface">
+          <h2 className="text-center text-3xl font-extrabold mb-6 text-content">
             Iniciar sesión
           </h2>
           <Signin />
         </div>
 
         {/* Formulario de Registro */}
-        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-md transition-colors duration-300">
-          <h2 className="text-center text-3xl font-extrabold text-neutral-900 dark:text-neutral-100 mb-6">
+        <div className="p-6 rounded-lg shadow-md transition-colors duration-300 bg-surface">
+          <h2 className="text-center text-3xl font-extrabold mb-6 text-content">
             Registrarse
           </h2>
           <Signup />

@@ -343,7 +343,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                   <FontAwesomeIcon icon={faSync} className="animate-spin text-sm text-primary-500" />
                 )}
               </CardTitle>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+              <p className="text-sm mt-1 text-content-muted">
                 {isPadre 
                   ? `${activeTasks.length} tareas activas (${dailyTasks.length} diarias, ${extraTasks.length} extra)`
                   : 'Solo los padres pueden gestionar las tareas'
@@ -371,10 +371,10 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
           {customTasks.length === 0 ? (
             <div className="text-center py-12">
               <FontAwesomeIcon icon={faTasks} className="text-4xl text-neutral-400 mb-4" />
-              <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-2">
+              <h3 className="text-lg font-medium mb-2 text-content">
                 No hay tareas personalizadas
               </h3>
-              <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+              <p className="mb-6 text-content-muted">
                 {isPadre 
                   ? 'Crea tu primera tarea personalizada para complementar las tareas base'
                   : 'Los padres pueden crear tareas personalizadas que aparecerán en tu sistema de puntos'
@@ -395,36 +395,36 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                   <div className="flex items-center gap-3">
                     <FontAwesomeIcon icon={faTasks} className="text-primary-500 text-xl" />
                     <div>
-                      <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                      <p className="text-2xl font-bold text-link">
                         {customTasks.length}
                       </p>
-                      <p className="text-sm text-primary-600 dark:text-primary-400">
+                      <p className="text-sm text-link">
                         Total tareas
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-success-50 dark:bg-success-900/20 p-4 rounded-lg">
+                <div className="p-4 rounded-lg bg-positive-bg">
                   <div className="flex items-center gap-3">
                     <FontAwesomeIcon icon={faCheckSquare} className="text-success-500 text-xl" />
                     <div>
-                      <p className="text-2xl font-bold text-success-600 dark:text-success-400">
+                      <p className="text-2xl font-bold text-positive-text">
                         {dailyTasks.length}
                       </p>
-                      <p className="text-sm text-success-600 dark:text-success-400">
+                      <p className="text-sm text-positive-text">
                         Tareas diarias
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-warning-50 dark:bg-warning-900/20 p-4 rounded-lg">
+                <div className="p-4 rounded-lg bg-caution-bg">
                   <div className="flex items-center gap-3">
                     <FontAwesomeIcon icon={faStar} className="text-warning-500 text-xl" />
                     <div>
-                      <p className="text-2xl font-bold text-warning-600 dark:text-warning-400">
+                      <p className="text-2xl font-bold text-caution-text">
                         {extraTasks.length}
                       </p>
-                      <p className="text-sm text-warning-600 dark:text-warning-400">
+                      <p className="text-sm text-caution-text">
                         Tareas extra
                       </p>
                     </div>
@@ -434,7 +434,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
 
               {/* Tareas Diarias Personalizadas */}
               <div>
-                <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 mb-3 flex items-center gap-2">
+                <h4 className="font-semibold mb-3 flex items-center gap-2 text-content">
                   <FontAwesomeIcon icon={faCheckSquare} className="text-success-500" />
                   Tareas Diarias Personalizadas ({customTasks.filter(t => t.tipo === 'diarias').length})
                 </h4>
@@ -453,7 +453,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                       />
                     ))}
                   {customTasks.filter(t => t.tipo === 'diarias').length === 0 && (
-                    <div className="col-span-full text-center py-8 space-y-3 text-neutral-500 dark:text-neutral-400">
+                    <div className="col-span-full text-center py-8 space-y-3 text-content-muted">
                       <FontAwesomeIcon icon={faCheckSquare} className="text-2xl mb-2" />
                       <p>No hay tareas diarias personalizadas</p>
                       {isPadre && (
@@ -470,7 +470,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
 
               {/* Tareas Extra Personalizadas */}
               <div>
-                <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 mb-3 flex items-center gap-2">
+                <h4 className="font-semibold mb-3 flex items-center gap-2 text-content">
                   <FontAwesomeIcon icon={faStar} className="text-warning-500" />
                   Tareas Extra Personalizadas ({customTasks.filter(t => t.tipo === 'extra').length})
                 </h4>
@@ -489,7 +489,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
                       />
                     ))}
                   {customTasks.filter(t => t.tipo === 'extra').length === 0 && (
-                    <div className="col-span-full text-center py-8 space-y-3 text-neutral-500 dark:text-neutral-400">
+                    <div className="col-span-full text-center py-8 space-y-3 text-content-muted">
                       <FontAwesomeIcon icon={faStar} className="text-2xl mb-2" />
                       <p>No hay tareas extra personalizadas</p>
                       {isPadre && (
@@ -607,7 +607,7 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
             />
 
             {/* Botones de acción */}
-            <div className="flex gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <div className="flex gap-3 pt-4 border-t border-line">
               <Button variant="neutral" layout="grow"
                 onClick={handleCloseModal}
                 disabled={saving}
@@ -659,15 +659,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
 }) => {
   const colorClasses = tipo === 'diarias' 
     ? {
-        active: 'bg-success-50 border-success-200 dark:bg-success-900/20 dark:border-success-800',
-        inactive: 'bg-neutral-50 border-neutral-200 dark:bg-neutral-800 dark:border-neutral-600 opacity-60',
-        points: 'text-success-600 dark:text-success-400',
-        badge: 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200'
+        active: 'border-success-200 dark:border-success-800 bg-positive-bg',
+        inactive: 'border-neutral-200 dark:border-neutral-600 opacity-60 bg-surface-sunken',
+        points: 'text-positive-text',
+        badge: 'bg-success-100 dark:bg-success-900 text-positive-text'
       }
     : {
-        active: 'bg-warning-50 border-warning-200 dark:bg-warning-900/20 dark:border-warning-800',
-        inactive: 'bg-neutral-50 border-neutral-200 dark:bg-neutral-800 dark:border-neutral-600 opacity-60',
-        points: 'text-warning-600 dark:text-warning-400',
+        active: 'border-warning-200 dark:border-warning-800 bg-caution-bg',
+        inactive: 'border-neutral-200 dark:border-neutral-600 opacity-60 bg-surface-sunken',
+        points: 'text-caution-text',
         badge: 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200'
       };
 
@@ -677,14 +677,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
     }`}>
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
-          <h5 className="font-medium text-neutral-900 dark:text-neutral-100 line-clamp-2">
+          <h5 className="font-medium line-clamp-2 text-content">
             {task.nombre}
           </h5>
           <p className={`text-sm ${colorClasses.points}`}>
             {task.puntos} puntos{tipo === 'extra' ? ' bonus' : ''}
           </p>
           {task.description && (
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">
+            <p className="text-xs mt-1 line-clamp-2 text-content-muted">
               {task.description}
             </p>
           )}
@@ -711,7 +711,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       {isPadre && (
         <div className="flex items-center justify-between">
           <span className={`text-xs px-2 py-1 rounded-full ${
-            task.isActive ? colorClasses.badge : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
+            task.isActive ? colorClasses.badge : 'text-content-muted bg-surface-sunken'
           }`}>
             {task.isActive ? 'Activa' : 'Inactiva'}
           </span>

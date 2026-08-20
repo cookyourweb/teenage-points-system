@@ -14,10 +14,10 @@ const App = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+      <div className="min-h-screen flex items-center justify-center bg-surface-page">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-lg text-neutral-600 dark:text-neutral-400">Cargando aplicación...</p>
+          <p className="text-lg text-content-muted">Cargando aplicación...</p>
         </div>
       </div>
     );
@@ -25,13 +25,13 @@ const App = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+      <div className="min-h-screen flex items-center justify-center bg-surface-page">
         <div className="text-center max-w-md">
           <div className="text-danger-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
+          <h2 className="text-xl font-bold mb-2 text-content">
             Error de Conexión
           </h2>
-          <p className="text-danger-600 dark:text-danger-400 mb-4">
+          <p className="mb-4 text-negative-text">
             {error.message}
           </p>
           <button 
@@ -88,13 +88,13 @@ const App = () => {
         <Route 
           path="*" 
           element={
-            <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
+            <div className="min-h-screen flex items-center justify-center bg-surface-page">
               <div className="text-center max-w-md">
                 <div className="text-neutral-400 text-6xl mb-4">🔍</div>
-                <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
+                <h2 className="text-xl font-bold mb-2 text-content">
                   Página no encontrada
                 </h2>
-                <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                <p className="mb-4 text-content-muted">
                   La página que buscas no existe o ha sido movida.
                 </p>
                 <button 

@@ -20,10 +20,10 @@ const Faqs: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-6 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
+    <div className="p-6 text-content bg-surface">
       <h2 className="text-2xl font-bold mb-4">FAQs</h2>
       {categorias.length === 0 ? (
-        <p className="text-neutral-500 dark:text-neutral-400">No hay FAQs disponibles.</p>
+        <p className="text-content-muted">No hay FAQs disponibles.</p>
       ) : (
         <ul className="space-y-4">
           {categorias.map((categoria) => (
@@ -31,7 +31,7 @@ const Faqs: React.FC = () => {
               <p className="card-title">
                 <strong>Categoría:</strong> {categoria.titulo}
               </p>
-              <p className="text-neutral-600 dark:text-neutral-400 italic">
+              <p className="italic text-content-muted">
                 Definición: {categoria.definicion}
               </p>
               <ul className="mt-2 space-y-2 ml-4">
@@ -44,7 +44,7 @@ const Faqs: React.FC = () => {
                     <strong>Soluciones:</strong>
                     <ul className="ml-4 list-disc">
                       {pregunta.soluciones.length === 0 ? (
-                        <li className="text-neutral-500 dark:text-neutral-400">Sin soluciones</li>
+                        <li className="text-content-muted">Sin soluciones</li>
                       ) : (
                         pregunta.soluciones.map((solucion) => (
                           <li key={solucion.id}>{solucion.texto}</li>

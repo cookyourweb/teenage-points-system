@@ -110,8 +110,8 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
   };
 
   return (
-    <div className="p-4 bg-white dark:bg-neutral-800 shadow-md rounded-md transition-colors">
-      <h2 className="text-xl font-bold mb-4 text-neutral-900 dark:text-neutral-100">{childToEdit ? "Estos son los datos de tu hijo" : "Vamos a añadir a tu hijo"}</h2>
+    <div className="p-4 shadow-md rounded-md transition-colors bg-surface">
+      <h2 className="text-xl font-bold mb-4 text-content">{childToEdit ? "Estos son los datos de tu hijo" : "Vamos a añadir a tu hijo"}</h2>
       <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
         <div className="mb-4">
           <Field
@@ -142,7 +142,7 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
             <p>Cargando preguntas...</p>
           ) : categoria ? (
             <div>
-              <h3 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Tipos de Adolescente</h3>
+              <h3 className="text-lg font-bold text-content">Tipos de Adolescente</h3>
               <div className="mt-2">
                 {/* El boton de ayuda va FUERA del label, no dentro. Un
                     <label> reenvia la activacion a su control, asi que con el

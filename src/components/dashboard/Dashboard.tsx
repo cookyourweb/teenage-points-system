@@ -221,10 +221,10 @@ const Dashboard: React.FC = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                  <h2 className="text-lg font-semibold mb-2 text-content">
                     Sistema de Puntos para Adolescentes
                   </h2>
-                  <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
+                  <p className="max-w-2xl mx-auto text-content-muted">
                     Gestiona las tareas y recompensas de tus hijos. Aquí puedes ver el progreso en tiempo real,
                     añadir nuevos hijos, crear tareas personalizadas y gestionar privilegios.
                   </p>
@@ -286,18 +286,18 @@ const Dashboard: React.FC = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                      <div className="text-2xl font-bold text-link">
                         {children.length}
                       </div>
-                      <p className="text-sm text-primary-600 dark:text-primary-400">
+                      <p className="text-sm text-link">
                         Hijo{children.length > 1 ? 's' : ''} registrado{children.length > 1 ? 's' : ''}
                       </p>
                     </div>
-                    <div className="text-center p-4 bg-success-50 dark:bg-success-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-success-600 dark:text-success-400">
+                    <div className="text-center p-4 rounded-lg bg-positive-bg">
+                      <div className="text-2xl font-bold text-positive-text">
                         12
                       </div>
-                      <p className="text-sm text-success-600 dark:text-success-400">
+                      <p className="text-sm text-positive-text">
                         Tareas base disponibles
                       </p>
                     </div>
@@ -320,7 +320,7 @@ const Dashboard: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+              <h2 className="text-xl font-semibold text-content">
                 Gestión de Hijos
               </h2>
               <Button onClick={handleAddChild}>
@@ -335,10 +335,10 @@ const Dashboard: React.FC = () => {
                   <div className="text-neutral-400 mb-4">
                     <FontAwesomeIcon icon={faUsers} size="3x" />
                   </div>
-                  <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-2">
+                  <h3 className="text-lg font-medium mb-2 text-content">
                     No hay hijos registrados
                   </h3>
-                  <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+                  <p className="mb-6 text-content-muted">
                     Comienza añadiendo a tu primer hijo para empezar a usar el sistema de puntos.
                   </p>
                   <Button onClick={handleAddChild}>
@@ -355,17 +355,17 @@ const Dashboard: React.FC = () => {
                         <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-3">
                           <span className="text-2xl">👤</span>
                         </div>
-                        <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                        <h3 className="text-lg font-semibold text-content">
                           {child.nombre}
                         </h3>
-                        <p className="text-neutral-600 dark:text-neutral-400">
+                        <p className="text-content-muted">
                           {child.edad} años
                         </p>
                       </div>
 
                       <div className="space-y-3 mb-6">
                         <div>
-                          <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                          <p className="text-sm font-medium mb-1 text-content">
                             Tipos de Adolescente:
                           </p>
                           <div className="flex flex-wrap gap-1">
@@ -379,7 +379,7 @@ const Dashboard: React.FC = () => {
                                 </span>
                               ))
                             ) : (
-                              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                              <span className="text-xs text-content-muted">
                                 No asignado
                               </span>
                             )}
@@ -424,10 +424,10 @@ const Dashboard: React.FC = () => {
                   <div className="text-neutral-400 mb-4">
                     <FontAwesomeIcon icon={faTasks} size="3x" />
                   </div>
-                  <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-2">
+                  <h3 className="text-lg font-medium mb-2 text-content">
                     Acceso Restringido
                   </h3>
-                  <p className="text-neutral-600 dark:text-neutral-400">
+                  <p className="text-content-muted">
                     Solo los padres pueden gestionar las tareas personalizadas.
                   </p>
                 </CardContent>
@@ -447,10 +447,10 @@ const Dashboard: React.FC = () => {
                   <div className="text-neutral-400 mb-4">
                     <FontAwesomeIcon icon={faGift} size="3x" />
                   </div>
-                  <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-2">
+                  <h3 className="text-lg font-medium mb-2 text-content">
                     Acceso Restringido
                   </h3>
-                  <p className="text-neutral-600 dark:text-neutral-400">
+                  <p className="text-content-muted">
                     Solo los padres pueden gestionar los privilegios personalizados.
                   </p>
                 </CardContent>
@@ -469,10 +469,10 @@ const Dashboard: React.FC = () => {
   // Mostrar loading si está cargando
   if (isRoleLoading || loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-neutral-50 dark:bg-neutral-900">
+      <div className="flex justify-center items-center min-h-screen bg-surface-page">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-lg text-neutral-600 dark:text-neutral-400">Cargando dashboard...</p>
+          <p className="text-lg text-content-muted">Cargando dashboard...</p>
         </div>
       </div>
     );
@@ -481,13 +481,13 @@ const Dashboard: React.FC = () => {
   // Mostrar error si hay alguno
   if (error || roleError) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-neutral-50 dark:bg-neutral-900">
+      <div className="flex justify-center items-center min-h-screen bg-surface-page">
         <div className="text-center max-w-md">
           <div className="text-danger-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
+          <h2 className="text-xl font-bold mb-2 text-content">
             Error al cargar el dashboard
           </h2>
-          <p className="text-danger-600 dark:text-danger-400 mb-4">
+          <p className="mb-4 text-negative-text">
             {error || roleError || "Error inesperado."}
           </p>
           <Button onClick={() => window.location.reload()}>
@@ -501,13 +501,13 @@ const Dashboard: React.FC = () => {
   // Verificar que tengamos familyId
   if (!familyId) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-neutral-50 dark:bg-neutral-900">
+      <div className="flex justify-center items-center min-h-screen bg-surface-page">
         <div className="text-center max-w-md">
           <div className="text-warning-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
+          <h2 className="text-xl font-bold mb-2 text-content">
             Configuración Incompleta
           </h2>
-          <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+          <p className="mb-4 text-content-muted">
             No se encontró un ID de familia asociado a tu usuario. Por favor, contacta al soporte.
           </p>
           <Button onClick={() => signOut(auth)}>
@@ -519,18 +519,18 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+    <div className="min-h-screen bg-surface-page">
       {/* Header */}
-      <header className="bg-white dark:bg-neutral-800 shadow-sm border-b border-neutral-200 dark:border-neutral-700">
+      <header className="shadow-sm border-b bg-surface border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+              <h1 className="text-2xl font-bold text-content">
                 Dashboard Familiar
               </h1>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+              <p className="text-sm mt-1 text-content-muted">
                 Bienvenido, {user?.displayName || "Usuario"}
-                {isPadre && <span className="ml-2 text-primary-600 dark:text-primary-400">👑 Padre</span>}
+                {isPadre && <span className="ml-2 text-link">👑 Padre</span>}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -540,7 +540,7 @@ const Dashboard: React.FC = () => {
                   await signOut(auth);
                   navigate("/");
                 }}
-                className="flex items-center gap-2 px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                className="flex items-center gap-2 px-4 py-2 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 text-content-muted"
                 title="Cerrar sesión"
               >
                 <FontAwesomeIcon icon={faSignOutAlt} />

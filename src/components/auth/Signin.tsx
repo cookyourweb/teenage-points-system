@@ -106,8 +106,8 @@ const Signin = () => {
   };
 
   return (
-    <form onSubmit={handleSignin} className="space-y-4 p-4 bg-white dark:bg-neutral-800 rounded-lg shadow-md">
-      <h2 className="text-center text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">
+    <form onSubmit={handleSignin} className="space-y-4 p-4 rounded-lg shadow-md bg-surface">
+      <h2 className="text-center text-xl font-bold mb-4 text-content">
         Iniciar Sesión
       </h2>
       
@@ -137,11 +137,11 @@ const Signin = () => {
       
       {error && (
         <div className="p-3 bg-danger-100 dark:bg-danger-900/20 border border-danger-300 dark:border-danger-700 rounded-lg">
-          <p className="text-danger-700 dark:text-danger-400 text-sm font-medium">
+          <p className="text-sm font-medium text-negative-text">
             {error}
           </p>
           {error.includes("email") && (
-            <p className="text-danger-600 dark:text-danger-400 text-xs mt-1">
+            <p className="text-xs mt-1 text-negative-text">
               💡 ¿Necesitas crear una cuenta? Usa el formulario de registro.
             </p>
           )}
@@ -163,9 +163,9 @@ const Signin = () => {
         )}
       </button>
       
-      <p className="text-center text-sm text-neutral-600 dark:text-neutral-400">
+      <p className="text-center text-sm text-content-muted">
         ¿No tienes cuenta?{" "}
-        <span className="text-primary-600 dark:text-primary-400 font-medium">
+        <span className="font-medium text-link">
           Usa el formulario de la derecha para registrarte
         </span>
       </p>

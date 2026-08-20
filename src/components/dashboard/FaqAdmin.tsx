@@ -145,7 +145,7 @@ const FaqAdmin: React.FC = () => {
   };
 
   return (
-<div className="p-6 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
+<div className="p-6 text-content bg-surface">
       <h1 className="text-2xl font-bold mb-4">Administración de FAQs</h1>
 
       {/* Agregar categoría */}

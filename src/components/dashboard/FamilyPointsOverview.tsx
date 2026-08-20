@@ -125,10 +125,10 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
             <div className="bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 p-4 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">
+                  <h3 className="text-lg font-semibold text-content">
                     Resumen Semanal
                   </h3>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  <p className="text-sm text-content-muted">
                     Semana actual • {childrenPoints.length} hijo{childrenPoints.length > 1 ? 's' : ''}
                   </p>
                 </div>
@@ -157,7 +157,7 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
               {childrenPoints.map((child) => (
                 <div
                   key={child.childId}
-                  className="relative border rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-neutral-800 focus-within:ring-2 focus-within:ring-action focus-within:ring-offset-2"
+                  className="relative border rounded-lg p-4 hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-action focus-within:ring-offset-2 bg-surface"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -165,7 +165,7 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
                         {getPointsIcon(child.totalWeeklyPoints)}
                       </div>
                       <div>
-                        <h4 className="font-semibold text-neutral-800 dark:text-neutral-200">
+                        <h4 className="font-semibold text-content">
                           <Link
                             to={`/reward-tracker/${familyId}/${child.childId}`}
                             className="after:absolute after:inset-0 focus-visible:outline-none"
@@ -192,7 +192,7 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
                   </div>
 
                   {/* Barra de progreso */}
-                  <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-2">
+                  <div className="w-full rounded-full h-2 mb-2 bg-line">
                     <div
                       className="bg-gradient-to-r from-primary-500 to-accent-500 h-2 rounded-full transition-all duration-500"
                       style={{ 
@@ -202,7 +202,7 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
                   </div>
 
                   {/* Próximo privilegio */}
-                  <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                  <div className="text-xs text-content-muted">
                     {getNextPrivilege(child.totalWeeklyPoints)}
                   </div>
 
@@ -229,8 +229,8 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
 
             {/* Ranking semanal */}
             {childrenPoints.length > 1 && (
-              <div className="mt-6 p-4 bg-warning-50 dark:bg-warning-900/20 rounded-lg">
-                <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 mb-3 flex items-center gap-2">
+              <div className="mt-6 p-4 rounded-lg bg-caution-bg">
+                <h4 className="font-semibold mb-3 flex items-center gap-2 text-content">
                   <FontAwesomeIcon icon={faTrophy} className="text-warning-500" />
                   Ranking de la Semana
                 </h4>
@@ -247,10 +247,10 @@ const FamilyPointsOverview: React.FC<FamilyPointsOverviewProps> = ({ familyId })
                         }`}>
                           {index + 1}
                         </div>
-                        <span className="flex-1 text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                        <span className="flex-1 text-sm font-medium text-content">
                           {child.childName || 'Hijo'}
                         </span>
-                        <span className="text-sm font-bold text-neutral-600 dark:text-neutral-400">
+                        <span className="text-sm font-bold text-content-muted">
                           {child.totalWeeklyPoints} pts
                         </span>
                       </div>

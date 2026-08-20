@@ -143,7 +143,7 @@ const ChildView: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-accent-50 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-lg text-neutral-600 dark:text-neutral-400">Cargando tus puntos...</p>
+          <p className="text-lg text-content-muted">Cargando tus puntos...</p>
         </div>
       </div>
     );
@@ -166,14 +166,14 @@ const ChildView: React.FC = () => {
       <ToastContainer />
       
       {/* Header */}
-      <div className="bg-white dark:bg-neutral-800 shadow-lg">
+      <div className="shadow-lg bg-surface">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="text-center">
             <div className="text-6xl mb-4">🏆</div>
-            <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
+            <h1 className="text-3xl font-bold mb-2 text-content">
               ¡Hola {childName}!
             </h1>
-            <p className="text-lg text-neutral-600 dark:text-neutral-400">
+            <p className="text-lg text-content-muted">
               {getMotivationalMessage()}
             </p>
             {isUpdatedByOther && (
@@ -230,7 +230,7 @@ const ChildView: React.FC = () => {
                 <div className="space-y-4">
                   {/* Tareas Diarias */}
                   <div>
-                    <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 mb-3">
+                    <h4 className="font-semibold mb-3 text-content">
                       Tareas Diarias 📋
                     </h4>
                     <div className="grid gap-3">
@@ -249,7 +249,7 @@ const ChildView: React.FC = () => {
 
                   {/* Tareas Extra */}
                   <div>
-                    <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 mb-3">
+                    <h4 className="font-semibold mb-3 text-content">
                       Tareas Extra ⭐ (¡Puntos bonus!)
                     </h4>
                     <div className="grid gap-3">
@@ -293,14 +293,14 @@ const ChildView: React.FC = () => {
                     className={`text-center p-4 rounded-lg border-2 transition-all ${
                       isToday 
                         ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
-                        : 'border-neutral-200 dark:border-neutral-700'
+                        : 'border-line'
                     }`}
                   >
-                    <div className="text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2">
+                    <div className="text-sm font-medium mb-2 text-content-muted">
                       {dia.substring(0, 3)}
                       {isToday && <span className="ml-1 text-primary-500">•</span>}
                     </div>
-                    <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-1">
+                    <div className="text-2xl font-bold mb-1 text-content">
                       {points}
                     </div>
                     <div className="text-xs text-neutral-500">
@@ -336,14 +336,14 @@ const ChildView: React.FC = () => {
                 getAvailablePrivileges().map((privilege, index) => (
                   <div 
                     key={index}
-                    className="flex items-center gap-4 p-4 bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 rounded-lg"
+                    className="flex items-center gap-4 p-4 border border-success-200 dark:border-success-800 rounded-lg bg-positive-bg"
                   >
                     <div className="text-3xl">🎁</div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-success-800 dark:text-success-200">
+                      <h4 className="font-semibold text-positive-text">
                         {privilege.name}
                       </h4>
-                      <p className="text-sm text-success-600 dark:text-success-400">
+                      <p className="text-sm text-positive-text">
                         ¡Ya puedes disfrutarlo!
                       </p>
                     </div>
@@ -361,7 +361,7 @@ const ChildView: React.FC = () => {
                   </div>
                 ))
               ) : (
-                <div className="col-span-full text-center py-8 text-neutral-500 dark:text-neutral-400">
+                <div className="col-span-full text-center py-8 text-content-muted">
                   <div className="text-4xl mb-4">🎯</div>
                   <p>¡Sigue completando tareas para desbloquear privilegios!</p>
                 </div>
@@ -396,23 +396,23 @@ const ChildView: React.FC = () => {
                 <div className="flex items-center gap-4 mb-4">
                   <div className="text-4xl">🎯</div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                    <h3 className="text-lg font-semibold text-content">
                       {getNextPrivilege()?.name}
                     </h3>
-                    <p className="text-neutral-600 dark:text-neutral-400">
+                    <p className="text-content-muted">
                       Necesitas {getNextPrivilege()?.points} puntos
                     </p>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm text-neutral-600 dark:text-neutral-400">
+                  <div className="flex justify-between text-sm text-content-muted">
                     <span>Progreso</span>
                     <span>
                       {weeklyTotal} / {getNextPrivilege()?.points} puntos
                     </span>
                   </div>
-                  <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-3">
+                  <div className="w-full rounded-full h-3 bg-line">
                     <div
                       className="bg-gradient-to-r from-warning-400 to-warning-500 h-3 rounded-full transition-all duration-500"
                       style={{
@@ -423,7 +423,7 @@ const ChildView: React.FC = () => {
                       }}
                     ></div>
                   </div>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  <p className="text-sm text-content-muted">
                     ¡Solo te faltan {(getNextPrivilege()?.points || 0) - weeklyTotal} puntos más!
                   </p>
                 </div>
@@ -436,10 +436,10 @@ const ChildView: React.FC = () => {
         <Card className="bg-gradient-to-r from-accent-100 to-accent-100 dark:from-accent-900/20 dark:to-accent-900/20">
           <CardContent className="text-center py-8">
             <div className="text-4xl mb-4">🌟</div>
-            <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+            <h3 className="text-xl font-semibold mb-2 text-content">
               ¡Sigue así, {childName}!
             </h3>
-            <p className="text-neutral-600 dark:text-neutral-400 max-w-md mx-auto">
+            <p className="max-w-md mx-auto text-content-muted">
               Cada tarea que completas te acerca más a tus objetivos. 
               ¡Tu familia está orgullosa de tu esfuerzo!
             </p>

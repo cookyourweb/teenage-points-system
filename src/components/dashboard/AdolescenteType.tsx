@@ -8,7 +8,7 @@ interface ChildrenCardProps {
 
 const ChildrenCard: React.FC<ChildrenCardProps> = ({ child }) => {
   return (
-    <div className="p-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-md">
+    <div className="p-4 border rounded-lg shadow-md bg-surface border-line">
       <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 mb-2">
         {child.nombre}
       </h3>

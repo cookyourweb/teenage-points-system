@@ -78,7 +78,7 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
       >
         <div className="space-y-6 max-w-2xl">
           <div className="text-center">
-            <p className="text-neutral-600 dark:text-neutral-400">
+            <p className="text-content-muted">
               Comparte el progreso de {child.nombre} con diferentes niveles de acceso
             </p>
           </div>
@@ -87,11 +87,11 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
           <div className="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg">
             <div className="flex items-center gap-3 mb-3">
               <FontAwesomeIcon icon={faEye} className="text-primary-500" />
-              <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+              <h3 className="text-lg font-semibold text-content">
                 Vista para {child.nombre}
               </h3>
             </div>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
+            <p className="text-sm mb-4 text-content-muted">
               Enlace simplificado donde {child.nombre} puede ver sus puntos y progreso 
               (solo lectura, interfaz amigable para niños)
             </p>
@@ -133,27 +133,27 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
 
               {/* QR Code para el hijo */}
               <div className="text-center">
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-2">
+                <p className="text-xs mb-2 text-content-muted">
                   Código QR para {child.nombre}
                 </p>
                 <img
                   src={generateQRCode(childViewLink)}
                   alt={`QR Code para ${child.nombre}`}
-                  className="mx-auto border border-neutral-200 dark:border-neutral-700 rounded"
+                  className="mx-auto border rounded border-line"
                 />
               </div>
             </div>
           </div>
 
           {/* Vista para Padres/Administradores */}
-          <div className="bg-warning-50 dark:bg-warning-900/20 p-4 rounded-lg">
+          <div className="p-4 rounded-lg bg-caution-bg">
             <div className="flex items-center gap-3 mb-3">
               <FontAwesomeIcon icon={faQrcode} className="text-warning-500" />
-              <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+              <h3 className="text-lg font-semibold text-content">
                 Vista Completa (Padres)
               </h3>
             </div>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
+            <p className="text-sm mb-4 text-content-muted">
               Enlace completo con capacidad de editar tareas y gestionar privilegios
             </p>
             
@@ -187,11 +187,11 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
           </div>
 
           {/* Instrucciones */}
-          <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
-            <h4 className="font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+          <div className="p-4 rounded-lg bg-surface-sunken">
+            <h4 className="font-semibold mb-2 text-content">
               💡 Consejos de uso:
             </h4>
-            <ul className="text-sm text-neutral-600 dark:text-neutral-400 space-y-2">
+            <ul className="text-sm space-y-2 text-content-muted">
               <li className="flex items-start gap-2">
                 <span className="text-primary-500 mt-1">•</span>
                 <span>
@@ -225,14 +225,14 @@ const ShareChildLink: React.FC<ShareChildLinkProps> = ({ child, familyId }) => {
 
           {/* Estado de copia */}
           {copySuccess && (
-            <div className="bg-success-100 dark:bg-success-900/20 border border-success-300 dark:border-success-700 text-success-800 dark:text-success-200 px-4 py-3 rounded-lg text-center">
+            <div className="bg-success-100 dark:bg-success-900/20 border border-success-300 dark:border-success-700 px-4 py-3 rounded-lg text-center text-positive-text">
               <FontAwesomeIcon icon={faCopy} className="mr-2" />
               ¡Enlace copiado al portapapeles!
             </div>
           )}
 
           {/* Botones de acción */}
-          <div className="flex justify-end gap-2 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+          <div className="flex justify-end gap-2 pt-4 border-t border-line">
             <Button variant="neutral"
               onClick={() => setShowModal(false)}
             >

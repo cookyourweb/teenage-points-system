@@ -60,22 +60,22 @@ const TaskPrivilegeManager: React.FC<TaskPrivilegeManagerProps> = ({ childId }) 
       ) : (
         <div className="space-y-3">
           {privilegeHistory.map((privilege, index) => (
-            <div key={index} className="p-3 border rounded-lg bg-white dark:bg-neutral-800 shadow">
+            <div key={index} className="p-3 border rounded-lg shadow bg-surface">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-medium text-neutral-900 dark:text-neutral-100">
+                  <h3 className="font-medium text-content">
                     {privilege.privilegeName || 'Privilegio sin nombre'}
                   </h3>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  <p className="text-sm text-content-muted">
                     Fecha: {privilege.dateUnlocked}
                   </p>
                 </div>
-                <span className="text-xs bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200 px-2 py-1 rounded-full">
+                <span className="text-xs bg-success-100 dark:bg-success-900 px-2 py-1 rounded-full text-positive-text">
                   Redimido
                 </span>
               </div>
               {privilege.unlockedBy && (
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                <p className="text-xs mt-1 text-content-muted">
                   Redimido por: {privilege.unlockedBy}
                 </p>
               )}

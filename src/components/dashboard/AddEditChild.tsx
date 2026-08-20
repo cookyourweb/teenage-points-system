@@ -5,6 +5,9 @@ import { Child } from "../../types/familyTypes";
 import { Categoria, Pregunta } from "../../types/faqsTypes";
 import { familyService } from "../../services/familyService";
 import Modal from "../ui/Modal";
+import Checkbox from "../ui/Checkbox";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
 
 interface AddEditChildProps {
   childToEdit?: Child;
@@ -142,32 +145,30 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
             <div>
               <h3 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Tipos de Adolescente</h3>
               <div className="mt-2">
+                {/* El boton de ayuda va FUERA del label, no dentro. Un
+                    <label> reenvia la activacion a su control, asi que con el
+                    boton dentro, pulsar la interrogacion marcaba y desmarcaba
+                    la casilla de paso. */}
                 {categoria.preguntas.map((pregunta) => {
                   const isChecked = tipoExiste(pregunta.titulo, tiposAdolescente);
                   return (
-                    <div key={pregunta.id} className="mb-4">
-                      <label className="flex items-center">
-                        <input 
-                          type="checkbox" 
-                          value={pregunta.id} 
-                          checked={isChecked}
-                          onChange={() => handleTipoChange(pregunta.id)} 
-                          className="mr-2" 
-                        />
-                        <span className="flex items-center text-neutral-900 dark:text-neutral-100">
-                          {pregunta.titulo}
-                          <button 
-                            type="button" 
-                            onClick={() => { 
-                              setSelectedPregunta(pregunta); 
-                              setShowModal(true); 
-                            }} 
-                            className="ml-2 text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 hover:underline"
-                          >
-                            ❓
-                          </button>
-                        </span>
-                      </label>
+                    <div key={pregunta.id} className="flex items-center gap-1">
+                      <Checkbox
+                        name={`tipo-${pregunta.id}`}
+                        label={pregunta.titulo}
+                        checked={isChecked}
+                        onChange={() => handleTipoChange(pregunta.id)}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        iconOnly={<FontAwesomeIcon icon={faCircleQuestion} />}
+                        label={`Qué significa "${pregunta.titulo}"`}
+                        onClick={() => {
+                          setSelectedPregunta(pregunta);
+                          setShowModal(true);
+                        }}
+                      />
                     </div>
                   );
                 })}
@@ -188,13 +189,24 @@ const AddEditChild: React.FC<AddEditChildProps> = ({
         <Modal
           onClose={() => setShowModal(false)}
           isOpen={showModal}
-          title="Consejos para tratar a estos adolescentes"
+          title={`¿Qué significa "${selectedPregunta.titulo}"?`}
         >
-          <p><strong>Definición:</strong> {selectedPregunta.definicion}</p>
-          <p><strong>Soluciones:</strong></p>
-          {selectedPregunta.soluciones.map(sol => (
-            <p key={sol.id}>{sol.texto}</p>
-          ))}
+          <div className="flex flex-col gap-4">
+            <p className="text-content">{selectedPregunta.definicion}</p>
+
+            {selectedPregunta.soluciones.length > 0 && (
+              <div>
+                <h3 className="mb-2 font-semibold text-content">Cómo tratarlo</h3>
+                {/* Una lista de consejos es una LISTA. Con <p> sueltos, un
+                    lector de pantalla no dice cuantos hay ni por cual va. */}
+                <ul className="flex list-disc flex-col gap-2 pl-5 text-content-muted">
+                  {selectedPregunta.soluciones.map((sol) => (
+                    <li key={sol.id}>{sol.texto}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </Modal>
       )}
     </div>

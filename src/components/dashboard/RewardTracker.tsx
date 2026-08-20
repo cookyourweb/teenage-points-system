@@ -1,6 +1,7 @@
 //src/components/dashboard/RewardTracker.tsx
 // Rutas Firebase: /weeklyTasks/{familyId}_{childId}_{weekId}, /privilegios/{privilegeId}, /familias/{familyId}
 import React, { useState, useEffect } from "react";
+import PrivilegeRedeemDialog from './PrivilegeRedeemDialog';
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/Card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
@@ -10,7 +11,6 @@ import {
   faEdit, 
   faTrash, 
   faPlus,
-  faCalendar,
   faSave,
   faTimes
 } from "@fortawesome/free-solid-svg-icons";
@@ -67,7 +67,6 @@ const RewardTracker: React.FC = () => {
   const [isAddingPrivilege, setIsAddingPrivilege] = useState(false);
   const [newPrivilege, setNewPrivilege] = useState({ name: '', points: 0, description: '' });
   const [showCalendar, setShowCalendar] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>('');
 
   const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
   const isPadre = role === 'padre' || role === 'admin';
@@ -372,7 +371,6 @@ const RewardTracker: React.FC = () => {
       });
 
       setShowCalendar(null);
-      setSelectedDate('');
 
       console.log("✅ Privilegio redimido y guardado en Firebase /privilegios y /weeklyTasks");
 
@@ -804,67 +802,17 @@ const RewardTracker: React.FC = () => {
                         {isEditing ? '✏️ Editando...' : (syncing ? '⏳ Sincronizando...' : (canUnlock ? '🎉 ¡Desbloquear!' : '🔒 No disponible'))}
                       </button>
                       
-                      {/* Calendario modal */}
+                      {/* El dialogo de canje vive en PrivilegeRedeemDialog. Aqui habia dos
+                          copias identicas escritas a mano, sin role="dialog" ni trampa de foco. */}
                       {showCalendar === privilegeId && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                          <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg max-w-md w-full mx-4">
-                            <h3 className="text-lg font-bold mb-4">📅 ¿Cuándo quieres disfrutar "{privilege.name}"?</h3>
-                            
-                            <div className="space-y-3 mb-4">
-                              <button
-                                onClick={() => handlePrivilegeRedeem(privilege, 'Hoy')}
-                                className="w-full p-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
-                              >
-                                🕐 Hoy
-                              </button>
-                              <button
-                                onClick={() => handlePrivilegeRedeem(privilege, 'Mañana')}
-                                className="w-full p-3 bg-success-500 text-white rounded-lg hover:bg-success-600"
-                              >
-                                🌅 Mañana
-                              </button>
-                              <button
-                                onClick={() => handlePrivilegeRedeem(privilege, 'Este fin de semana')}
-                                className="w-full p-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600"
-                              >
-                                🎉 Este fin de semana
-                              </button>
-                            </div>
-
-                            <div className="mb-4">
-                              <label className="block text-sm font-medium mb-2">O elige una fecha específica:</label>
-                              <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => setSelectedDate(e.target.value)}
-                                min={getMinDate()}
-                                max={getMaxDate()}
-                                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                              />
-                            </div>
-
-                            <div className="flex gap-2">
-                              {selectedDate && (
-                                <button
-                                  onClick={() => handlePrivilegeRedeem(privilege, new Date(selectedDate).toLocaleDateString('es-ES'))}
-                                  className="flex-1 p-3 bg-warning-500 text-white rounded-lg hover:bg-warning-600"
-                                >
-                                  <FontAwesomeIcon icon={faCalendar} className="mr-2" />
-                                  Confirmar fecha
-                                </button>
-                              )}
-                              <button
-                                onClick={() => {
-                                  setShowCalendar(null);
-                                  setSelectedDate('');
-                                }}
-                                className="flex-1 p-3 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600"
-                              >
-                                Cancelar
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+                        <PrivilegeRedeemDialog
+                          isOpen
+                          privilegeName={privilege.name}
+                          minDate={getMinDate()}
+                          maxDate={getMaxDate()}
+                          onClose={() => { setShowCalendar(null); }}
+                          onRedeem={(cuando) => handlePrivilegeRedeem(privilege, cuando)}
+                        />
                       )}
                     </div>
                   </div>
@@ -964,67 +912,17 @@ const RewardTracker: React.FC = () => {
                         {syncing ? '⏳ Sincronizando...' : (canUnlock ? '✨ ¡Desbloquear!' : '🔒 No disponible')}
                       </button>
                       
-                      {/* Calendario modal para privilegios personalizados */}
+                      {/* El dialogo de canje vive en PrivilegeRedeemDialog. Aqui habia dos
+                          copias identicas escritas a mano, sin role="dialog" ni trampa de foco. */}
                       {showCalendar === privilege.id && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                          <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg max-w-md w-full mx-4">
-                            <h3 className="text-lg font-bold mb-4">📅 ¿Cuándo quieres disfrutar "{privilege.name}"?</h3>
-                            
-                            <div className="space-y-3 mb-4">
-                              <button
-                                onClick={() => handlePrivilegeRedeem(privilege, 'Hoy')}
-                                className="w-full p-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
-                              >
-                                🕐 Hoy
-                              </button>
-                              <button
-                                onClick={() => handlePrivilegeRedeem(privilege, 'Mañana')}
-                                className="w-full p-3 bg-success-500 text-white rounded-lg hover:bg-success-600"
-                              >
-                                🌅 Mañana
-                              </button>
-                              <button
-                                onClick={() => handlePrivilegeRedeem(privilege, 'Este fin de semana')}
-                                className="w-full p-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600"
-                              >
-                                🎉 Este fin de semana
-                              </button>
-                            </div>
-
-                            <div className="mb-4">
-                              <label className="block text-sm font-medium mb-2">O elige una fecha específica:</label>
-                              <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => setSelectedDate(e.target.value)}
-                                min={getMinDate()}
-                                max={getMaxDate()}
-                                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                              />
-                            </div>
-
-                            <div className="flex gap-2">
-                              {selectedDate && (
-                                <button
-                                  onClick={() => handlePrivilegeRedeem(privilege, new Date(selectedDate).toLocaleDateString('es-ES'))}
-                                  className="flex-1 p-3 bg-warning-500 text-white rounded-lg hover:bg-warning-600"
-                                >
-                                  <FontAwesomeIcon icon={faCalendar} className="mr-2" />
-                                  Confirmar fecha
-                                </button>
-                              )}
-                              <button
-                                onClick={() => {
-                                  setShowCalendar(null);
-                                  setSelectedDate('');
-                                }}
-                                className="flex-1 p-3 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600"
-                              >
-                                Cancelar
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+                        <PrivilegeRedeemDialog
+                          isOpen
+                          privilegeName={privilege.name}
+                          minDate={getMinDate()}
+                          maxDate={getMaxDate()}
+                          onClose={() => { setShowCalendar(null); }}
+                          onRedeem={(cuando) => handlePrivilegeRedeem(privilege, cuando)}
+                        />
                       )}
                     </div>
                   </div>

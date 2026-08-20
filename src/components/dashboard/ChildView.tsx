@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import TaskToggle from './TaskToggle';
+import PrivilegeRedeemDialog from './PrivilegeRedeemDialog';
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { initialPrivileges } from '../../config/rewardConfig';
@@ -369,44 +370,16 @@ const ChildView: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Modal para canjear privilegio */}
+        {/* El dialogo de canje vive en PrivilegeRedeemDialog: heredaba de
+            ui/Modal los seis arreglos de accesibilidad que este bloque, por
+            estar escrito a mano, se saltaba. */}
         {selectedPrivilege && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full">
-              <h3 className="text-lg font-bold text-neutral-900 dark:text-neutral-100 mb-4">
-                🎉 ¡Canjear Privilegio!
-              </h3>
-              <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-                ¿Cuándo quieres disfrutar de "{selectedPrivilege.name}"?
-              </p>
-              <div className="space-y-3">
-                <button
-                  onClick={() => handleRedeemPrivilege(selectedPrivilege, 'Hoy')}
-                  className="w-full p-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
-                >
-                  🌅 Hoy
-                </button>
-                <button
-                  onClick={() => handleRedeemPrivilege(selectedPrivilege, 'Mañana')}
-                  className="w-full p-3 bg-success-500 text-white rounded-lg hover:bg-success-600 transition-colors"
-                >
-                  🌤️ Mañana
-                </button>
-                <button
-                  onClick={() => handleRedeemPrivilege(selectedPrivilege, 'Este fin de semana')}
-                  className="w-full p-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors"
-                >
-                  🎈 Este fin de semana
-                </button>
-                <button
-                  onClick={() => setSelectedPrivilege(null)}
-                  className="w-full p-3 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600 transition-colors"
-                >
-                  ❌ Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
+          <PrivilegeRedeemDialog
+            isOpen
+            privilegeName={selectedPrivilege.name}
+            onClose={() => setSelectedPrivilege(null)}
+            onRedeem={(cuando) => handleRedeemPrivilege(selectedPrivilege, cuando)}
+          />
         )}
 
         {/* Resto del componente... (próximo objetivo, estadísticas, etc.) */}

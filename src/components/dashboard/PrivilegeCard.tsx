@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import PrivilegeRedemptionModal from '../ui/PrivilegeRedemptionModal';
+import PrivilegeRedeemDialog from './PrivilegeRedeemDialog';
 
 interface Privilege {
   privilegioId: string;
@@ -10,11 +10,10 @@ interface Privilege {
 interface PrivilegeCardProps {
   privilege: Privilege;
   points: number;
-  childName: string;
-  onRedeem: (date: string) => void;
+    onRedeem: (date: string) => void;
 }
 
-const PrivilegeCard: React.FC<PrivilegeCardProps> = ({ privilege, points, childName, onRedeem }) => {
+const PrivilegeCard: React.FC<PrivilegeCardProps> = ({ privilege, points, onRedeem }) => {
   const canUnlock = points >= privilege.pointsRequired;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -37,11 +36,11 @@ const PrivilegeCard: React.FC<PrivilegeCardProps> = ({ privilege, points, childN
         {canUnlock ? 'Desbloquear' : 'No disponible'}
       </button>
 
-      <PrivilegeRedemptionModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <PrivilegeRedeemDialog
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onRedeem={handleRedeem}
-        childName={childName}
+        privilegeName={privilege.name}
       />
     </div>
   );

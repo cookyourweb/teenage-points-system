@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import Accordion from '../ui/Accordion';
 import Field from '../ui/Field';
+import Footer from '../Footer';
 import {
   fetchCategorias,
   addCategoria,
@@ -148,145 +150,250 @@ const FaqAdmin: React.FC = () => {
   };
 
   return (
-<div className="p-6 text-content bg-surface">
-      <Link
-        to="/dashboard"
-        className="mb-4 inline-flex items-center gap-2 text-link underline-offset-4 hover:text-link-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-2"
-      >
-        <FontAwesomeIcon icon={faArrowLeft} aria-hidden="true" />
-        Volver al panel
-      </Link>
+    <div className="min-h-screen bg-surface-page">
+      <main className="mx-auto flex max-w-4xl flex-col gap-8 p-6">
+        <div>
+          <Link
+            to="/dashboard"
+            className="mb-4 inline-flex items-center gap-2 text-link underline-offset-4 hover:text-link-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-2"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} aria-hidden="true" />
+            Volver al panel
+          </Link>
 
-      <h1 className="text-2xl font-bold mb-4">Administración de FAQs</h1>
+          <h1 className="text-2xl font-bold text-content">Administración de preguntas frecuentes</h1>
+          <p className="mt-1 text-content-muted">
+            Lo que se publica aquí lo ven todas las familias.
+          </p>
+        </div>
 
-      {/* Agregar categoría */}
-      <div className="mb-6 space-y-2">
-        <h2 className="text-xl font-semibold">Categorías</h2>
-        <Field
-          label="Título de la categoría"
-          name="nueva-categoria-titulo"
-          value={newCategoriaTitulo}
-          onChange={(e) => setNewCategoriaTitulo(e.target.value)}
-        />
-        <Field
-          label="Definición de la categoría"
-          name="nueva-categoria-definicion"
-          value={newCategoriaDefinicion}
-          onChange={(e) => setNewCategoriaDefinicion(e.target.value)}
-        />
-        <Button onClick={handleAddCategoria}>Agregar Categoría</Button>
-      </div>
+        {/* Nueva categoría */}
+        <section
+          aria-labelledby="nueva-categoria"
+          className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-6"
+        >
+          <h2 id="nueva-categoria" className="text-lg font-semibold text-content">
+            Nueva categoría
+          </h2>
 
-      <ul className="space-y-4">
-        {categorias.map((cat) => (
-          <li key={cat.id} className="p-4 bg-neutral-100 rounded shadow">
-            {editMode[cat.id] ? (
-              <div>
-                <Field
-                  label="Título"
-                  name={`editar-titulo-${cat.id}`}
-                  value={editCategoriaTitulo[cat.id] || ""}
-                  onChange={(e) =>
-                    setEditCategoriaTitulo((prev) => ({ ...prev, [cat.id]: e.target.value }))
-                  }
-                />
-                <Field
-                  label="Definición"
-                  name={`editar-definicion-${cat.id}`}
-                  value={editCategoriaDefinicion[cat.id] || ""}
-                  onChange={(e) =>
-                    setEditCategoriaDefinicion((prev) => ({ ...prev, [cat.id]: e.target.value }))
-                  }
-                />
-                <div className="flex space-x-2 mt-2">
-<Button onClick={() => handleUpdateCategoria(cat.id)}>Guardar Cambios</Button>
-                  <Button onClick={() => setEditMode((prev) => ({ ...prev, [cat.id]: false }))}>
-                    Cancelar
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <p className="text-lg font-semibold">
-                  <strong>Categoría:</strong> {cat.titulo}
-                </p>
-                <p className="italic">Definición: {cat.definicion}</p>
-                <div className="flex space-x-2 mt-2">
-<Button onClick={() => handleEditCategoria(cat)}>Editar</Button>
-<Button onClick={() => handleDeleteCategoria(cat.id)}>Eliminar</Button>
-                </div>
-              </div>
-            )}
+          <Field
+            label="Título"
+            name="nueva-categoria-titulo"
+            value={newCategoriaTitulo}
+            onChange={(e) => setNewCategoriaTitulo(e.target.value)}
+          />
+          <Field
+            label="Definición"
+            name="nueva-categoria-definicion"
+            value={newCategoriaDefinicion}
+            onChange={(e) => setNewCategoriaDefinicion(e.target.value)}
+          />
 
-            <div className="mt-4 space-y-2 border-t pt-4">
-              <h3 className="font-medium">Agregar Pregunta a {cat.titulo}:</h3>
-              <Field
-                label="Título de la pregunta"
-                name={`nueva-pregunta-titulo-${cat.id}`}
-                value={newPreguntaTitulo[cat.id] || ""}
-                onChange={(e) => setNewPreguntaTitulo((prev) => ({ ...prev, [cat.id]: e.target.value }))}
-              />
-              <Field
-                label="Definición de la pregunta"
-                name={`nueva-pregunta-definicion-${cat.id}`}
-                value={newPreguntaDefinicion[cat.id] || ""}
-                onChange={(e) => setNewPreguntaDefinicion((prev) => ({ ...prev, [cat.id]: e.target.value }))}
-              />
-              <Button onClick={() => handleAddPreguntaClick(cat.id)}>Agregar Pregunta</Button>
+          <div className="flex">
+            <Button onClick={handleAddCategoria}>Añadir categoría</Button>
+          </div>
+        </section>
 
-              {cat.preguntas.length > 0 && (
-                <ul className="mt-4 space-y-4">
-                  {cat.preguntas.map((preg) => (
-                    <li key={preg.id} className="bg-white p-4 rounded border">
-                      <p className="font-semibold">Título: {preg.titulo}</p>
-                      <p className="italic">Definición: {preg.definicion}</p>
-                      <div className="flex space-x-2 mt-2">
-                        <Button onClick={() => handleUpdatePreguntaClick(cat.id, preg)}>
-                          Editar Pregunta
-                        </Button>
-                        <Button onClick={() => handleDeletePreguntaClick(cat.id, preg.id)}>
-                          Eliminar Pregunta
+        {/* Categorías existentes */}
+        <section aria-labelledby="categorias" className="flex flex-col gap-4">
+          <h2 id="categorias" className="text-lg font-semibold text-content">
+            Categorías publicadas
+          </h2>
+
+          {categorias.length === 0 ? (
+            <p className="text-content-muted">Todavía no hay ninguna.</p>
+          ) : (
+            /* Cada categoria se pliega. Con varias, cada una con sus
+               preguntas y sus soluciones, esta pantalla es un muro.
+
+               OJO: el titulo del acordeon YA ES UN BOTON, y no se puede meter
+               un boton dentro de otro. Por eso Editar y Eliminar van DENTRO
+               del panel y no en la cabecera. De paso queda mejor: abres la
+               categoria y entonces ves lo que puedes hacerle. */
+            <Accordion
+              headingLevel={3}
+              items={categorias.map((cat) => ({
+                id: cat.id,
+                titulo: `${cat.titulo} (${cat.preguntas.length} ${cat.preguntas.length === 1 ? 'pregunta' : 'preguntas'})`,
+                contenido: (
+                  <div className="flex flex-col gap-4 pb-2">
+                  {editMode[cat.id] ? (
+                    <div className="flex flex-col gap-4">
+                      <Field
+                        label="Título"
+                        name={`editar-titulo-${cat.id}`}
+                        value={editCategoriaTitulo[cat.id] || ""}
+                        onChange={(e) =>
+                          setEditCategoriaTitulo((prev) => ({ ...prev, [cat.id]: e.target.value }))
+                        }
+                      />
+                      <Field
+                        label="Definición"
+                        name={`editar-definicion-${cat.id}`}
+                        value={editCategoriaDefinicion[cat.id] || ""}
+                        onChange={(e) =>
+                          setEditCategoriaDefinicion((prev) => ({ ...prev, [cat.id]: e.target.value }))
+                        }
+                      />
+                      <div className="flex gap-3">
+                        <Button onClick={() => handleUpdateCategoria(cat.id)}>Guardar cambios</Button>
+                        <Button
+                          variant="neutral"
+                          onClick={() => setEditMode((prev) => ({ ...prev, [cat.id]: false }))}
+                        >
+                          Cancelar
                         </Button>
                       </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-content-muted">{cat.definicion}</p>
+                      </div>
+                      {/* Editar es terciario y Eliminar es destructivo. Antes los
+                          dos eran `primary`, o sea que borrar una categoria
+                          entera pesaba visualmente lo mismo que guardar. */}
+                      <div className="flex shrink-0 gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleEditCategoria(cat)}>
+                          Editar
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteCategoria(cat.id)}
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
-                      {/* Agregar solución */}
-                      <Field
-                        label="Nueva solución"
-                        name={`nueva-solucion-${cat.id}-${preg.id}`}
-                        value={newSolucionTexto[`${cat.id}-${preg.id}`] || ""}
-                        onChange={(e) => setNewSolucionTexto((prev) => ({ ...prev, [`${cat.id}-${preg.id}`]: e.target.value }))}
-                      />
-                      <Button onClick={() => handleAddSolucionClick(cat.id, preg)}>
-                        Agregar Solución
-                      </Button>
+                  {/* Preguntas de la categoría */}
+                  <div className="flex flex-col gap-4 border-t border-line pt-4">
+                    <h4 className="font-medium text-content">Preguntas de «{cat.titulo}»</h4>
 
-                      {preg.soluciones.length > 0 ? (
-                        <ul className="mt-2 space-y-2">
-                          {preg.soluciones.map((sol) => (
-                            <li key={sol.id} className="ml-4 flex items-center justify-between border p-2 rounded">
-                              <span>{sol.texto}</span>
-                              <div className="flex space-x-2">
-                                <Button onClick={() => handleDeleteSolucionClick(cat.id, preg, sol.id)}>
-                                  Eliminar
-                                </Button>
-                                <Button onClick={() => handleUpdateSolucionClick(cat.id, preg, sol)}>
+                    {cat.preguntas.length > 0 && (
+                      <ul className="flex flex-col gap-4">
+                        {cat.preguntas.map((preg) => (
+                          <li
+                            key={preg.id}
+                            className="flex flex-col gap-3 rounded-lg bg-surface-sunken p-4"
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div>
+                                <p className="font-semibold text-content">{preg.titulo}</p>
+                                <p className="text-sm text-content-muted">{preg.definicion}</p>
+                              </div>
+                              <div className="flex shrink-0 gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleUpdatePreguntaClick(cat.id, preg)}
+                                >
                                   Editar
                                 </Button>
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  onClick={() => handleDeletePreguntaClick(cat.id, preg.id)}
+                                >
+                                  Eliminar
+                                </Button>
                               </div>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-neutral-500 mt-2">Sin soluciones</p>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
+                            </div>
+
+                            {preg.soluciones.length > 0 ? (
+                              <ul className="flex flex-col gap-2">
+                                {preg.soluciones.map((sol) => (
+                                  <li
+                                    key={sol.id}
+                                    className="flex items-center justify-between gap-3 rounded border border-line bg-surface p-2"
+                                  >
+                                    <span className="text-sm text-content">{sol.texto}</span>
+                                    <div className="flex shrink-0 gap-2">
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleUpdateSolucionClick(cat.id, preg, sol)}
+                                      >
+                                        Editar
+                                      </Button>
+                                      <Button
+                                        variant="danger"
+                                        size="sm"
+                                        onClick={() => handleDeleteSolucionClick(cat.id, preg, sol.id)}
+                                      >
+                                        Eliminar
+                                      </Button>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-sm text-content-muted">Sin soluciones todavía.</p>
+                            )}
+
+                            {/* El campo y su boton van EN LA MISMA FILA, alineados
+                                por abajo. Antes el boton caia pegado debajo del
+                                campo y no se veia que fueran la misma accion. */}
+                            <div className="flex items-end gap-3">
+                              <div className="flex-1">
+                                <Field
+                                  label="Nueva solución"
+                                  name={`nueva-solucion-${cat.id}-${preg.id}`}
+                                  value={newSolucionTexto[`${cat.id}-${preg.id}`] || ""}
+                                  onChange={(e) =>
+                                    setNewSolucionTexto((prev) => ({
+                                      ...prev,
+                                      [`${cat.id}-${preg.id}`]: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </div>
+                              <Button onClick={() => handleAddSolucionClick(cat.id, preg)}>
+                                Añadir
+                              </Button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {/* Nueva pregunta */}
+                    <div className="flex flex-col gap-3 rounded-lg border border-dashed border-line-strong p-4">
+                      <p className="font-medium text-content">Añadir una pregunta</p>
+                      <Field
+                        label="Título de la pregunta"
+                        name={`nueva-pregunta-titulo-${cat.id}`}
+                        value={newPreguntaTitulo[cat.id] || ""}
+                        onChange={(e) =>
+                          setNewPreguntaTitulo((prev) => ({ ...prev, [cat.id]: e.target.value }))
+                        }
+                      />
+                      <Field
+                        label="Definición"
+                        name={`nueva-pregunta-definicion-${cat.id}`}
+                        value={newPreguntaDefinicion[cat.id] || ""}
+                        onChange={(e) =>
+                          setNewPreguntaDefinicion((prev) => ({ ...prev, [cat.id]: e.target.value }))
+                        }
+                      />
+                      <div className="flex">
+                        <Button onClick={() => handleAddPreguntaClick(cat.id)}>
+                          Añadir pregunta
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                ),
+              }))}
+            />
+          )}
+        </section>
+      </main>
+
+      <Footer />
     </div>
   );
 };

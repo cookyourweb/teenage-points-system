@@ -14,7 +14,7 @@ Todas las cifras de este documento están medidas sobre el código, no estimadas
 | Interfaz | React 18 + TypeScript 5.7, Vite 5 | `src/` |
 | Estilos | Tailwind 3.4 sobre una capa de tokens propia | `src/styles/tokens.css` |
 | Design system | 8 piezas cerradas, documentadas en Storybook 10 | `src/components/ui/` |
-| Pruebas | Vitest 2 + Testing Library — **290 tests** | `src/__tests__/` |
+| Pruebas | Vitest 2 + Testing Library — **296 tests** | `src/__tests__/` |
 | Backend | Spring Boot 4.1 sobre Java 17 | `backend/` |
 | Datos | **Firestore y MongoDB a la vez** — ver abajo | |
 | Sesión | Firebase Authentication | |
@@ -91,6 +91,48 @@ sistema.** Por eso cada uso legítimo tiene su prop: `layout` en `Button`, `icon
 y `padding` en `Card`, `labelHidden` en `Field`. Salieron de medir qué se pasaba
 de verdad, no de imaginarlo.
 
+### Permisos, en dos capas
+
+Los datos de una familia no los ve otra, y eso se comprueba **dos veces**:
+
+| Capa | Dónde corre | ¿Se puede saltar? |
+|---|---|---|
+| Guarda de ruta en React | el navegador | **sí** |
+| `firestore.rules` | el servidor de Google | no |
+
+La del navegador es comodidad: evita llegar por accidente y da un mensaje
+decente. **La que protege son las reglas**, porque quien quiera se salta la
+primera con las herramientas de desarrollo o llamando a la API de Firestore sin
+pasar por la aplicación.
+
+Hasta el 20 de agosto de 2026 esas reglas **vivían solo en la consola de
+Firebase**: sin historial, sin revisión y sin que nadie supiera cuáles eran sin
+entrar a mirar. Ahora están en `firestore.rules`, versionadas.
+
+Son dos preguntas distintas, y por eso hay dos guardas y no una:
+
+```
+RutaSoloAdmin      ¿QUIÉN ERES?     → el rol
+RutaDeMiFamilia    ¿ESTO ES TUYO?   → comparar la familia de la URL con la tuya
+```
+
+Tres detalles de las reglas que marcan la diferencia:
+
+- Se comprueba el **campo** `familyId`, no el nombre del documento. El nombre es
+  una cadena que se compone desde fuera.
+- Al actualizar se comprueban **las dos** familias, la del documento existente y
+  la del que llega. Sin la segunda, alguien cambia el `familyId` de un documento
+  suyo y se lo lleva.
+- `rol` y `familyId` del usuario **no se pueden cambiar desde el cliente**. Si se
+  pudieran, cualquiera se asciende a admin y el resto de reglas sobra.
+
+**Cuando se cambien hay que desplegarlas**, o el fichero es un documento y no
+una protección:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
 ### Accesibilidad
 
 No es una capa encima: **está dentro de los componentes**, que es lo único que
@@ -133,7 +175,7 @@ Dos decisiones que están en el código y conviene no deshacer sin querer:
 
 ## Las pruebas
 
-**290 tests** con Vitest y Testing Library. No son solo de comportamiento: hay
+**296 tests** con Vitest y Testing Library. No son solo de comportamiento: hay
 tres clases distintas, y las dos últimas son las que evitan que el sistema se
 deshaga.
 

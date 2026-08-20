@@ -40,7 +40,7 @@ La aplicación convierte el acuerdo en algo visible:
 | **React Router 7** | rutas |
 | **Tailwind 3.4** | sobre una capa de tokens propia, no suelto |
 | **Storybook 10** | documentación viva del design system |
-| **Vitest 2** + **Testing Library** | 290 tests |
+| **Vitest 2** + **Testing Library** | 296 tests |
 
 ### Backend
 
@@ -108,6 +108,34 @@ COMPONENTE   --tps-btn-primary-bg: var(--tps-action)   "quién lo usa"
 Un componente nunca nombra un color: nombra un rol. La consecuencia es que **el
 modo oscuro son veinte declaraciones**, no una clase `dark:` en cada elemento.
 
+### Permisos en dos capas
+
+Los datos de una familia no los ve otra. Y eso se comprueba **dos veces, en dos
+sitios distintos**, porque una sola no basta:
+
+| Capa | Qué hace | Se puede saltar |
+|---|---|---|
+| Guarda de ruta en React | evita llegar por accidente y explica por qué | sí |
+| **Reglas de Firestore** | lo impide de verdad, en el servidor de Google | no |
+
+La guarda del navegador es comodidad. Quien quiera se la salta con las
+herramientas de desarrollo, o llamando a la API de Firestore sin pasar por la
+aplicación. **Lo que protege son las reglas**, y por eso están en
+[`firestore.rules`](firestore.rules), versionadas y revisables, y no en un
+panel web.
+
+Son dos preguntas distintas y por eso hay dos guardas, no una con un `if`
+dentro:
+
+```
+RutaSoloAdmin      ¿QUIÉN ERES?     → se resuelve con el rol
+RutaDeMiFamilia    ¿ESTO ES TUYO?   → se resuelve comparando
+```
+
+Las dos **deniegan por defecto**: sin rol, sin familia o si falla la lectura,
+no se entra. Un error al comprobar permisos no puede acabar en permiso
+concedido.
+
 ### Accesibilidad dentro del componente
 
 No es una revisión al final: está en la pieza, que es lo único que escala.
@@ -122,7 +150,7 @@ No es una revisión al final: está en la pieza, que es lo único que escala.
 
 ## Pruebas
 
-**290 tests**, de tres clases distintas:
+**296 tests**, de tres clases distintas:
 
 | Tipo | Qué vigila |
 |---|---|
@@ -136,7 +164,7 @@ botón sin nombre accesible. Un test que recorre el código fuente, sí.
 
 ```bash
 npm run typecheck   # tsc -b
-npx vitest run      # 290 tests
+npx vitest run      # 296 tests
 npm run storybook   # el design system, en el 6006
 ```
 
@@ -195,10 +223,11 @@ de una tarea podría moverla a la suya.
 
 En desarrollo activo. Lo siguiente:
 
-- Comprobación de pertenencia a la familia en las reglas de Firestore
-- Autenticación en el backend
+- Autenticación en el backend de Java, que hoy está abierto
 - Migrar los dominios de privilegios, familias y recompensas
-- Despliegue
+- Separar el rol global del papel dentro de cada familia, para que una misma
+  persona pueda ser madre en la suya e invitada en otra
+- Desplegar la aplicación
 
 ---
 

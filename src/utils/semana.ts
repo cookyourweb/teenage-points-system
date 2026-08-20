@@ -74,3 +74,41 @@ export function comoAtributoFecha(fecha: Date): string {
   const dia = String(fecha.getDate()).padStart(2, '0');
   return `${fecha.getFullYear()}-${mes}-${dia}`;
 }
+
+/**
+ * El identificador de la semana, en formato ISO 8601: `2026-W34`.
+ *
+ * DECIDE DONDE SE GUARDAN LOS DATOS: la ruta es
+ * `/weeklyTasks/{familyId}_{childId}_{weekId}`. Si este valor cambia a mitad
+ * de semana, se escribe en otro documento y lo anterior se pierde de vista.
+ *
+ * Y eso es exactamente lo que pasaba. La version que habia en `familyService`
+ * daba, medido dia a dia:
+ *
+ *     lunes 17-ago a sabado 22-ago  ->  2026-W34
+ *     DOMINGO 23-ago                ->  2026-W35   <-- otra semana
+ *
+ * O sea: lo que se marcaba el domingo se guardaba en la semana siguiente, y el
+ * lunes habia desaparecido. El domingo es el dia que mas se repasa la semana.
+ *
+ * Se usa la definicion ISO 8601 porque es la que ya se usa en España y la que
+ * resuelve los bordes sin inventar reglas: la semana 1 de un año es la que
+ * contiene su primer jueves.
+ */
+export function idDeLaSemana(fecha: Date = new Date()): string {
+  // Se trabaja sobre el JUEVES de la semana. Es el truco de ISO 8601: el jueves
+  // siempre cae en el año al que pertenece la semana, asi que resuelve solo el
+  // caso de enero, donde los primeros dias pueden ser del año anterior.
+  const jueves = new Date(fecha);
+  jueves.setHours(0, 0, 0, 0);
+  jueves.setDate(jueves.getDate() + 3 - ((jueves.getDay() + 6) % 7));
+
+  const primerJueves = new Date(jueves.getFullYear(), 0, 4);
+  primerJueves.setDate(primerJueves.getDate() + 3 - ((primerJueves.getDay() + 6) % 7));
+
+  const semanasDeDiferencia = Math.round(
+    (jueves.getTime() - primerJueves.getTime()) / (7 * 24 * 60 * 60 * 1000),
+  );
+
+  return `${jueves.getFullYear()}-W${String(semanasDeDiferencia + 1).padStart(2, '0')}`;
+}

@@ -1,4 +1,5 @@
 import { BaseService } from "./baseService";
+import { comoAtributoFecha, idDeLaSemana, rangoDeLaSemana } from "../utils/semana";
 import type { Family, Child } from "../types/familyTypes";
 import type { TasksState } from "../types/taskTypes";
 import { 
@@ -129,21 +130,38 @@ class FamilyService extends BaseService<FamilyWithId> {
 
   // ========== NUEVAS FUNCIONES PARA PUNTOS ==========
 
-  // Obtener el ID de la semana actual (formato: YYYY-WW)
+  /**
+   * El identificador de la semana, que DECIDE DONDE SE GUARDAN LOS DATOS: la
+   * ruta es `/weeklyTasks/{familyId}_{childId}_{weekId}`.
+   *
+   * La cuenta vive en `utils/semana` y no aqui por dos motivos. El primero es
+   * que estaba mal. El segundo es que estas dos funciones eran PRIVADAS, asi
+   * que la interfaz no podia usarlas y cada pantalla se hacia su propia
+   * version: por eso el usuario veia "Semana 2026-W34" en un sitio y la ruta
+   * de Firestore en otro.
+   *
+   * LO QUE ESTABA ROTO, medido dia a dia sobre una semana real:
+   *
+   *     lunes 17-ago a sabado 22-ago  ->  2026-W34
+   *     DOMINGO 23-ago                ->  2026-W35   <-- otro documento
+   *
+   * O sea que lo marcado el domingo se guardaba en la semana siguiente y el
+   * lunes habia desaparecido. Y el domingo es el dia que mas se repasa.
+   *
+   * SOBRE LOS DATOS QUE YA EXISTEN: se comparo el formato viejo con el nuevo
+   * dia a dia durante todo 2026 y coinciden en 313 de 365. Los 52 que no son
+   * exactamente los domingos, que es el fallo. La semana en curso da el mismo
+   * id con las dos formulas, asi que lo guardado se sigue encontrando.
+   */
   private getCurrentWeekId(): string {
-    const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000));
-    const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
-    return `${now.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`;
+    return idDeLaSemana();
   }
 
-  // Obtener el lunes de la semana actual
+  /** El lunes de la semana en curso, en formato AAAA-MM-DD. */
   private getWeekStartDate(): string {
-    const now = new Date();
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - now.getDay() + 1);
-    return monday.toISOString().split('T')[0];
+    // No se usa toISOString(), que convierte a UTC: en España eso puede
+    // devolver el domingo anterior a partir de las 22:00 o 23:00.
+    return comoAtributoFecha(rangoDeLaSemana().lunes);
   }
 
   // Guardar el estado completo de la semana

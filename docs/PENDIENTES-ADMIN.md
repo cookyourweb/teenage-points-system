@@ -65,7 +65,27 @@ Como mínimo:
 
 ---
 
-## 3-bis. GRAVE Y DISTINTO: nadie comprueba de qué familia eres
+## 3-bis. ~~GRAVE: nadie comprueba de qué familia eres~~ HECHO
+
+**Cerrado el 20-ago en dos capas:**
+
+- `RutaDeMiFamilia` en el navegador, con 6 tests. Compara la familia de la URL
+  con la del usuario, deniega por defecto y explica por qué en vez de echar en
+  silencio.
+- **`firestore.rules`, que es lo que protege de verdad.** Ahora está en el
+  repositorio: hasta hoy vivía solo en la consola de Firebase, sin historial ni
+  revisión posible.
+
+**PENDIENTE Y OBLIGATORIO:** las reglas no protegen nada hasta que se
+despliegan.
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+Lo que sigue debajo es el diagnóstico original, que explica por qué.
+
+---
 
 Salió al arreglar la guarda de rol, mirando las demás rutas.
 

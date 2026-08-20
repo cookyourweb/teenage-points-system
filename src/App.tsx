@@ -8,6 +8,7 @@ import RewardTracker from "./components/dashboard/RewardTracker";
 import ChildView from "./components/dashboard/ChildView";
 import FaqAdmin from "./components/dashboard/FaqAdmin";
 import RutaSoloAdmin from "./components/RutaSoloAdmin";
+import RutaDeMiFamilia from "./components/RutaDeMiFamilia";
 import PaginaFaqs from "./components/PaginaFaqs";
 
 const App = () => {
@@ -61,10 +62,17 @@ const App = () => {
           element={user ? <Dashboard /> : <Navigate to="/" replace />} 
         />
         
-        {/* Sistema de puntos completo para padres (requiere autenticación) */}
-        <Route 
-          path="/reward-tracker/:familyId/:childId" 
-          element={user ? <RewardTracker /> : <Navigate to="/" replace />} 
+        {/* Sistema de puntos. Requiere sesion Y PERTENECER a esa familia.
+            Antes la condicion era solo `user`: cualquiera con cuenta que
+            cambiara el familyId de la URL entraba en los puntos de otra
+            familia, y no solo a mirar. */}
+        <Route
+          path="/reward-tracker/:familyId/:childId"
+          element={
+            <RutaDeMiFamilia uid={user?.uid}>
+              <RewardTracker />
+            </RutaDeMiFamilia>
+          }
         />
         
         {/* Vista simplificada para hijos (NO requiere autenticación) */}

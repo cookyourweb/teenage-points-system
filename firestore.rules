@@ -1,0 +1,118 @@
+rules_version = '2';
+
+// REGLAS DE SEGURIDAD DE FIRESTORE
+//
+// Esto es lo que protege los datos de verdad. La guarda que hay en el
+// navegador (`RutaDeMiFamilia`) es comodidad: evita llegar por accidente y da
+// un mensaje decente. Pero vive en el cliente y quien quiera se la salta con
+// las herramientas de desarrollo, o llamando a la API de Firestore
+// directamente sin pasar por la aplicación.
+//
+// Estas reglas se ejecutan en el servidor de Google. No se saltan.
+//
+// POR QUÉ ESTE FICHERO ESTÁ EN EL REPOSITORIO:
+// hasta ahora las reglas vivían solo en la consola de Firebase. Eso significa
+// que nadie sabía cuáles eran sin entrar a mirar, no había historial de quién
+// las cambió ni por qué, y no se podían revisar antes de aplicarlas. Una regla
+// de seguridad es código: va versionada.
+//
+// CÓMO SE APLICAN (no basta con guardar el fichero):
+//     firebase deploy --only firestore:rules
+//
+// Mientras no se despliegue, esto es un documento y no una protección.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Ayudas ----------
+
+    function haIniciadoSesion() {
+      return request.auth != null;
+    }
+
+    function miDocumento() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    // La pregunta que faltaba: ¿esta familia es la tuya?
+    function esMiFamilia(familyId) {
+      return haIniciadoSesion() && miDocumento().familyId == familyId;
+    }
+
+    function soyAdmin() {
+      return haIniciadoSesion() && miDocumento().rol == 'admin';
+    }
+
+    // ---------- Usuarios ----------
+    // Cada uno ve y edita su propio documento, y nada más.
+    //
+    // `rol` y `familyId` NO se pueden cambiar desde el cliente: si se
+    // pudieran, cualquiera se ascendería a admin o se cambiaría de familia, y
+    // todas las reglas de abajo dejarían de servir para nada.
+    match /usuarios/{uid} {
+      allow read: if haIniciadoSesion() && request.auth.uid == uid;
+
+      allow update: if haIniciadoSesion()
+                    && request.auth.uid == uid
+                    && request.resource.data.rol == resource.data.rol
+                    && request.resource.data.familyId == resource.data.familyId;
+
+      allow create: if haIniciadoSesion() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    // ---------- Familias ----------
+    match /familias/{familyId} {
+      allow read, write: if esMiFamilia(familyId);
+    }
+
+    // ---------- Puntos de la semana ----------
+    // EL AGUJERO QUE SE CIERRA AQUÍ.
+    //
+    // El identificador del documento es `{familyId}_{childId}_{weekId}`, y el
+    // dato lleva además `familyId` dentro. Se comprueba el CAMPO y no el
+    // nombre del documento: el nombre es una cadena que se puede componer como
+    // se quiera desde fuera, el campo es el dato.
+    match /weeklyTasks/{docId} {
+      allow read: if esMiFamilia(resource.data.familyId);
+
+      allow create: if esMiFamilia(request.resource.data.familyId);
+
+      // Y al actualizar se comprueban las DOS: la familia del documento que ya
+      // existe y la del que se manda. Sin la segunda, alguien podría cambiarle
+      // el familyId a un documento suyo y llevárselo a otra familia.
+      allow update: if esMiFamilia(resource.data.familyId)
+                    && esMiFamilia(request.resource.data.familyId);
+
+      allow delete: if esMiFamilia(resource.data.familyId);
+    }
+
+    // ---------- Privilegios ----------
+    match /privilegios/{privilegeId} {
+      allow read: if esMiFamilia(resource.data.familyId);
+      allow create: if esMiFamilia(request.resource.data.familyId);
+      allow update: if esMiFamilia(resource.data.familyId)
+                    && esMiFamilia(request.resource.data.familyId);
+      allow delete: if esMiFamilia(resource.data.familyId);
+    }
+
+    // ---------- FAQs ----------
+    // Se leen sin sesión a propósito: la página `/faqs` es pública, para que
+    // un padre pueda mandarle el enlace a un abuelo que no tiene cuenta.
+    //
+    // Escribir es otra cosa. Antes la ruta `/admin/faqs` solo comprobaba que
+    // hubieras iniciado sesión, así que cualquiera con cuenta podía borrar las
+    // FAQs de todas las familias. Un hijo incluido.
+    match /categorias/{categoriaId} {
+      allow read: if true;
+      allow write: if soyAdmin();
+    }
+
+    // ---------- Todo lo demás ----------
+    // Denegar por defecto. Una colección nueva no queda abierta por olvido:
+    // hay que venir aquí y decidir quién la puede tocar.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

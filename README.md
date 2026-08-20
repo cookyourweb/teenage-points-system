@@ -1,121 +1,158 @@
-# Sistema de puntos familiar
+# Sistema de Puntos
 
-Una plataforma para que las familias acuerden tareas, puntos y privilegios con sus
-hijos adolescentes, y para que los hijos vean su progreso sin depender de que
-alguien se lo recuerde.
+Aplicación web para familias con hijos adolescentes: los padres acuerdan tareas
+y privilegios, los hijos ven su progreso, y el sistema mide lo que de verdad
+está pasando en casa.
 
-Los padres definen las tareas y lo que vale cada una. Los hijos las completan y
-acumulan puntos. Al llegar a cierto umbral se desbloquean privilegios, y cada hijo
-tiene un enlace propio de solo lectura para consultar su marcador.
+Está pensado como herramienta de apoyo para programas de acompañamiento
+familiar: los que trabajan acuerdos concretos entre padres e hijos y necesitan
+ver si se cumplen. La aplicación traduce ese trabajo a algo medible: qué se
+acuerda, qué se cumple y cómo evoluciona semana a semana.
 
-Nació de un problema doméstico real y se ha convertido en el proyecto donde pruebo
-decisiones de arquitectura de punta a punta.
-
----
-
-## Con qué está hecho
-
-**Frontend**
-React 18 · TypeScript · Vite · React Router · Tailwind · Vitest y Testing Library
-
-**Backend**
-Java 17 · Spring Boot 4.1 · Spring Data MongoDB · Bean Validation · JUnit 5 y Mockito
-
-**Datos y servicios**
-MongoDB · Firebase (Auth y Firestore, en migración)
+**Design system publicado:**
+[cookyourweb.github.io/teenage-points-system](https://cookyourweb.github.io/teenage-points-system/)
 
 ---
 
-## Arquitectura, y por qué está a medio camino
+## Qué resuelve
 
-El backend original es Firestore, con el frontend hablando directamente con él.
-Ahora se está migrando a una API propia en Spring Boot. **Los dos conviven**: se
-migra endpoint por endpoint, sin reescribir nada y sin parar la aplicación.
+El problema no es que un adolescente no ordene su cuarto. Es que **nadie
+recuerda lo que se acordó**, y la conversación acaba siendo la misma discusión
+cada semana.
+
+La aplicación convierte el acuerdo en algo visible:
+
+- Los padres definen tareas y cuántos puntos vale cada una
+- Los hijos las marcan según las hacen, desde su propio enlace
+- Al llegar a cierto umbral se desbloquean privilegios
+- Y queda registro de la semana, para hablar de datos y no de percepciones
+
+---
+
+## Tecnología
+
+### Interfaz
+
+| | |
+|---|---|
+| **React 18** + **TypeScript 5.7** | componentes tipados de punta a punta |
+| **Vite 5** | empaquetado y servidor de desarrollo |
+| **React Router 7** | rutas |
+| **Tailwind 3.4** | sobre una capa de tokens propia, no suelto |
+| **Storybook 10** | documentación viva del design system |
+| **Vitest 2** + **Testing Library** | 290 tests |
+
+### Backend
+
+| | |
+|---|---|
+| **Java 17** + **Spring Boot 4.1** | API REST |
+| **Spring Data MongoDB** | persistencia |
+| **Bean Validation** | validación de entrada |
+| **JUnit 5** + **Mockito** | pruebas de dominio |
+
+### Datos
+
+| | |
+|---|---|
+| **MongoDB** | dominios ya migrados |
+| **Firebase** (Auth y Firestore) | sesión y lo que queda por migrar |
+
+---
+
+## Arquitectura
+
+### Una migración incremental, no un big bang
+
+El proyecto nació sobre Firestore y está pasando a un backend propio en Java.
+**Los dos conviven**, y se migra dominio a dominio sin parar la aplicación.
 
 ```
-componentes React
-       |
-src/services/*.ts        <- la unica capa que sabe de donde vienen los datos
-       |                                    |
-   Firestore                        API Spring Boot
-   (lo que queda)                          |
-                                        MongoDB
+      componentes React
+              │
+      src/services/*.ts        ← la única capa que sabe de dónde vienen los datos
+              │
+      ┌───────┴────────┐
+  Firestore      API Spring Boot
+ (lo que queda)         │
+                     MongoDB
 ```
 
-Que esto sea barato no es casualidad. Los componentes nunca llamaron a Firestore
-directamente: llaman a `fetchTasks()`, `addCustomTask()`, `updateCustomTask()`. Toda
-la dependencia del proveedor está encerrada en seis ficheros de `src/services/`.
+Que esto salga barato no es casualidad: **los componentes nunca llamaron a
+Firestore directamente**. Llaman a `fetchTasks()`, `addCustomTask()`. Toda la
+dependencia del proveedor está encerrada en seis ficheros de `src/services/`.
 
-El puerto ya estaba construido. La migración consiste en escribir otro adaptador.
+El puerto ya estaba construido. Migrar consiste en escribir otro adaptador.
 
-Es el mismo enfoque que aplico cuando hay que cambiar una pieza de un sistema vivo:
-incremental, con las dos versiones funcionando a la vez, nunca un big bang.
+### Design system con contratos cerrados
 
-El mapa completo con el estado y las decisiones está en
-[`docs/MIGRACION-A-JAVA.md`](docs/MIGRACION-A-JAVA.md).
+Ocho componentes propios, y **ninguno acepta `className`**:
+
+```ts
+Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style'>
+```
+
+Esa línea convierte el sistema de convención en regla: **no es algo que
+recordar en la revisión, es que no compila**. Y en la configuración de Tailwind
+se *sustituye* `theme.colors` en vez de extenderlo, así que `bg-blue-500` ni
+siquiera existe.
+
+El color se organiza en **tres niveles**:
+
+```
+PRIMITIVO    --tps-brand-600: #2563eb                  "qué color es"
+SEMÁNTICO    --tps-action: var(--tps-brand-600)        "para qué sirve"
+COMPONENTE   --tps-btn-primary-bg: var(--tps-action)   "quién lo usa"
+```
+
+Un componente nunca nombra un color: nombra un rol. La consecuencia es que **el
+modo oscuro son veinte declaraciones**, no una clase `dark:` en cada elemento.
+
+### Accesibilidad dentro del componente
+
+No es una revisión al final: está en la pieza, que es lo único que escala.
+
+- `Field` exige la etiqueta **en el tipo**, y cablea `aria-invalid` y
+  `aria-describedby` solo
+- `Modal` trae trampa de foco, cierre con Escape y devolución del foco
+- `Tabs` implementa el patrón WAI-ARIA completo, con navegación por flechas
+- **El contraste se mide en los tests**: 21 pares de color por dos modos
 
 ---
 
-## Algunas decisiones, y su motivo
+## Pruebas
 
-**`Task` es un `record` inmutable, no una clase con setters.** Una tarea no se muta
-a trozos: se reemplaza entera. Así es imposible dejarla en un estado intermedio.
+**290 tests**, de tres clases distintas:
 
-**El `Clock` se inyecta en lugar de llamar a `Instant.now()` dentro del servicio.**
-Sin eso ningún test puede afirmar nada sobre `createdAt` ni `updatedAt`. Con el
-reloj inyectado, los tests lo fijan y lo comprueban de verdad.
+| Tipo | Qué vigila |
+|---|---|
+| Comportamiento | que los componentes funcionen, sobre todo **con teclado** |
+| Contraste | ratios WCAG calculados sobre los colores reales, en claro y oscuro |
+| Guardas de arquitectura | que no vuelvan a entrar controles crudos ni colores fuera del sistema |
 
-**`actualizar()` ignora `familyId` y `createdBy` aunque vengan en la petición.** Una
-tarea no cambia de familia ni de autor. Sin esa regla, cualquiera con el id de una
-tarea podría moverla a la suya. Hay un test que lo comprueba.
-
-**Los nombres de los campos en Java son idénticos a los de TypeScript.** El JSON que
-devuelve la API es el mismo objeto que el frontend ya maneja, así que la migración
-no necesita capa de traducción.
-
-**Los errores salen como `ProblemDetail` (RFC 7807).** El cliente recibe siempre la
-misma forma: `404` para lo que no existe, `400` con la lista de campos que fallan y
-por qué.
-
----
-
-## Cómo levantarlo
+Las guardas existen porque **los tipos no lo pueden todo**: un icono es un
+`ReactNode` válido dentro de `children`, así que TypeScript no puede impedir un
+botón sin nombre accesible. Un test que recorre el código fuente, sí.
 
 ```bash
-# 1. Base de datos
-docker run -d --name points-mongo -p 27017:27017 -v points-mongo-data:/data/db mongo:7
-
-# 2. API      (no hace falta instalar Maven: el proyecto trae el wrapper)
-cd backend && ./mvnw spring-boot:run          # http://localhost:8080
-
-# 3. Frontend
-npm install && npm run dev                     # http://localhost:5173
+npm run typecheck   # tsc -b
+npx vitest run      # 290 tests
+npm run storybook   # el design system, en el 6006
 ```
-
-Comprobar que la API responde:
-
-```bash
-curl localhost:8080/actuator/health
-```
-
-El frontend necesita un `.env` con la configuración de Firebase mientras dure la
-migración. Las variables son las que aparecen en `src/firebase.ts`.
 
 ---
 
-## Tests
+## Cómo se levanta
 
-```bash
-npm test                    # frontend
-cd backend && ./mvnw test   # backend
-```
+Son **tres piezas**: MongoDB, el backend de Java y el frontend. Con menos, la
+aplicación se ve pero no guarda.
 
-Los tests del backend no necesitan MongoDB levantado: el repositorio va mockeado,
-porque lo que se prueba ahí son las reglas de negocio y no que Mongo sepa guardar.
+Está explicado paso a paso, con sus trampas, en
+**[docs/LEVANTAR-EN-LOCAL.md](docs/LEVANTAR-EN-LOCAL.md)**.
 
 ---
 
-## La API hoy
+## La API
 
 | Método | Ruta | Qué hace |
 |---|---|---|
@@ -125,60 +162,44 @@ porque lo que se prueba ahí son las reglas de negocio y no que Mongo sepa guard
 | `PUT` | `/api/tasks/{id}` | Actualizar |
 | `DELETE` | `/api/tasks/{id}` | Borrar. Devuelve `204` |
 
----
+Tres decisiones del backend que están en el código:
 
-## El design system
+**`Task` es un `record` inmutable.** Una tarea no se muta a trozos: se
+reemplaza entera con un `PUT`. Así es imposible dejarla a medias.
 
-La interfaz tiene ocho piezas propias y **ninguna acepta `className`**. La regla
-que ordena todo es que un componente nunca nombra un color, nombra un rol, y la
-consecuencia es que el modo oscuro son veinte declaraciones en vez de las 521
-clases `dark:` que había escritas a mano.
+**El `Clock` se inyecta** en lugar de llamar a `Instant.now()` dentro del
+servicio. Sin eso, ningún test puede afirmar nada sobre `createdAt`.
 
-La accesibilidad no es una capa encima: está dentro de los componentes. `Field`
-obliga a poner etiqueta en el tipo, `Modal` trae trampa de foco, y el contraste
-**se mide en los tests**, 21 estados por dos modos.
-
-**290 tests**, de tres clases: comportamiento, contraste y guardas de
-arquitectura que impiden que vuelvan a entrar controles crudos.
-
-Todo está documentado en Storybook, con once funciones `play` que son tests que
-se pueden mirar:
-
-```bash
-npm run storybook
-```
+**`actualizar()` ignora `familyId` y `createdBy`** aunque vengan en la
+petición. Una tarea no cambia de familia. Sin esa regla, cualquiera con el id
+de una tarea podría moverla a la suya.
 
 ---
 
-## Cómo levantarlo
-
-Son **tres piezas**, y con menos la aplicación se ve pero no funciona: crear
-tareas no guarda. Está explicado paso a paso, con sus trampas, en
-[`docs/LEVANTAR-EN-LOCAL.md`](docs/LEVANTAR-EN-LOCAL.md).
-
----
-
-## Qué falta
-
-- **Nadie comprueba de qué familia eres**: cambiando el identificador de la URL
-  se entra en los puntos de otra familia. Es lo más urgente, y está en
-  [`docs/PENDIENTES-ADMIN.md`](docs/PENDIENTES-ADMIN.md)
-- Autenticación en el backend, que hoy está abierto
-- Los dominios de privilegios, familias y recompensas
-- Migrar los datos existentes
-- Desplegar
-
----
-
-## Los documentos
+## Documentación
 
 | | |
 |---|---|
-| [`ARQUITECTURA.md`](docs/ARQUITECTURA.md) | cómo está montado, con las cifras medidas |
-| [`LEVANTAR-EN-LOCAL.md`](docs/LEVANTAR-EN-LOCAL.md) | las tres piezas y sus trampas |
-| [`MIGRACION-A-JAVA.md`](docs/MIGRACION-A-JAVA.md) | el plan de salida de Firebase |
-| [`DESIGN-SYSTEM-PROPUESTA.md`](docs/DESIGN-SYSTEM-PROPUESTA.md) | el diagnóstico del que salió el sistema |
-| [`AUDITORIA-ACCESIBILIDAD.md`](docs/AUDITORIA-ACCESIBILIDAD.md) | los 54 hallazgos y su estado |
-| [`MODELO-DE-ROLES.md`](docs/MODELO-DE-ROLES.md) | por qué el rol actual no da para lo que hace falta |
-| [`PENDIENTES-ADMIN.md`](docs/PENDIENTES-ADMIN.md) | el agujero de propiedad entre familias |
-| [`TODO-UI.md`](docs/TODO-UI.md) | el plan de mejoras de interfaz |
+| [ARQUITECTURA.md](docs/ARQUITECTURA.md) | cómo está montado, con las cifras medidas |
+| [LEVANTAR-EN-LOCAL.md](docs/LEVANTAR-EN-LOCAL.md) | las tres piezas y sus trampas |
+| [MIGRACION-A-JAVA.md](docs/MIGRACION-A-JAVA.md) | el plan de salida de Firebase |
+| [DESIGN-SYSTEM-PROPUESTA.md](docs/DESIGN-SYSTEM-PROPUESTA.md) | el diagnóstico del que salió el sistema |
+| [AUDITORIA-ACCESIBILIDAD.md](docs/AUDITORIA-ACCESIBILIDAD.md) | 54 hallazgos WCAG 2.2 y su estado |
+| [MODELO-DE-ROLES.md](docs/MODELO-DE-ROLES.md) | el modelo de permisos y por qué hay que cambiarlo |
+| [PENDIENTES-ADMIN.md](docs/PENDIENTES-ADMIN.md) | pendientes del rol de administrador |
+| [TODO-UI.md](docs/TODO-UI.md) | plan de mejoras de interfaz |
+
+---
+
+## Estado
+
+En desarrollo activo. Lo siguiente:
+
+- Comprobación de pertenencia a la familia en las reglas de Firestore
+- Autenticación en el backend
+- Migrar los dominios de privilegios, familias y recompensas
+- Despliegue
+
+---
+
+Desarrollado por **[WunjoCreations](https://wunjocreations.com)**

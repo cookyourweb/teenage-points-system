@@ -1,7 +1,9 @@
-# Familias Estelares - Plataforma Educativa
+# Plan de mejoras de interfaz
 
 ## Descripción
-Plataforma educativa tipo Netflix diseñada para la gestión y apoyo en la educación de adolescentes. Ofrece un sistema integral que conecta a padres, profesores y adolescentes en un entorno educativo interactivo y gamificado.
+Plataforma de acompañamiento familiar para la educación de adolescentes.
+Conecta a padres, formadores y adolescentes alrededor de acuerdos concretos:
+tareas, puntos y privilegios que se pueden medir y revisar.
 
 ## ToDo
 

@@ -1,5 +1,8 @@
 //FaqAdmin.tsx
 import React, { useEffect, useState } from "react";
+import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import Field from '../ui/Field';
 import {
   fetchCategorias,
@@ -146,6 +149,14 @@ const FaqAdmin: React.FC = () => {
 
   return (
 <div className="p-6 text-content bg-surface">
+      <Link
+        to="/dashboard"
+        className="mb-4 inline-flex items-center gap-2 text-link underline-offset-4 hover:text-link-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-2"
+      >
+        <FontAwesomeIcon icon={faArrowLeft} aria-hidden="true" />
+        Volver al panel
+      </Link>
+
       <h1 className="text-2xl font-bold mb-4">Administración de FAQs</h1>
 
       {/* Agregar categoría */}

@@ -2,6 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { fetchCategorias } from "../../services/faqsService";
 import { Categoria } from "../../types/faqsTypes";
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import Footer from "../Footer";
 
 const Faqs: React.FC = () => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -20,8 +24,19 @@ const Faqs: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-6 text-content bg-surface">
-      <h2 className="text-2xl font-bold mb-4">FAQs</h2>
+    <div className="flex min-h-screen flex-col bg-surface text-content">
+      <main className="mx-auto w-full max-w-4xl flex-1 p-6">
+        {/* Sin esto, /faqs era un callejon sin salida: se entraba y no habia
+            forma de volver mas que con el boton de atras del navegador. */}
+        <Link
+          to="/dashboard"
+          className="mb-4 inline-flex items-center gap-2 text-link underline-offset-4 hover:text-link-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-2"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} aria-hidden="true" />
+          Volver al panel
+        </Link>
+
+      <h1 className="text-2xl font-bold mb-4">Preguntas frecuentes</h1>
       {categorias.length === 0 ? (
         <p className="text-content-muted">No hay FAQs disponibles.</p>
       ) : (
@@ -58,6 +73,9 @@ const Faqs: React.FC = () => {
           ))}
         </ul>
       )}
+      </main>
+
+      <Footer />
     </div>
   );
 };

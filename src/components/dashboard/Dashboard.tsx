@@ -1,7 +1,7 @@
 // src/components/dashboard/Dashboard.tsx (Actualizado con gestión de tareas)
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { auth, db } from "../../firebase";
 import { signOut } from "firebase/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -25,6 +25,7 @@ import Button from "../ui/Button";
 import Modal from "../ui/Modal";
 import Tabs from "../ui/Tabs";
 import ThemeToggle from "../ui/ThemeToggle";
+import Footer from "../Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { Child } from "../../types/familyTypes";
 import { useUserRole } from "../../hooks/useUserRole";
@@ -534,6 +535,24 @@ const Dashboard: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {/* Las FAQs existian en /faqs y no habia ni un enlace en toda la
+                  aplicacion: solo se llegaba escribiendo la URL. */}
+              <Link
+                to="/faqs"
+                className="rounded-lg px-3 py-2 text-sm text-content-muted underline-offset-4 transition-colors hover:bg-surface-sunken hover:text-content hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-2"
+              >
+                Preguntas frecuentes
+              </Link>
+
+              {isAdmin && (
+                <Link
+                  to="/admin/faqs"
+                  className="rounded-lg px-3 py-2 text-sm text-content-muted underline-offset-4 transition-colors hover:bg-surface-sunken hover:text-content hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-2"
+                >
+                  Administrar FAQs
+                </Link>
+              )}
+
               <ThemeToggle />
               <button
                 onClick={async () => {
@@ -628,6 +647,8 @@ const Dashboard: React.FC = () => {
           <FontAwesomeIcon icon={faPlus} size="lg" />
         </button>
       </div>
+
+      <Footer />
     </div>
   );
 };

@@ -65,6 +65,41 @@ Como mínimo:
 
 ---
 
+## 3-bis. GRAVE Y DISTINTO: nadie comprueba de qué familia eres
+
+Salió al arreglar la guarda de rol, mirando las demás rutas.
+
+```tsx
+<Route
+  path="/reward-tracker/:familyId/:childId"
+  element={user ? <RewardTracker /> : <Navigate to="/" replace />}
+/>
+```
+
+`RewardTracker` coge `familyId` de la URL con `useParams` y **no comprueba en
+ningún momento que esa familia sea la tuya**. Tiene `user` y tiene `role`, pero
+no compara el `familyId` de la URL con el de tu usuario.
+
+Es decir: **cualquiera con cuenta que cambie el identificador de la URL entra
+en el seguimiento de puntos de OTRA familia.** Y no solo mira: puede marcar
+tareas, canjear privilegios y editar.
+
+Esto NO es lo mismo que la guarda de rol y no se arregla igual:
+
+- La de rol pregunta **"¿quién eres?"**. Se resuelve con el rol.
+- Esta pregunta **"¿esto es tuyo?"**. Se resuelve comparando la familia de la
+  URL con la del usuario, y **sobre todo en el servidor**, porque los datos
+  vienen de ahí.
+
+Lo mismo aplica a `/child-view/:familyId/:childId`, aunque ahí es más discutible
+porque esa vista está pensada para compartirse por enlace con el hijo.
+
+**Qué hacer:** decidir primero el modelo. ¿El enlace de la vista del hijo es un
+secreto compartido a propósito, o hace falta sesión? De esa respuesta sale si
+`child-view` se protege igual que `reward-tracker` o no.
+
+---
+
 ## 4. `AddFaq.tsx` está huérfano
 
 71 líneas, cero importaciones y sin ruta. Es el tercer fichero muerto que
@@ -77,7 +112,12 @@ un fichero que nadie usa no protege de nada y confunde al que llega.
 
 ## Orden sugerido
 
-1. **La guarda de rol** (punto 2). Es lo único que es un agujero de verdad.
+1. ~~**La guarda de rol** (punto 2)~~. **HECHO** el 20-ago: `RutaSoloAdmin`,
+   con 6 tests. Deniega por defecto y no decide mientras carga el rol.
+   Pendiente: que **el servidor** lo compruebe también. La guarda del navegador
+   es comodidad, no seguridad.
+1-bis. **La comprobación de propiedad** (punto 3-bis). Es el agujero que queda,
+   y es más gordo que el anterior porque afecta a los datos de otras familias.
 2. **La puerta** (punto 1). Es media hora y desbloquea una pantalla que ya
    funciona.
 3. Decidir el alcance del admin (punto 3). Eso es producto, no código.

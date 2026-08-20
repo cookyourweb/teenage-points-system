@@ -7,6 +7,7 @@ import Dashboard from "./components/dashboard/Dashboard";
 import RewardTracker from "./components/dashboard/RewardTracker";
 import ChildView from "./components/dashboard/ChildView";
 import FaqAdmin from "./components/dashboard/FaqAdmin";
+import RutaSoloAdmin from "./components/RutaSoloAdmin";
 import Faqs from "./components/dashboard/Faqs";
 
 const App = () => {
@@ -78,10 +79,17 @@ const App = () => {
           element={<Faqs />} 
         />
         
-        {/* Administración de FAQs (requiere autenticación) */}
-        <Route 
-          path="/admin/faqs" 
-          element={user ? <FaqAdmin /> : <Navigate to="/" replace />} 
+        {/* Administración de FAQs. SOLO administradores.
+            Antes la condición era `user`, que solo comprueba que hayas
+            iniciado sesión: cualquiera con cuenta podía borrar las FAQs de
+            toda la familia escribiendo esta URL. */}
+        <Route
+          path="/admin/faqs"
+          element={
+            <RutaSoloAdmin uid={user?.uid}>
+              <FaqAdmin />
+            </RutaSoloAdmin>
+          }
         />
         
         {/* Ruta 404 - Página no encontrada */}

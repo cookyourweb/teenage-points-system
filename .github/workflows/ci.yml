@@ -1,0 +1,96 @@
+# CI del proyecto: dos jobs, front y back.
+#
+# Sin --passWithNoTests y sin continue-on-error: si un paso falla, falla.
+#
+# El backend no necesita base de datos en CI: los tests mockean el repositorio
+# y el contexto arranca sin Mongo (verificado 16-oct-2026: BUILD SUCCESS con
+# Mongo apagado; la traza ConnectException del log es ruido conocido).
+#
+# Ojo con el wrapper de Maven: NO se versiona el jar. .mvn/wrapper/
+# maven-wrapper.properties es distributionType=only-script, asi que mvnw
+# descarga Maven (3.9.16) por su cuenta. En un checkout fresco anda igual
+# que en local, pero necesita red.
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Si se empuja dos veces seguidas, se cancela la corrida vieja en vez de
+# encolarla (mismo renglón que usa storybook.yml para Pages).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend (lint → typecheck → tests → build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Primero lo barato. Nunca corrió en CI hasta 2026-10: con estos errores
+      # el repo pisoaba igual, por eso este paso existe.
+      - name: Lint
+        run: npm run lint
+
+      # npm run typecheck (tsc -b), nunca `tsc --noEmit` a secas: el tsconfig
+      # raíz es { "files": [], "references": [...] } y compila cero ficheros.
+      - name: Tipos
+        run: npm run typecheck
+
+      # Tests y build con Firebase FALSO a propósito: ningún test ni build
+      # habla con la base real. Igual que hace storybook.yml. Sin esto,
+      # src/firebase.ts revienta con auth/invalid-api-key al cargar el módulo.
+      - name: Tests
+        run: npx vitest run
+        env:
+          VITE_FIREBASE_API_KEY: clave-de-prueba
+          VITE_FIREBASE_AUTH_DOMAIN: prueba.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: proyecto-de-prueba
+          VITE_FIREBASE_STORAGE_BUCKET: prueba.appspot.com
+          VITE_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+          VITE_FIREBASE_APP_ID: "1:000000000000:web:7777777777777777777777"
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: clave-de-prueba
+          VITE_FIREBASE_AUTH_DOMAIN: prueba.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: proyecto-de-prueba
+          VITE_FIREBASE_STORAGE_BUCKET: prueba.appspot.com
+          VITE_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+          VITE_FIREBASE_APP_ID: "1:000000000000:web:7777777777777777777777"
+
+  backend:
+    name: Backend (./mvnw test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      # --batch-mode para sin colores ni banners; --no-transfer-progress para
+      # no llenar el log con el progreso de descargas que cachea setup-java.
+      - name: Tests
+        run: ./mvnw --batch-mode --no-transfer-progress test

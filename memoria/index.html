@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<!--
+  Registro de sesiones de trabajo — teenage-points-system
+
+  Un archivo, cero dependencias, doble clic y listo.
+
+  IMPORTANTE (leído antes de cualquier idea de "mejorarlo a lo grande"):
+  - En file:// el localStorage es indefinido según la SPEC (MDN) y puede
+    lanzar SecurityError; además cada URL file:// tiene su propio storage
+    (renombrar o mover este archivo "pierde" los datos guardados).
+    Por eso: try/catch + exportar/importar JSON y este archivo es la copia
+    durable, el storage es una caché, NUNCA la única verdad.
+  - La racha cuenta días consecutivos con al menos una sesión. Si hoy
+    todavía no hay sesión, cuenta desde ayer (que no se corte por no
+    haber cerrado el día). Cargar una fecha pasada la recalcula.
+  - El Date se arma manualmente (constructor con números) porque
+    new Date("YYYY-MM-DD") es UTC y se desplaza según el huso horario.
+  - LÍMITE DECLARADO (también en MEMORY.md): este archivo no tiene suite
+    de tests (sería meter build a una pieza sin build). La lógica va en
+    funciones puras al final del script para poder extraerse si algún día
+    esto se integra al proyecto.
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registro de sesiones — teenage-points-system</title>
+<style>
+  :root { --linea: #d1d5db; --texto: #111827; --apagado: #6b7280; --acento: #2563eb; --ok: #16a34a; --error: #dc2626; }
+  * { box-sizing: border-box; }
+  body { font: 15px/1.5 system-ui, sans-serif; color: var(--texto); max-width: 40rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
+  h1 { font-size: 1.25rem; } h2 { font-size: 1.05rem; margin-top: 2rem; }
+  fieldset { border: 1px solid var(--linea); border-radius: 8px; padding: 1rem; margin: 0; }
+  label { display: block; font-weight: 600; margin-top: .75rem; }
+  input, button { font: inherit; padding: .4rem .6rem; border: 1px solid var(--linea); border-radius: 6px; background: #fff; }
+  input[type="date"], input[type="number"], input[type="text"] { width: 100%; }
+  button { cursor: pointer; }
+  button.primario { background: var(--acento); border-color: var(--acento); color: #fff; font-weight: 600; }
+  .lado-a-lado { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 1rem; }
+  .estado { margin-top: .75rem; font-weight: 600; min-height: 1.4em; }
+  .ok { color: var(--ok); } .error { color: var(--error); } .apagado { color: var(--apagado); }
+  .aviso { border: 1px solid #f59e0b; background: #fffbeb; border-radius: 8px; padding: .75rem 1rem; margin: 1rem 0; }
+  table { border-collapse: collapse; width: 100%; margin-top: .5rem; }
+  th, td { border-bottom: 1px solid var(--linea); padding: .45rem .3rem; text-align: left; vertical-align: top; }
+  th { font-size: .8rem; color: var(--apagado); }
+  td.num, th.num { text-align: right; }
+  details { margin-top: 1.5rem; } pre { white-space: pre-wrap; background: #f9fafb; border: 1px solid var(--linea); border-radius: 8px; padding: 1rem; font-size: .85rem; }
+  .racha { font-size: 2rem; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<h1>Registro de sesiones</h1>
+
+<div class="aviso" id="aviso-storage" hidden>
+  Este navegador no permite guardar de forma persistente por estar abierto
+  como <code>file://</code>. Podés trabajar igual, pero al cerrar se van los
+  datos: usá <strong>Exportar JSON</strong> para guardarlos a mano.
+</div>
+
+<form id="formulario" aria-label="Registrar una sesión">
+  <fieldset>
+    <legend>Registrar una sesión</legend>
+    <label for="campo-fecha">Fecha (editable: permite cargar días pasados)</label>
+    <input type="date" id="campo-fecha" required>
+
+    <label for="campo-tema">Tema</label>
+    <input type="text" id="campo-tema" required placeholder="¿Qué se trabajó?">
+
+    <label for="campo-minutos">Minutos</label>
+    <input type="number" id="campo-minutos" min="1" step="1" required>
+
+    <div class="lado-a-lado">
+      <button type="submit" class="primario">Guardar sesión</button>
+      <button type="button" id="exportar">Exportar JSON</button>
+      <label for="importar" style="margin:0; font-weight:400">Importar JSON:</label>
+      <input type="file" id="importar" accept=".json,application/json" style="width:auto">
+    </div>
+    <p class="estado" aria-live="polite" id="estado"></p>
+  </fieldset>
+</form>
+
+<h2>Llevador</h2>
+<p>Racha actual: <span class="racha" id="racha" aria-live="polite">0</span><br>
+<span class="apagado" id="totales">0 sesiones · 0 min</span></p>
+
+<h2>Sesiones</h2>
+<table>
+  <caption class="apagado" style="caption-side: top; text-align:left">La más nueva arriba. Los días pasados se cargan con la fecha editable.</caption>
+  <thead>
+    <tr><th scope="col">Fecha</th><th scope="col">Tema</th><th scope="col" class="num">Min</th><th scope="col"> </th></tr>
+  </thead>
+  <tbody id="tabla"></tbody>
+</table>
+
+<details>
+  <summary>Bloque para MEMORY.md</summary>
+  <div class="lado-a-lado">
+    <button type="button" id="copiar" class="primario">Copiar tabla para MEMORY.md</button>
+    <button type="button" id="actualizar-preview">Refrescar vista</button>
+  </div>
+  <p class="estado" aria-live="polite" id="estado-copia"></p>
+  <pre id="preview-bloque"></pre>
+</details>
+
+<script>
+"use strict";
+
+// ---------- persistencia: caché con copia de seguridad vía JSON ----------
+const CLAVE = "tps-sesiones-v1";
+let storageDisponible = true;
+
+function leer() {
+  try {
+    return JSON.parse(localStorage.getItem(CLAVE) || "[]");
+  } catch (e) {
+    storageDisponible = false; // SecurityError o datos ilegibles: no es fatal, el JSON respalda
+    return [];
+  }
+}
+
+function guardar(sesiones) {
+  try {
+    localStorage.setItem(CLAVE, JSON.stringify(sesiones));
+    storageDisponible = true;
+  } catch (e) {
+    storageDisponible = false;
+  }
+  actualizarAviso();
+  render();
+}
+
+// ---------- funciones puras (extraíbles a un módulo si se integra) ----------
+/** Etiqueta local YYYY-MM-DD. Sin new Date(string): es UTC y se desplaza. */
+function etiquetaLocal(fecha) {
+  return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}-${String(fecha.getDate()).padStart(2, "0")}`;
+}
+
+/** Date local desde "YYYY-MM-DD" (constructor, nunca parsear el string). */
+function deEtiqueta(texto) {
+  const [a, m, d] = texto.split("-").map(Number);
+  return new Date(a, m - 1, d);
+}
+
+/** Días consecutivos con sesiones, terminando HOY (o AYER si hoy no cierra). */
+function calcularRacha(sesiones) {
+  const dias = new Set(sesiones.map(s => s.fecha));
+  let cursor = new Date();
+  if (!dias.has(etiquetaLocal(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let racha = 0;
+  while (dias.has(etiquetaLocal(cursor))) { racha += 1; cursor.setDate(cursor.getDate() - 1); }
+  return racha;
+}
+
+/** La tabla de las últimas 5 + totales, lista para pegar en MEMORY.md. */
+function generarBloqueMarkdown(sesiones) {
+  const ordenadas = [...sesiones].sort((a, b) => b.fecha.localeCompare(a.fecha));
+  const totalMin = sesiones.reduce((suma, s) => suma + s.minutos, 0);
+  const filas = ordenadas.slice(0, 5).map(s => `| ${s.fecha} | ${s.tema.replace(/\|/g, "/")} | ${s.minutos} |`);
+  return [
+    "| Fecha | Tema | Min |",
+    "|---|---|---|",
+    ...filas,
+    "",
+    `**Total: ${sesiones.length} ${sesiones.length === 1 ? "sesión" : "sesiones"} · ${totalMin} min · racha ${calcularRacha(sesiones)}**`,
+  ].join("\n");
+}
+
+// ---------- render ----------
+const $ = id => document.getElementById(id);
+
+function render() {
+  const sesiones = leer().sort((a, b) => b.fecha.localeCompare(a.fecha));
+  const totalMin = sesiones.reduce((suma, s) => suma + s.minutos, 0);
+  const escComm = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  $("racha").textContent = calcularRacha(sesiones);
+  $("totales").textContent = `${sesiones.length} sesiones · ${totalMin} min`;
+
+  $("tabla").innerHTML = sesiones.map(s => `
+    <tr>
+      <td>${escComm(s.fecha)}</td><td>${escComm(s.tema)}</td><td class="num">${s.minutos}</td>
+      <td><button type="button" data-fecha="${escComm(s.fecha)}" aria-label="Borrar sesión del ${escComm(s.fecha)}">✕</button></td>
+    </tr>`).join("");
+
+  $("preview-bloque").textContent = generarBloqueMarkdown(sesiones);
+}
+
+function actualizarAviso() { $("aviso-storage").hidden = storageDisponible; }
+
+function anunciar(texto, clase) {
+  $("estado").textContent = texto;
+  $("estado").className = "estado " + (clase || "");
+}
+
+// ---------- eventos ----------
+$("campo-fecha").value = etiquetaLocal(new Date());
+
+$("formulario").addEventListener("submit", evento => {
+  evento.preventDefault();
+  const fecha = $("campo-fecha").value;
+  const tema = $("campo-tema").value.trim();
+  const minutos = parseInt($("campo-minutos").value, 10);
+  if (!fecha || !tema || !Number.isFinite(minutos) || minutos < 1) { anunciar("Faltan datos.", "error"); return; }
+
+  const sesiones = leer();
+  sesiones.push({ fecha, tema, minutos, creado: new Date().toISOString() });
+  guardar(sesiones); // guarda y re-renderiza
+  anunciar(`Guardado ✅ total con racha ${calcularRacha(sesiones)}`, "ok");
+  $("campo-tema").value = ""; $("campo-minutos").value = "";
+});
+
+$("tabla").addEventListener("click", evento => {
+  const fecha = evento.target.dataset && evento.target.dataset.fecha;
+  if (!fecha) return;
+  if (!confirm(`¿Borrar la sesión del ${fecha}?`)) return;
+  guardar(leer().filter(s => s.fecha !== fecha));
+  anunciar("Borrada.", "ok");
+});
+
+$("exportar").addEventListener("click", () => {
+  const datos = new Blob([JSON.stringify(leer(), null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(datos);
+  const a = document.createElement("a");
+  a.href = url; a.download = "sesiones-teenage-points.json"; a.click();
+  URL.revokeObjectURL(url);
+  anunciar("Exportado ✅ es tu copia durable fuera del navegador", "ok");
+});
+
+$("importar").addEventListener("change", evento => {
+  const fichero = evento.target.files[0];
+  if (!fichero) return;
+  fichero.text().then(texto => {
+    const llegan = JSON.parse(texto);
+    if (!Array.isArray(llegan)) throw new Error("no es un array");
+    const limpias = llegan.filter(s => s && s.fecha && s.tema && Number.isFinite(s.minutos));
+    if (!limpias.length) throw new Error("sin sesiones válidas");
+    guardar([...leer(), ...limpias]);
+    anunciar(`Importadas ${limpias.length} sesiones ✅`, "ok");
+  }).catch(error => anunciar("JSON no válido: " + error.message, "error"));
+});
+
+$("actualizar-preview").addEventListener("click", render);
+
+$("copiar").addEventListener("click", async () => {
+  const bloque = generarBloqueMarkdown(leer());
+  try {
+    await navigator.clipboard.writeText(bloque);
+    anunciarCopia("Copiado ✅ pegalo en MEMORY.md (podés usar el preview de abajo)", "ok");
+  } catch (e) {
+    // Sin clipboard en file:// o permiso denegado: el bloque ya está visible en el <pre> para copiar a mano.
+    anunciarCopia("El bloque está visible abajo: copialo a mano (Cmd/Ctrl+C sobre el texto gris)", "apagado");
+  }
+});
+
+function anunciarCopia(texto, clase) {
+  $("estado-copia").textContent = texto;
+  $("estado-copia").className = "estado " + clase;
+}
+
+render();
+actualizarAviso();
+</script>
+</body>
+</html>

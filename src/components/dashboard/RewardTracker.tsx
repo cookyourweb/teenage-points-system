@@ -20,7 +20,7 @@ import useAuth from "../../hooks/useAuth";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { TasksState } from "../../types/taskTypes";
+import { TasksState, type Task } from "../../types/taskTypes";
 import { getChildNameById } from "../../services/familyService";
 import { initialTasks, initialPrivileges } from "../../config/rewardConfig";
 import { useUserRole } from "../../hooks/useUserRole";
@@ -48,6 +48,30 @@ interface EditablePrivilege {
   description?: string;
 }
 
+// Lo minimo que hace falta para canjear. Lo comparten los privilegios
+// iniciales (Privilege, con id opcional porque viene de Firestore) y los
+// editables (EditablePrivilege): el canje no le exige a ninguno mas de lo
+// que de verdad usa: id, name y points.
+interface Canjeable {
+  id?: string;
+  name: string;
+  points: number;
+}
+
+// Entrada del historial tal como la crea el canje local. Firebase guarda
+// otra forma (PrivilegeHistory, con dateUnlocked); no son la misma pieza
+// y no se mezclan.
+interface PrivilegeRedimido {
+  id: string;
+  privilegeName: string;
+  pointsUsed: number;
+  dateRedeemed: string;
+  redeemedBy: string;
+  redeemedAt: string;
+  childId: string;
+  familyId: string;
+}
+
 const RewardTracker: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -58,7 +82,7 @@ const RewardTracker: React.FC = () => {
   const [tasks, setTasks] = useState<TasksState>({});
   const [totalPoints, setTotalPoints] = useState<{ [key: string]: number }>({});
   const [weeklyTotal, setWeeklyTotal] = useState(0);
-  const [privilegeHistory, setPrivilegeHistory] = useState<any[]>([]);
+  const [privilegeHistory, setPrivilegeHistory] = useState<PrivilegeRedimido[]>([]);
   const [customPrivileges, setCustomPrivileges] = useState<EditablePrivilege[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -131,7 +155,7 @@ const RewardTracker: React.FC = () => {
         if (storedTasks && storedPoints) {
           const tasks = JSON.parse(storedTasks);
           const points = JSON.parse(storedPoints);
-          const weeklyTotal = Object.values(points).reduce((sum: number, val: any) => sum + (val || 0), 0);
+          const weeklyTotal = Object.values(points).reduce((sum: number, val) => sum + (Number(val) || 0), 0);
           
           // Usar saveWeeklyTasks del familyService - ruta: /weeklyTasks/{familyId}_{childId}_{weekId}
           await saveWeeklyTasks(familyId, childId, tasks, points, weeklyTotal, user.uid);
@@ -202,7 +226,7 @@ const RewardTracker: React.FC = () => {
     try {
       // Actualizar estado local inmediatamente para UX responsiva
       const nuevoEstado = JSON.parse(JSON.stringify(tasks));
-      const taskIndex = nuevoEstado[dia][tipo].findIndex((task: any) => task.id === taskId);
+      const taskIndex = nuevoEstado[dia][tipo].findIndex((task: Task) => task.id === taskId);
       
       if (taskIndex !== -1) {
         const task = nuevoEstado[dia][tipo][taskIndex];
@@ -324,7 +348,7 @@ const RewardTracker: React.FC = () => {
   };
 
   // Redimir privilegio con calendario - ruta: /privilegios/{privilegeId}
-  const handlePrivilegeRedeem = async (privilege: any, date: string) => {
+  const handlePrivilegeRedeem = async (privilege: Canjeable, date: string) => {
     if (!familyId || !childId || weeklyTotal < privilege.points || syncing || !user?.uid) return;
 
     setSyncing(true);

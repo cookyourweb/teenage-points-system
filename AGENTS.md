@@ -4,6 +4,7 @@
 
 - **Al empezar**: leé `MEMORY.md` — un resumen de ≤ 50 líneas con el estado del proyecto, las decisiones tomadas y por qué, los errores a evitar y los próximos pasos. Sirve para no repetir trabajo ni reabrir discusiones cerradas.
 - **Al terminar una tarea**: actualizá `MEMORY.md` — estado actual, decisiones importantes y por qué, errores a evitar, próximos pasos.
+- **Cerrar sesión (siempre, sin que la dueña lo pida)**: tras actualizar `MEMORY.md`, entregale `Tema: … · Minutos: …` listos para pegar en `memoria/index.html` (fecha sola va precargada). Los minutos se cuentan por la hora real de inicio/fin, no a ojo. El `localStorage` del navegador no es accesible para el agente: ella lo carga con clics; evitá duplicar si ya hay sesión del día.
 - Máximo **50 líneas**: resumí o quitá lo que ya no aporte.
 - **Nunca guardar datos sensibles** (claves, tokens, datos personales) en `MEMORY.md` ni en ningún archivo versionado: el repo es público.
 - El log completo de sesiones (fecha, tema, minutos) vive en `memoria/index.html`; con su botón copiás la tabla lista para `MEMORY.md`.

@@ -51,6 +51,10 @@ Backend (`backend/`): Java 17 / Spring Boot 4.1 con Maven wrapper. `./mvnw test`
 - **No debilitar las reglas de Firestore ni los tests de accesibilidad/contraste/arquitectura** para que un test pase.
 - Repositorio público: **nunca claves, tokens ni datos personales** versionados. Las credenciales de Firebase ya viven en `.env` / `.env.local`, gitignored.
 - No editar `dist/`, `storybook-static/` ni `backend/target/` (artefactos generados).
+- **No agregar contenido del método al repo**: el Método Efera y la tipología de colores
+  son de Vicent Ginés Romero (usó de alumna, no comercializable — ver `NOTICE.md`).
+  Viven en Firestore (colección `categorias`); el código solo guarda la **estructura**
+  (nombres de pasos y colores) y el contenido va al prompt en tiempo de ejecución.
 
 ## Gotchas
 

@@ -1,13 +1,14 @@
 /**
  * El perfil del padre — el paso UNO del metodo.
  *
- * El Metodo dice: primero el padre se diagnostica a si mismo ("tengo que
- * conocerme yo para no pagarlo con mi hijo"), despues se mira al hijo. Este
- * modulo guarda SOLO la estructura de eso: los cinco pasos y su orden.
+ * El metodo empieza por el padre: conocerse a si mismo y cambiar la mirada
+ * hacia el hijo, ANTES de mirar al hijo. Por eso la pantalla de configuracion
+ * pregunta del padre y no del hijo. El por que y el como de cada paso viven
+ * en Firestore (coleccion `categorias`); este modulo guarda SOLO la
+ * estructura: los cinco pasos y su orden.
  *
- * El TEXTO de cada paso y su explicacion viven en Firestore (coleccion
- * `categorias`), no aca: el repo es publico y el metodo es de Vicent Gines
- * Romero (ver NOTICE.md). Aca no hay ni una frase del metodo, solo nombres.
+ * Repo publico + metodo de Vicent Gines Romero: no copiar texto del metodo aca
+ * (ver NOTICE.md). El contenido viaja al prompt en tiempo de ejecucion.
  *
  * La regla de este modulo: el resumen es EXPLICABLE. Cada paso del resumen
  * cita la respuesta literal que lo produjo. Si no la hay, no existe la

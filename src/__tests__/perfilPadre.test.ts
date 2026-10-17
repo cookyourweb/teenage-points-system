@@ -5,10 +5,10 @@ import { PASOS_EFERA, resumirPerfilPadre } from '../utils/perfilPadre';
 /**
  * El perfil del padre: el paso UNO del metodo.
  *
- * El padre se diagnostica a si mismo antes de tocar al hijo: "tengo que
- * conocerme yo para no pagarlo con mi hijo". Esta funcion pura es la parte
- * mecanica de eso: tomar las respuestas de los cinco pasos y devolver un
- * resumen EXPЛИCABLE — cada conclusion cita la respuesta que la produjo.
+ * El padre se conoce a si mismo y cambia la mirada hacia el hijo ANTES de
+ * mirar al hijo. Esta funcion pura es la parte mecanica de eso: tomar las
+ * respuestas de los cinco pasos y devolver un resumen EXPЛИCABLE — cada
+ * conclusion cita la respuesta que la produjo.
  *
  * Las tres reglas del metodo que este test fija:
  *   - Perfil parcial: se devuelven solo los pasos respondidos, sin inventar.

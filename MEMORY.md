@@ -9,29 +9,31 @@
 
 - Branch `develop`, limpio en `355b0d1`. Versión `0.0.0` (package.json).
 - 💚 `lint` 0 · `typecheck` 0 · **296/296 tests** · `npm run build` exit 0 (16-oct-2026).
-- Backend: `./mvnw test` en verde **sin Mongo** (11 tests). Falla conocida del log de tests: la traza `ConnectException` con Mongo apagado es ruido, no fallo.
-- Nuevo hoy: `AGENTS.md` (raíz + `backend/`), `ci.yml` (front lint→typecheck→tests→build y back `./mvnw test`), plantilla PR (`.github/pull_request_template.md`), ESLint regla `no-unused-vars` para rest siblings (15 errores → 0), 8 `any` tipados, `diasSemana` a módulo, `loadCustomTasks` en `useCallback`, `memoria/index.html`.
-- Riesgo declarado: el `ChildView`/`RewardTracker`/`TaskManagement` quedaron **sin tests propios** (solo cubre la suite general).
+- Backend: `./mvnw test` verde sin Mongo (11 tests); la traza `ConnectException` del log es ruido, no fallo.
+- 16-oct: `AGENTS.md`×2, `ci.yml`, plantilla PR, ESLint rest siblings (15→0), 8 `any` tipados, `memoria/index.html`.
+- 17-oct: **plan del coach + perfil del padre CERRADO, sin implementar**. Traspaso completo: `.opencode/plan/sesion-2026-10-17-coach-acuerdos.md` (iteraciones 0-5, decisiones, método leído de Firestore).
+- Riesgo declarado: `ChildView`/`RewardTracker`/`TaskManagement` sin tests propios.
 
 ## Decisiones y por qué
 
-- **AGENTS.md en dos piezas** (raíz front + `backend/`): OpenCode carga lo anidado solo al tocar esa carpeta; el root se queda liviano.
-- **`ci.yml` completo, sin atajos**: era el único pipeline que había (storybook.yml) y lint no corría en CI. Sin `--passWithNoTests` ni `continue-on-error`: puerta falsa = la peor deuda.
-- **Rest siblings en ESLint, no borrar el código**: los `_ignorado`/`_tampoco` son la enforcement del contrato sin `className` del design system, no descuidos.
-- **`MEMORY.md` lleva solo el resumen; el log completo vive en `memoria/index.html`**: una sola verdad por cosa — este repo ya pagó por tener dos (ver abajo).
-- **Export/import JSON en `memoria/`**: MDN dice que en `file://` el `localStorage` es indefinido y puede lanzar `SecurityError`; el JSON es la copia durable, el storage es caché.
+- **AGENTS.md en dos piezas**: OpenCode carga lo anidado solo al tocar esa carpeta.
+- **`ci.yml` completo, sin atajos**: sin `--passWithNoTests` ni `continue-on-error`.
+- **`MEMORY.md` lleva el resumen; el log completo vive en `memoria/index.html`**: una sola verdad por cosa.
+- **Coach**: modelo aditivo (no lo hace → no gana, jamás pierde); acuerdos padre-hijo; **nivel de confianza NUNCA baja**; `Task.java` intocable (el acuerdo crea la tarea por el POST existente); proveedor **Claude**; el nivel sube por **acuerdo mutuo** con datos que solo informan, no deciden.
+- **Derechos**: el método **Efera** (Error-Foco-Estrategia-Rol-Acción) y los 5 colores son de **Vicent Ginés Romero**; licencia de alumna = uso personal, no comercializable → el método vive en **Firestore, nunca en el repo**; `NOTICE.md` pendiente (iteración 0). Los **5 colores ya están** en `child.tiposAdolescente` (`AddEditChild.tsx:152`).
 
 ## Ojo — errores ya pagados (no repites)
 
-- `tsc --noEmit` a secas = **no-op** acá (`tsconfig` raíz con referencias) → solo `npm run typecheck`.
-- El backend **arranca con Mongo caído** y no se reconecta: si levantás Mongo después, reiniciás el backend; `/actuator/health` vacío = aviso.
-- Dos copias del mismo código = dos verdades: hubo una copia entera de `customTaskService` camuflada como componente (`FamilyPointsOverview.tsx`); hoy lo vigila `arquitectura.test.ts`.
+- `tsc --noEmit` a secas = **no-op** → solo `npm run typecheck`.
+- El backend arranca con Mongo caído y no se reconecta: levantar Mongo después = reiniciar backend.
+- Dos copias del mismo código = dos verdades (lo vigila `arquitectura.test.ts`).
+- **El agente SÍ puede leer Firestore**: `firestore.rules` tiene `allow read: if true` en `categorias`; se lee por REST con la key de `.env`. Ese contenido está sucio (duplicados/typos): limpiar en la iteración 0 antes de dárselo al LLM.
 
 ## Próximos pasos
 
-1. Empujar esta ronda a `develop` y ver el `ci.yml` nuevo en verde (si algo da rojo, se arregla ahí, es el CI que el repo nunca tuvo).
-2. Migrar los dominios que faltan de Firestore a Java: `docs/MIGRACION-A-JAVA.md`.
-3. Revisar rol de administrador y sus pendientes: `docs/PENDIENTES-ADMIN.md`.
+1. Plan coach, iteración 0: `NOTICE.md` + limpieza de `categorias` (con OK de la dueña); luego iteración 1: **perfil del padre**, empezando por el test de `src/utils/perfilPadre.ts`.
+2. Empujar la ronda del 16-oct a `develop` y ver el `ci.yml` nuevo en verde.
+3. Migrar dominios restantes a Java (`docs/MIGRACION-A-JAVA.md`) y rol admin (`docs/PENDIENTES-ADMIN.md`).
 
 ## Sesiones
 
@@ -39,7 +41,8 @@ Una sola sesión por partida, la más nueva arriba:
 
 | Fecha | Tema | Min |
 |---|---|---|
+| 2026-10-17 | Plan coach (método Efera / Vicent Ginés): research, derechos, acuerdos y 5 iteraciones | 131 |
 | 2026-10-16 | AGENTS.md×2, flujo TDD/PR/CI, lint+8 any, plantilla PR, MEMORY, memoria/ | 75 |
 
-**Total: 1 sesión · 75 min · racha 1**
-(Es la cuenta completa; se actualiza al terminar cada tarea.)
+**Total: 2 sesiones · 206 min · racha 2**
+(Es la cuenta de este resumen; la cuenta completa y verificable vive en `memoria/index.html`.)

@@ -38,3 +38,6 @@ storybook-static
 
 # Registro de la CLI de Firebase, se regenera solo
 firebase-debug.log
+
+# Planes de sesión: pueden contener contenido del método (no versionable, ver NOTICE)
+.opencode/plan/

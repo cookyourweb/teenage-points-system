@@ -41,3 +41,4 @@ firebase-debug.log
 
 # Planes de sesión: pueden contener contenido del método (no versionable, ver NOTICE)
 .opencode/plan/
+.claude/RESUME.md

@@ -7,11 +7,12 @@
 
 ## Estado actual
 
-- Branch `develop` en `4a9c91c`, **7 commits sin push** a `origin/develop`. Versión `0.0.0`.
+- Branch `develop` al día con `origin/develop` (push 19-oct, CI `39267451164` ✅ back+front). Versión `0.0.0`.
 - 💚 **301/301 tests** (19-oct-2026). `lint`/`typecheck`/`build` medidos por última vez el 16-oct.
 - Backend: `./mvnw test` verde sin Mongo (11 tests); la traza `ConnectException` del log es ruido, no fallo.
 - Plan coach: traspaso en `.opencode/plan/sesion-2026-10-17-coach-acuerdos.md` (**gitignored**: lleva contenido del método).
-- Iteración 0: ✅ `NOTICE.md` (`0b85f1f`); ⏳ limpieza de `categorias`. Iteración 1 empezada: ✅ `src/utils/perfilPadre.ts` + test (`d3b6fa4`, `aa27b1b`).- Riesgo declarado: `ChildView`/`RewardTracker`/`TaskManagement` sin tests propios.
+- Iteración 0: ✅ `NOTICE.md` (`0b85f1f`); ⏳ limpieza de `categorias`. Iteración 1 empezada: ✅ `src/utils/perfilPadre.ts` + test (`d3b6fa4`, `aa27b1b`).
+- Riesgo declarado: `ChildView`/`RewardTracker`/`TaskManagement` sin tests propios.
 
 ## Decisiones y por qué
 
@@ -32,13 +33,11 @@
 
 ## Próximos pasos
 
-1. Push de los 7 commits a `develop` y ver el `ci.yml` en verde.
+1. CI avisa deprecaciones: `actions/setup-java@v4`→v5 y acciones en Node 20; login sin `h1` y título "Vite + React + TS".
 2. Plan coach: limpieza de `categorias` (con OK de la dueña) y seguir iteración 1 (perfil del padre: cuestionario + guardado).
 3. Migrar dominios restantes a Java (`docs/MIGRACION-A-JAVA.md`) y rol admin (`docs/PENDIENTES-ADMIN.md`).
 
 ## Sesiones
-
-Una sola sesión por partida, la más nueva arriba:
 
 | Fecha | Tema | Min |
 |---|---|---|

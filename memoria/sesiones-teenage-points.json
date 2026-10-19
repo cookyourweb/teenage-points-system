@@ -10,5 +10,17 @@
     "tema": "Plan coach (método Efera / Vicent Ginés): research, derechos, acuerdos y 5 iteraciones",
     "minutos": 131,
     "creado": "2026-10-17T13:20:00.000Z"
+  },
+  {
+    "fecha": "2026-10-18",
+    "tema": "Estructura .opencode (agente + 4 skills), backend Java explicado, plan del coach movido al repo y gitignored",
+    "minutos": 60,
+    "creado": "2026-10-18T14:45:00.000Z"
+  },
+  {
+    "fecha": "2026-10-19",
+    "tema": "MCP chrome-devtools en OpenCode, plugins v1→v2, API key nueva, MEMORY.md al día, engram subido, informe RAG",
+    "minutos": 145,
+    "creado": "2026-10-19T11:46:00.000Z"
   }
 ]

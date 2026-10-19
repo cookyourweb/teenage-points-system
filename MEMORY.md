@@ -42,8 +42,9 @@ Una sola sesión por partida, la más nueva arriba:
 
 | Fecha | Tema | Min |
 |---|---|---|
+| 2026-10-19 | MCP chrome-devtools en OpenCode, plugins v1→v2, API key nueva, MEMORY al día, engram subido, informe RAG | 145 |
+| 2026-10-18 | Estructura .opencode (agente + 4 skills), backend Java explicado, plan coach al repo (gitignored) | 60 |
 | 2026-10-17 | Plan coach (método Efera / Vicent Ginés): research, derechos, acuerdos y 5 iteraciones | 131 |
 | 2026-10-16 | AGENTS.md×2, flujo TDD/PR/CI, lint+8 any, plantilla PR, MEMORY, memoria/ | 75 |
 
-**Total: 2 sesiones · 206 min · racha 2**
-(Es la cuenta de este resumen; la cuenta completa y verificable vive en `memoria/index.html`.)
+**Total: 4 sesiones · 411 min · racha 4** (la cuenta verificable: `memoria/sesiones-teenage-points.json`)

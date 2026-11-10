@@ -19,8 +19,8 @@
   },
   {
     "fecha": "2026-10-19",
-    "tema": "MCP chrome-devtools en OpenCode, plugins v1→v2, API key nueva, MEMORY.md al día, engram subido, informe RAG",
-    "minutos": 145,
+    "tema": "MCP chrome-devtools + plugins v1→v2 + API key nueva + MEMORY al día + engram + informe RAG; auditoría de login (consola, red, a11y) y 7 commits sin empujar",
+    "minutos": 372,
     "creado": "2026-10-19T11:46:00.000Z"
   }
 ]

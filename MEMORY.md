@@ -7,8 +7,7 @@
 
 ## Estado actual
 
-- Branch `develop` al día con `origin/develop` (push 19-oct, CI `39267451164` ✅ back+front). Versión `0.0.0`.
-- 💚 **301/301 tests** (19-oct-2026). `lint`/`typecheck`/`build` medidos por última vez el 16-oct.
+- `develop`: push 19-oct con CI `39267451164` ✅; el 10-nov, 2 commits de docs (AWS) sin push. 💚 **301/301 tests** (19-oct); `lint`/`typecheck`/`build` del 16-oct.
 - Backend: `./mvnw test` verde sin Mongo (11 tests); la traza `ConnectException` del log es ruido, no fallo.
 - Plan coach: traspaso en `.opencode/plan/sesion-2026-10-17-coach-acuerdos.md` (**gitignored**: lleva contenido del método).
 - Iteración 0: ✅ `NOTICE.md` (`0b85f1f`); ⏳ limpieza de `categorias`. Iteración 1 empezada: ✅ `src/utils/perfilPadre.ts` + test (`d3b6fa4`, `aa27b1b`).
@@ -21,6 +20,7 @@
 - **`MEMORY.md` lleva el resumen; el log completo vive en `memoria/index.html`**: una sola verdad por cosa.
 - **Coach**: modelo aditivo (no lo hace → no gana, jamás pierde); acuerdos padre-hijo; **nivel de confianza NUNCA baja**; `Task.java` intocable (el acuerdo crea la tarea por el POST existente); proveedor **Claude**; el nivel sube por **acuerdo mutuo** con datos que solo informan, no deciden.
 - **Derechos**: el método **Efera** (Error-Foco-Estrategia-Rol-Acción) y los 5 colores son de **Vicent Ginés Romero**; licencia de alumna = uso personal, no comercializable → el método vive en **Firestore, nunca en el repo** (ni en planes versionados). Los **5 colores ya están** en `child.tiposAdolescente` (`AddEditChild.tsx:152`).
+- **AWS** (`docs/AWS-JUSTIFICACION.md`): solo **Always Free o céntimos** (sin créditos ni free plan); API en Docker→ECR→**Lambda con imagen** (ECS 24/7 rompe los 5 €); datos de Firestore `weeklyTasks` con IDs seudonimizados.
 
 ## Ojo — errores ya pagados (no repites)
 
@@ -33,9 +33,10 @@
 
 ## Próximos pasos
 
-1. CI avisa deprecaciones: `actions/setup-java@v4`→v5 y acciones en Node 20; login sin `h1` y título "Vite + React + TS".
-2. Plan coach: limpieza de `categorias` (con OK de la dueña) y seguir iteración 1 (perfil del padre: cuestionario + guardado).
-3. Migrar dominios restantes a Java (`docs/MIGRACION-A-JAVA.md`) y rol admin (`docs/PENDIENTES-ADMIN.md`).
+1. AWS fase 1 (cuenta propia, no la de un cliente; revisar la cuenta vieja que cobraba). Plan: engram `architecture/aws-plan`.
+2. CI avisa deprecaciones: `actions/setup-java@v4`→v5 y acciones en Node 20; login sin `h1` y título "Vite + React + TS"; pantallas autenticadas sin auditar (falta usuario de prueba).
+3. Plan coach: limpieza de `categorias` (con OK de la dueña) y seguir iteración 1 (perfil del padre: cuestionario + guardado).
+4. Migrar dominios restantes a Java (`docs/MIGRACION-A-JAVA.md`) y rol admin (`docs/PENDIENTES-ADMIN.md`).
 
 ## Sesiones
 

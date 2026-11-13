@@ -7,15 +7,15 @@ import Faqs from './dashboard/Faqs';
 import Footer from './Footer';
 
 /**
- * La version publica de las preguntas frecuentes, en `/faqs`.
+ * Las preguntas frecuentes, en `/faqs`. Es una pagina que pide sesion.
  *
  * Es una envoltura fina: el contenido lo pone `Faqs`, que es un componente y
  * vive tambien dentro del panel como una pestaña mas. Aqui solo se le pone
  * alrededor lo que necesita una PAGINA y no un trozo: un encabezado de nivel 1,
  * la region principal, la vuelta atras y el pie.
  *
- * Existe porque esta ruta NO pide sesion: alguien puede llegar desde fuera, o
- * un padre puede mandarle el enlace a un abuelo que no tiene cuenta.
+ * Pide sesion (ver `App.tsx`) porque el contenido es del metodo de su autor,
+ * no es nuestro para publicarlo.
  */
 const PaginaFaqs: React.FC = () => (
   <div className="flex min-h-screen flex-col bg-surface-page">

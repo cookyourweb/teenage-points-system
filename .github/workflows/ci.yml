@@ -1,4 +1,4 @@
-# CI del proyecto: dos jobs, front y back.
+# CI del proyecto: tres jobs, front, back y reglas de Firestore.
 #
 # Sin --passWithNoTests y sin continue-on-error: si un paso falla, falla.
 #
@@ -94,3 +94,28 @@ jobs:
       # no llenar el log con el progreso de descargas que cachea setup-java.
       - name: Tests
         run: ./mvnw --batch-mode --no-transfer-progress test
+
+  # Las reglas de Firestore se prueban contra el emulador en cada push: si
+  # alguien las afloja y nadie corre los tests, se abren sin que nadie lo vea.
+  # El emulador es Java, por eso va setup-java. firebase-tools va fijado a
+  # 13.13.0 para que el emulador no cambie de versión entre corridas.
+  reglas:
+    name: Reglas de Firestore (emulador)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - run: npm ci
+
+      - name: Reglas
+        run: npx firebase-tools@13.13.0 emulators:exec --only firestore --project demo-teenage-points "npx vitest run --config vitest.rules.config.ts"

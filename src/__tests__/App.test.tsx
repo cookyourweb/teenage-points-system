@@ -1,13 +1,31 @@
 import React from 'react'; // Agregar importación de React
 import { render, screen } from '@testing-library/react';
 import App from '../App';
-import { describe, it, expect } from 'vitest'; // Importar describe, it y expect de Vitest
+import { beforeEach, describe, it, expect, vi } from 'vitest'; // Importar describe, it y expect de Vitest
 import '@testing-library/jest-dom'; // Importar jest-dom para los matchers
+import { useAuthState } from 'react-firebase-hooks/auth';
+
+vi.mock('react-firebase-hooks/auth', () => ({ useAuthState: vi.fn() }));
+vi.mock('../firebase', () => ({ auth: {}, db: {} }));
+vi.mock('../components/auth/AuthPage', () => ({ default: () => <div>pantalla-de-entrada</div> }));
+vi.mock('../components/PaginaFaqs', () => ({ default: () => <div>pagina-faqs</div> }));
 
 describe('App Component', () => {
+  beforeEach(() => {
+    window.history.pushState({}, '', '/');
+  });
+
   it('renderiza correctamente el componente en estado de carga', () => {
+    vi.mocked(useAuthState).mockReturnValue([null, true, undefined]);
     render(<App />);
-    console.log(screen.debug()); // Verificar el contenido renderizado
     expect(screen.getByText(/cargando/i)).toBeInTheDocument(); // Verificar que el texto "Cargando..." esté presente
+  });
+
+  it('sin sesión, /faqs lleva a la pantalla de entrada y no muestra las FAQs', () => {
+    vi.mocked(useAuthState).mockReturnValue([null, false, undefined]);
+    window.history.pushState({}, '', '/faqs');
+    render(<App />);
+    expect(screen.getByText('pantalla-de-entrada')).toBeInTheDocument();
+    expect(screen.queryByText('pagina-faqs')).not.toBeInTheDocument();
   });
 });

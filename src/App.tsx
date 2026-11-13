@@ -81,10 +81,11 @@ const App = () => {
           element={<ChildView />} 
         />
         
-        {/* FAQs públicas (NO requiere autenticación) */}
+        {/* FAQs. Requieren sesión: el contenido es del método y sus
+            reglas de Firestore ya no lo sirven a quien no ha iniciado sesión. */}
         <Route 
           path="/faqs" 
-          element={<PaginaFaqs />} 
+          element={user ? <PaginaFaqs /> : <Navigate to="/" replace />} 
         />
         
         {/* Administración de FAQs. SOLO administradores.

@@ -115,14 +115,18 @@ service cloud.firestore {
     }
 
     // ---------- FAQs ----------
-    // Se leen sin sesión a propósito: la página `/faqs` es pública, para que
-    // un padre pueda mandarle el enlace a un abuelo que no tiene cuenta.
+    // Leer necesita sesión. Antes se leía sin ella a propósito, para que un
+    // padre pudiera mandarle el enlace de `/faqs` a un abuelo sin cuenta. Esa
+    // decisión se revirtió: `categorias` guarda el contenido del método, que
+    // es de su autor (Vicent Ginés Romero) y no nuestro para publicarlo.
+    // Leerlo solo desde el backend llega con la sesión 4; hasta entonces, con
+    // sesión.
     //
     // Escribir es otra cosa. Antes la ruta `/admin/faqs` solo comprobaba que
     // hubieras iniciado sesión, así que cualquiera con cuenta podía borrar las
     // FAQs de todas las familias. Un hijo incluido.
     match /categorias/{categoriaId} {
-      allow read: if true;
+      allow read: if haIniciadoSesion();
       allow write: if soyAdmin();
     }
 

@@ -7,7 +7,7 @@
 
 ## Estado actual
 
-- `develop`: push 12-nov con CI `43220810619` ✅ (docs AWS). 💚 **301/301 tests** (19-oct); `lint`/`typecheck`/`build` del 16-oct.
+- `develop`: push 13-nov con CI `43379635465` ✅ (docs AWS). 💚 **301/301 tests** (19-oct); `lint`/`typecheck`/`build` del 16-oct.
 - Backend: `./mvnw test` verde sin Mongo (11 tests); la traza `ConnectException` del log es ruido, no fallo.
 - Plan coach: traspaso en `.opencode/plan/sesion-2026-10-17-coach-acuerdos.md` (**gitignored**: lleva contenido del método).
 - Iteración 0: ✅ `NOTICE.md` (`0b85f1f`); ⏳ limpieza de `categorias`. Iteración 1 empezada: ✅ `src/utils/perfilPadre.ts` + test (`d3b6fa4`, `aa27b1b`).
@@ -33,7 +33,7 @@
 
 ## Próximos pasos
 
-1. AWS fase 1: cuenta **propia nueva** `vero-labs` (la vieja está cerrada para siempre; la del 29-oct es del cliente). Desde este Mac se entra con el usuario invitado (`hello.cookyourweb`). Falta: región, MFA, factura a 0, Budget de 5 € y AWS CLI. Plan: engram `architecture/aws-plan` y `aws/cuenta-elegida`.
+1. AWS fase 1 ⏳: cuenta propia **Ready Set Build** (plan gratuito, 0 $, eu-north-1; `hello.cookyourweb` es miembro invitado, NO usuario IAM). AWS CLI instalado. **Bloqueado** hasta que AWS verifique la cuenta (≤2 días): después `aws login` (elegir la sesión existente) y CloudShell. Pendientes de la dueña: MFA, correo de recuperación y teléfono. **Nunca** "Plan de actualización". Detalle: engram `aws/cuenta-elegida`.
 2. CI avisa deprecaciones: `actions/setup-java@v4`→v5 y acciones en Node 20; login sin `h1` y título "Vite + React + TS"; pantallas autenticadas sin auditar (falta usuario de prueba).
 3. Plan coach: limpieza de `categorias` (con OK de la dueña) y seguir iteración 1 (perfil del padre: cuestionario + guardado).
 4. Migrar dominios restantes a Java (`docs/MIGRACION-A-JAVA.md`) y rol admin (`docs/PENDIENTES-ADMIN.md`).
@@ -42,9 +42,9 @@
 
 | Fecha | Tema | Min |
 |---|---|---|
+| 2026-11-13 | AWS fase 1: plan gratuito, CLI; esperando la verificación | 104 |
 | 2026-11-12 | Push con CI verde, hook salvavidas arreglado, cuenta AWS propia | 37 |
 | 2026-11-11 | /doctor, 12 puntos de tu-vuelta-al-sol, traza del hook | 67 |
 | 2026-11-10 | AWS fase 0: justificación, plan, Lambda con imagen, Always Free | 63 |
-| 2026-10-19 | MCP chrome-devtools, plugins v1→v2, MEMORY al día, auditoría de login | 372 |
 
-**Total: 7 sesiones · 805 min** (la tabla muestra las 4 últimas; la cuenta verificable: `memoria/sesiones-teenage-points.json`)
+**Total: 8 sesiones · 909 min** (la tabla muestra las 4 últimas; la cuenta verificable: `memoria/sesiones-teenage-points.json`)

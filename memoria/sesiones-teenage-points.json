@@ -40,5 +40,11 @@
     "tema": "Push de develop con CI verde, hook salvavidas arreglado (jq 17× más rápido + async), AWS fase 1: cuenta propia vero-labs",
     "minutos": 37,
     "creado": "2026-11-12T12:45:00.000Z"
+  },
+  {
+    "fecha": "2026-11-13",
+    "tema": "AWS fase 1: cuenta propia en plan gratuito (0 $), AWS CLI instalado; aws login y CloudShell bloqueados por la verificación de la cuenta nueva",
+    "minutos": 104,
+    "creado": "2026-11-13T06:29:00.000Z"
   }
 ]

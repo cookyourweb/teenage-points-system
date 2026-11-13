@@ -57,13 +57,31 @@ service cloud.firestore {
                     && request.resource.data.rol == resource.data.rol
                     && request.resource.data.familyId == resource.data.familyId;
 
-      allow create: if haIniciadoSesion() && request.auth.uid == uid;
+      // Al crearse: sin campos de más, siempre `padre` (el admin se asigna a
+      // mano, nunca desde el cliente) y solo en una familia donde ya figuras
+      // como adulto. El alta crea la familia primero y el usuario después, así
+      // que esa familia ya existe cuando llega este documento. Sin esto,
+      // cualquiera se daba de alta como admin o en la familia de otro.
+      allow create: if haIniciadoSesion()
+                    && request.auth.uid == uid
+                    && request.resource.data.keys().hasOnly(
+                         ['nombre', 'email', 'rol', 'familyId', 'fechaCreacion'])
+                    && request.resource.data.rol == 'padre'
+                    && request.auth.uid in get(/databases/$(database)/documents/familias/$(request.resource.data.familyId)).data.miembros.padres;
       allow delete: if false;
     }
 
     // ---------- Familias ----------
     match /familias/{familyId} {
-      allow read, write: if esMiFamilia(familyId);
+      allow read, update, delete: if esMiFamilia(familyId);
+
+      // Crear: aún no existe `usuarios/{uid}`, así que `esMiFamilia` no sirve
+      // (el alta crea la familia antes que el usuario). Se exige que el único
+      // adulto sea quien la crea y que no traiga hijos: nadie puede fundar una
+      // familia metiendo a otro dentro.
+      allow create: if haIniciadoSesion()
+                    && request.resource.data.miembros.padres.keys().hasOnly([request.auth.uid])
+                    && request.resource.data.miembros.hijos.size() == 0;
     }
 
     // ---------- Puntos de la semana ----------

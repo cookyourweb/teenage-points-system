@@ -1,9 +1,10 @@
 package es.cookyourweb.points.config;
 
-import es.cookyourweb.points.familia.ClienteHttp;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
@@ -13,6 +14,7 @@ import java.time.Duration;
 public class ClienteHttpConfig {
 
     @Bean
+    @Scope("prototype") // como Boot: cada consumidor recibe el suyo
     public RestClient.Builder restClientBuilder(@Value("${app.http.timeout:5s}") Duration timeout) {
         return ClienteHttp.builderConTimeouts(timeout);
     }

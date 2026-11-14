@@ -3,6 +3,8 @@ package es.cookyourweb.points.web;
 import es.cookyourweb.points.familia.FamiliaNoEncontradaException;
 import es.cookyourweb.points.familia.ServicioExternoException;
 import es.cookyourweb.points.task.TaskNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,6 +28,8 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class ManejadorDeErrores {
 
+    private static final Logger log = LoggerFactory.getLogger(ManejadorDeErrores.class);
+
     @ExceptionHandler(TaskNotFoundException.class)
     public ProblemDetail noEncontrada(TaskNotFoundException e) {
         ProblemDetail p = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
@@ -44,6 +48,9 @@ public class ManejadorDeErrores {
     /** 502 y no 404: que Firestore falle no significa que no seas de la familia. */
     @ExceptionHandler(ServicioExternoException.class)
     public ProblemDetail servicioExterno(ServicioExternoException e) {
+        // Rastro para operar, solo con la CLASE de la causa: nunca mensaje, cabeceras ni token.
+        Throwable causa = e.getCause() == null ? e : e.getCause();
+        log.warn("Servicio externo fallo: causa={}", causa.getClass().getName());
         ProblemDetail p = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_GATEWAY, "un servicio externo no respondio, reintenta");
         p.setTitle("Servicio externo no disponible");

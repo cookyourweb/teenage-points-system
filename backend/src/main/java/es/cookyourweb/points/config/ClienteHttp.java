@@ -1,4 +1,4 @@
-package es.cookyourweb.points.familia;
+package es.cookyourweb.points.config;
 
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;

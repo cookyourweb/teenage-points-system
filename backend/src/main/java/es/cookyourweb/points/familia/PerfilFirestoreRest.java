@@ -25,7 +25,7 @@ public class PerfilFirestoreRest implements PerfilFirestore {
     public PerfilFirestoreRest(RestClient.Builder builder,
                                @Value("${app.firestore.url-base}") String urlBase,
                                @Value("${app.firebase.project-id}") String proyecto) {
-        this.cliente = builder.baseUrl(urlBase).build();
+        this.cliente = builder.clone().baseUrl(urlBase).build();
         this.proyecto = proyecto;
     }
 

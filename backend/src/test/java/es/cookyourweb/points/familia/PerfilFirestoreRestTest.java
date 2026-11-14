@@ -1,6 +1,7 @@
 package es.cookyourweb.points.familia;
 
 import com.sun.net.httpserver.HttpServer;
+import es.cookyourweb.points.config.ClienteHttp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
@@ -79,6 +80,19 @@ class PerfilFirestoreRestTest {
 
         assertThatThrownBy(() -> perfil.familyIdDe("ana", "tok-ana"))
                 .isInstanceOf(ServicioExternoException.class);
+    }
+
+    @Test
+    void noContaminaElBuilderCompartido() {
+        // El bean RestClient.Builder es unico: si el adaptador le pone baseUrl, el siguiente
+        // consumidor mandaria sus peticiones (y quiza otros tokens) a Firestore.
+        RestClient.Builder compartido = RestClient.builder();
+        MockRestServiceServer otro = MockRestServiceServer.bindTo(compartido).build();
+        new PerfilFirestoreRest(compartido, BASE, "proyecto-test");
+
+        otro.expect(requestTo("/ping")).andRespond(withSuccess());
+        compartido.build().get().uri("/ping").retrieve().toBodilessEntity();
+        otro.verify();
     }
 
     @Test

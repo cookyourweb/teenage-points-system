@@ -105,13 +105,32 @@ service cloud.firestore {
       allow delete: if esMiFamilia(resource.data.familyId);
     }
 
-    // ---------- Privilegios ----------
-    match /privilegios/{privilegeId} {
+    // ---------- Privilegios (recompensas) ----------
+    // Antes este bloque se llamaba `privilegios`, pero el código siempre usó la
+    // colección `privileges`: la regla no coincidía con ninguna ruta real y todo
+    // caía en el "denegar por defecto" de abajo. La pantalla de privilegios
+    // fallaba entera y nadie lo veía porque ningún test miraba esta colección.
+    //
+    // Mismo patrón que `weeklyTasks`: se comprueba el CAMPO `familyId`. Por eso
+    // listar exige `where('familyId', '==', ...)`: Firestore no deja pedir una
+    // colección entera si alguna regla podría rechazar algún documento.
+    match /privileges/{privilegeId} {
       allow read: if esMiFamilia(resource.data.familyId);
       allow create: if esMiFamilia(request.resource.data.familyId);
       allow update: if esMiFamilia(resource.data.familyId)
                     && esMiFamilia(request.resource.data.familyId);
       allow delete: if esMiFamilia(resource.data.familyId);
+    }
+
+    // ---------- Historial de canjes ----------
+    // Es un libro de registro: cada fila dice "este hijo canjeó este privilegio
+    // este día". Se lee y se añade, pero NUNCA se reescribe ni se borra: si un
+    // canje se pudiera editar, se podría falsificar qué se gastó y cuándo.
+    // Un error se corrige apuntando otro canje, no borrando el anterior.
+    match /privilegeHistory/{canjeId} {
+      allow read: if esMiFamilia(resource.data.familyId);
+      allow create: if esMiFamilia(request.resource.data.familyId);
+      allow update, delete: if false;
     }
 
     // ---------- FAQs ----------

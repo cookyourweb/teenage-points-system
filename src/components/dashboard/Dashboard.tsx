@@ -1,9 +1,7 @@
 // src/components/dashboard/Dashboard.tsx (Actualizado con gestión de tareas)
 import React, { useState, useEffect, useCallback } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate, Link } from "react-router-dom";
-import { auth, db } from "../../firebase";
-import { signOut } from "firebase/auth";
+import { useSesion } from "../../auth/useSesion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faSignOutAlt, 
@@ -30,22 +28,27 @@ import Footer from "../Footer";
 import Faqs from "./Faqs";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { Child } from "../../types/familyTypes";
-import { useUserRole } from "../../hooks/useUserRole";
 import { 
   addChildToFamily, 
   fetchFamilyById, 
   deleteChildFromFamily, 
   updateChildInFamily 
 } from "../../services/familyService";
-import { doc, getDoc } from "firebase/firestore";
 import ShareChildLink from "../ShareChildLink";
 
 const Dashboard: React.FC = () => {
-  const [user] = useAuthState(auth);
+  // La familia y el rol salen del perfil que observa el AuthProvider, no de
+  // lecturas propias de `usuarios/{uid}`: esas lecturas corrían antes de que
+  // el alta creara el documento y pintaban un error al registrarse.
+  const sesion = useSesion();
+  const user = sesion.tipo === "autenticado" ? sesion.user : null;
+  const estadoPerfil = sesion.tipo === "autenticado" ? sesion.perfil : null;
+  const altaEnCurso = sesion.tipo === "autenticado" && sesion.altaEnCurso;
+  const perfil = estadoPerfil?.tipo === "listo" ? estadoPerfil.perfil : null;
+  const familyId = perfil?.familyId ?? null;
   const navigate = useNavigate();
 
   // Estados principales
-  const [familyId, setFamilyId] = useState<string | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
   const [childToEdit, setChildToEdit] = useState<Child | null>(null);
   
@@ -61,40 +64,9 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { role, isLoading: isRoleLoading, error: roleError } = useUserRole(user?.uid);
+  const role = perfil?.rol ?? null;
   const isAdmin = role === "admin";
   const isPadre = role === "padre" || role === "admin";
-
-  // Función para obtener el ID de la familia (memoizada para evitar bucles)
-  const fetchFamilyId = useCallback(async (userId: string) => {
-    try {
-      console.log("Fetching family ID for user:", userId);
-      const userDocRef = doc(db, "usuarios", userId);
-      const userDoc = await getDoc(userDocRef);
-
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const retrievedFamilyId = userData.familyId;
-        
-        if (retrievedFamilyId && typeof retrievedFamilyId === "string") {
-          setFamilyId(retrievedFamilyId);
-          return retrievedFamilyId;
-        } else {
-          console.warn("No se encontró un ID de familia válido.");
-          setError("No se encontró un ID de familia válido.");
-          return null;
-        }
-      } else {
-        console.warn("No se encontró el documento del usuario.");
-        setError("No se encontró el documento del usuario.");
-        return null;
-      }
-    } catch (err) {
-      console.error("Error al obtener familia:", err);
-      setError("Error al obtener la información de la familia.");
-      return null;
-    }
-  }, []);
 
   // Función para cargar los hijos (memoizada)
   const fetchChildren = useCallback(async (familyId: string) => {
@@ -116,43 +88,27 @@ const Dashboard: React.FC = () => {
     }
   }, []);
 
-  // Efecto para obtener el ID de la familia cuando el usuario cambia
+  // Carga de los hijos cuando el perfil ya trae la familia.
   useEffect(() => {
+    if (!familyId) {
+      setLoading(false);
+      return;
+    }
     let isMounted = true;
 
-    const loadFamilyId = async () => {
-      if (!user?.uid) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const retrievedFamilyId = await fetchFamilyId(user.uid);
-        
-        if (isMounted && retrievedFamilyId) {
-          await fetchChildren(retrievedFamilyId);
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error("Error en loadFamilyId:", err);
-          setError("Error al cargar los datos de la familia.");
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
+    const loadChildren = async () => {
+      setLoading(true);
+      setError(null);
+      await fetchChildren(familyId);
+      if (isMounted) setLoading(false);
     };
 
-    loadFamilyId();
+    loadChildren();
 
     return () => {
       isMounted = false;
     };
-  }, [user?.uid, fetchFamilyId, fetchChildren]);
+  }, [familyId, fetchChildren]);
 
   // Handlers para las acciones
   const handleAddChild = useCallback(() => {
@@ -472,8 +428,19 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Mostrar loading si está cargando
-  if (isRoleLoading || loading) {
+  const pantalla = (icono: string, titulo: string, texto: string, accion?: React.ReactNode) => (
+    <div className="flex justify-center items-center min-h-screen bg-surface-page">
+      <div className="text-center max-w-md">
+        <div className="text-warning-500 text-6xl mb-4">{icono}</div>
+        <h2 className="text-xl font-bold mb-2 text-content">{titulo}</h2>
+        <p className="mb-4 text-content-muted">{texto}</p>
+        {accion}
+      </div>
+    </div>
+  );
+
+  // Perfil aún sin resolver: se espera, no se decide.
+  if (!estadoPerfil || estadoPerfil.tipo === "cargando") {
     return (
       <div className="flex justify-center items-center min-h-screen bg-surface-page">
         <div className="text-center">
@@ -484,8 +451,45 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  // Mostrar error si hay alguno
-  if (error || roleError) {
+  // Sin documento y con el alta en curso: el documento está a punto de
+  // aparecer (Signup lo crea). Es espera, no error.
+  if (estadoPerfil.tipo === "sin-documento" && altaEnCurso) {
+    return pantalla("⏳", "Preparando tu cuenta…", "Estamos creando tu familia. Un momento.");
+  }
+
+  // Sin documento y sin alta: cuenta huérfana de verdad.
+  if (estadoPerfil.tipo === "sin-documento") {
+    return pantalla(
+      "⚠️",
+      "Tu cuenta no está configurada",
+      "Tu usuario existe pero no tiene una familia asociada. Cierra sesión y contacta con soporte.",
+      <Button onClick={() => sesion.cerrarSesion()}>Cerrar Sesión</Button>,
+    );
+  }
+
+  // Fallo de lectura (red, permisos): no es lo mismo que "sin configurar".
+  if (estadoPerfil.tipo === "error") {
+    return pantalla(
+      "⚠️",
+      "Error al cargar la cuenta",
+      "No pudimos cargar tu cuenta. Revisa tu conexión y recarga la página.",
+      <Button onClick={() => window.location.reload()}>Reintentar</Button>,
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-surface-page">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-lg text-content-muted">Cargando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error al cargar los hijos u otras acciones del panel.
+  if (error) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-surface-page">
         <div className="text-center max-w-md">
@@ -493,31 +497,9 @@ const Dashboard: React.FC = () => {
           <h2 className="text-xl font-bold mb-2 text-content">
             Error al cargar el dashboard
           </h2>
-          <p className="mb-4 text-negative-text">
-            {error || roleError || "Error inesperado."}
-          </p>
+          <p className="mb-4 text-negative-text">{error}</p>
           <Button onClick={() => window.location.reload()}>
             Reintentar
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Verificar que tengamos familyId
-  if (!familyId) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-surface-page">
-        <div className="text-center max-w-md">
-          <div className="text-warning-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold mb-2 text-content">
-            Configuración Incompleta
-          </h2>
-          <p className="mb-4 text-content-muted">
-            No se encontró un ID de familia asociado a tu usuario. Por favor, contacta al soporte.
-          </p>
-          <Button onClick={() => signOut(auth)}>
-            Cerrar Sesión
           </Button>
         </div>
       </div>
@@ -552,7 +534,7 @@ const Dashboard: React.FC = () => {
               <ThemeToggle />
               <button
                 onClick={async () => {
-                  await signOut(auth);
+                  await sesion.cerrarSesion();
                   navigate("/");
                 }}
                 className="flex items-center gap-2 px-4 py-2 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 text-content-muted"
@@ -607,7 +589,7 @@ const Dashboard: React.FC = () => {
         >
           <AddEditChild
             childToEdit={childToEdit || undefined}
-            familyId={familyId}
+            familyId={familyId!}
             onSave={handleSaveChild}
             onCancel={handleCloseAddChild}
           />
@@ -620,7 +602,7 @@ const Dashboard: React.FC = () => {
           isOpen={isInviting}
           title="Invitar a un miembro de la familia"
         >
-          <InviteMember familyId={familyId} onClose={() => setIsInviting(false)} />
+          <InviteMember familyId={familyId!} onClose={() => setIsInviting(false)} />
         </Modal>
       )}
 

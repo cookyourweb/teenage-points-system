@@ -1,7 +1,6 @@
 // src/App.tsx (Actualizado con ruta ChildView)
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "./firebase";
+import { useSesion } from "./auth/useSesion";
 import AuthPage from "./components/auth/AuthPage";
 import Dashboard from "./components/dashboard/Dashboard";
 import RewardTracker from "./components/dashboard/RewardTracker";
@@ -12,36 +11,17 @@ import RutaDeMiFamilia from "./components/RutaDeMiFamilia";
 import PaginaFaqs from "./components/PaginaFaqs";
 
 const App = () => {
-  const [user, loading, error] = useAuthState(auth);
+  // La sesión la observa un solo AuthProvider (src/auth). App ya no se
+  // suscribe a Firebase por su cuenta: solo lee lo que el proveedor expone.
+  const sesion = useSesion();
+  const user = sesion.tipo === "autenticado" ? sesion.user : null;
 
-  if (loading) {
+  if (sesion.tipo === "cargando") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-page">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
           <p className="text-lg text-content-muted">Cargando aplicación...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-page">
-        <div className="text-center max-w-md">
-          <div className="text-danger-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold mb-2 text-content">
-            Error de Conexión
-          </h2>
-          <p className="mb-4 text-negative-text">
-            {error.message}
-          </p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
-          >
-            Reintentar
-          </button>
         </div>
       </div>
     );

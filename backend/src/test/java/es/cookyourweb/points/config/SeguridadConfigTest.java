@@ -56,4 +56,16 @@ class SeguridadConfigTest {
             assertThat(contexto.getStartupFailure()).hasStackTraceContaining("app.firebase.project-id");
         });
     }
+
+    @Test
+    @DisplayName("con app.firebase.project-id definida pero vacia el contexto no arranca")
+    void proyectoVacioNoArranca() {
+        // FIREBASE_PROJECT_ID= (definida y vacia) llega como cadena vacia: el placeholder
+        // se resuelve y no falla, asi que hay que rechazarlo a mano.
+        runner.withPropertyValues("app.firebase.project-id=")
+                .run(contexto -> {
+                    assertThat(contexto).hasFailed();
+                    assertThat(contexto.getStartupFailure()).hasStackTraceContaining("app.firebase.project-id");
+                });
+    }
 }

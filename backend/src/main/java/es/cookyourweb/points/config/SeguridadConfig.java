@@ -1,5 +1,6 @@
 package es.cookyourweb.points.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.util.Assert;
 
 /**
  * Quien puede llamar a la API: solo quien traiga un ID token de Firebase valido.
@@ -36,6 +38,11 @@ public class SeguridadConfig {
                 // preflight del navegador nunca lleva token y tiene que llegar a CORS.
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(a -> a
+                        // El redespacho a /error (tras un 400/404/405 del propio MVC) tambien
+                        // pasa por Spring Security; sin esto caeria en denyAll y el cliente
+                        // veria un 403 vacio en lugar del error verdadero. La autenticacion
+                        // ya se exigio en el despacho original.
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/**").authenticated()
@@ -52,6 +59,9 @@ public class SeguridadConfig {
      */
     @Bean
     JwtDecoder jwtDecoder(@Value("${app.firebase.project-id}") String proyecto) {
+        // FIREBASE_PROJECT_ID definida pero vacia resuelve el placeholder sin fallar:
+        // hay que rechazarla a mano o la API arrancaria rechazando todos los tokens.
+        Assert.hasText(proyecto, "app.firebase.project-id (FIREBASE_PROJECT_ID) no puede estar vacia");
         NimbusJwtDecoder decodificador = NimbusJwtDecoder.withJwkSetUri(TokenFirebase.JWKS_URL)
                 // Solo RS256, que es lo que firma Firebase. Evita aceptar otros algoritmos.
                 .jwsAlgorithm(SignatureAlgorithm.RS256)

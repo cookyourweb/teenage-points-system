@@ -2,9 +2,11 @@
 #
 # Sin --passWithNoTests y sin continue-on-error: si un paso falla, falla.
 #
-# El backend no necesita base de datos en CI: los tests mockean el repositorio
-# y el contexto arranca sin Mongo (verificado 16-oct-2026: BUILD SUCCESS con
-# Mongo apagado; la traza ConnectException del log es ruido conocido).
+# El backend no necesita un Mongo instalado en CI: casi todos los tests mockean el
+# repositorio y el contexto arranca sin Mongo (la traza ConnectException del log es
+# ruido conocido). La excepcion es task/PropiedadIntegracionTest, que levanta su
+# propio Mongo con Testcontainers y SI necesita Docker; los runners ubuntu-latest de
+# GitHub ya lo traen, por eso no hay ningun paso extra.
 #
 # Ojo con el wrapper de Maven: NO se versiona el jar. .mvn/wrapper/
 # maven-wrapper.properties es distributionType=only-script, asi que mvnw

@@ -28,6 +28,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -35,6 +36,7 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -50,7 +52,10 @@ import static org.mockito.Mockito.when;
  */
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = "app.firebase.project-id=proyecto-test")
+        properties = {"app.firebase.project-id=proyecto-test",
+                // Al parar el contenedor el monitor del driver loguea trazas de conexion rota:
+                // ruido esperado, no un fallo. Solo en este test.
+                "logging.level.org.mongodb.driver=ERROR"})
 class PropiedadIntegracionTest {
 
     private static final String FAMILIA = "fA";
@@ -77,6 +82,12 @@ class PropiedadIntegracionTest {
 
     @BeforeEach
     void preparaEscenario() {
+        // El indice lo crea la app en segundo plano al arrancar (config/IndicesMongo): se espera a que
+        // exista, que es justo lo que se quiere probar, sin llamar a ningun codigo de la app a mano.
+        await().atMost(Duration.ofSeconds(20)).untilAsserted(() ->
+                assertThat(mongoTemplate.indexOps(Membresia.class).getIndexInfo())
+                        .anyMatch(i -> i.isUnique() && i.getName().equals("uid_1_familyId_1")));
+
         // Cada test parte de cero: las colecciones se vacian, los indices se conservan.
         mongoTemplate.getCollectionNames().forEach(c -> mongoTemplate.remove(new Query(), c));
 

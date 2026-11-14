@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { auth } from "../firebase";
 import { observarPerfil } from "../services/usersService";
+import { asegurarMembresia } from "../services/identidadService";
 import { SesionContext, type EstadoPerfil, type SesionConAcciones } from "./useSesion";
 
 // Única excepción a "Firebase solo en services/": este proveedor es el único
@@ -60,6 +61,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // uid (o en el doble montaje de StrictMode) React la llama antes de abrir la nueva.
     return observarPerfil(uid, (estado) => setPerfilDe({ uid, estado }));
   }, [uid]);
+
+  // familyId del perfil SOLO si es listo y de la cuenta actual (mismo criterio
+  // de `perfilDe`: el de otra cuenta no cuenta). Vacio = aun no hay familia.
+  const familyId =
+    perfilDe && perfilDe.uid === uid && perfilDe.estado.tipo === "listo"
+      ? perfilDe.estado.perfil.familyId
+      : undefined;
+  // uid cuya membresia ya se pidio: una llamada por cuenta aunque el perfil se
+  // emita varias veces o StrictMode repita el efecto (el ref sobrevive a ambos).
+  const uidAsegurado = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    // Sin sesion se olvida: si la misma cuenta vuelve a entrar, se asegura de nuevo.
+    if (!uid) {
+      uidAsegurado.current = undefined;
+      return;
+    }
+    if (!familyId || uidAsegurado.current === uid) return;
+    uidAsegurado.current = uid;
+    // El backend exige membresia para las tareas. El servidor la crea leyendo la
+    // familia en Firestore con nuestro token (idempotente). Un fallo no tumba la
+    // sesion: solo se registra; la siguiente entrada lo reintenta.
+    asegurarMembresia().catch((e: unknown) => console.error("No se pudo asegurar la membresia", e));
+  }, [uid, familyId]);
 
   const iniciarAlta = useCallback(() => {
     if (uidActual.current) setAltaDe(uidActual.current);

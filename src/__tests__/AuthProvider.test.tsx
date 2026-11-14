@@ -5,6 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { AuthProvider } from "../auth/AuthProvider";
 import { useSesion, type EstadoPerfil } from "../auth/useSesion";
 import { observarPerfil } from "../services/usersService";
+import { asegurarMembresia } from "../services/identidadService";
 
 vi.mock("../firebase", () => ({ auth: {}, db: {} }));
 vi.mock("firebase/auth", () => ({
@@ -12,6 +13,7 @@ vi.mock("firebase/auth", () => ({
   signOut: vi.fn().mockResolvedValue(undefined),
 }));
 vi.mock("../services/usersService", () => ({ observarPerfil: vi.fn() }));
+vi.mock("../services/identidadService", () => ({ asegurarMembresia: vi.fn() }));
 
 // Control manual de lo que emite Firebase: cada test decide cuándo llega cada dato.
 let emitirUsuario: (u: unknown) => void;
@@ -35,6 +37,7 @@ const listo = (familyId: string): EstadoPerfil => ({
 beforeEach(() => {
   vi.clearAllMocks();
   suscripciones = [];
+  vi.mocked(asegurarMembresia).mockResolvedValue({ familyId: "f", papel: "ADULTO" });
   vi.mocked(onAuthStateChanged).mockImplementation(((_a: unknown, cb: (u: unknown) => void) => {
     emitirUsuario = cb;
     return () => {};
@@ -166,5 +169,56 @@ describe("AuthProvider", () => {
     act(() => emitirUsuario(null));
     act(() => emitirUsuario(ana));
     expect(result.current.tipo === "autenticado" && result.current.perfil.tipo).toBe("cargando");
+  });
+
+  describe("membresia", () => {
+    it("seAseguraUnaVezPorCuenta: listo dos veces para ana = 1 llamada; beto = 1 mas", () => {
+      renderHook(() => useSesion(), { wrapper: envoltorio });
+      act(() => emitirUsuario(ana));
+      act(() => suscripciones[0].emitir(listo("f1")));
+      act(() => suscripciones[0].emitir(listo("f1")));
+      expect(asegurarMembresia).toHaveBeenCalledTimes(1);
+
+      act(() => emitirUsuario(beto));
+      act(() => suscripciones[1].emitir(listo("f2")));
+      expect(asegurarMembresia).toHaveBeenCalledTimes(2);
+    });
+
+    it("en StrictMode tampoco se llama dos veces para el mismo uid", () => {
+      renderHook(() => useSesion(), { wrapper: envoltorioStrict });
+      act(() => emitirUsuario(ana));
+      const viva = suscripciones.filter((s) => s.baja.mock.calls.length === 0);
+      act(() => viva[0].emitir(listo("f1")));
+      expect(asegurarMembresia).toHaveBeenCalledTimes(1);
+    });
+
+    it("al cerrar sesion se resetea: la misma cuenta que vuelve se asegura otra vez", () => {
+      renderHook(() => useSesion(), { wrapper: envoltorio });
+      act(() => emitirUsuario(ana));
+      act(() => suscripciones[0].emitir(listo("f1")));
+      act(() => emitirUsuario(null));
+      act(() => emitirUsuario(ana));
+      act(() => suscripciones[1].emitir(listo("f1")));
+      expect(asegurarMembresia).toHaveBeenCalledTimes(2);
+    });
+
+    it("noSeLlamaSinFamilia: sin-documento o familyId vacio", () => {
+      renderHook(() => useSesion(), { wrapper: envoltorio });
+      act(() => emitirUsuario(ana));
+      act(() => suscripciones[0].emitir({ tipo: "sin-documento" }));
+      act(() => suscripciones[0].emitir(listo("")));
+      expect(asegurarMembresia).not.toHaveBeenCalled();
+    });
+
+    it("unFalloNoRompeLaSesion: se registra y la sesion sigue autenticada con perfil listo", async () => {
+      const error = vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.mocked(asegurarMembresia).mockRejectedValue(new Error("502"));
+      const { result } = renderHook(() => useSesion(), { wrapper: envoltorio });
+      act(() => emitirUsuario(ana));
+      await act(async () => suscripciones[0].emitir(listo("f1")));
+      expect(error).toHaveBeenCalled();
+      expect(result.current.tipo === "autenticado" && result.current.perfil.tipo).toBe("listo");
+      error.mockRestore();
+    });
   });
 });

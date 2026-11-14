@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { getIdToken } = vi.hoisted(() => ({ getIdToken: vi.fn() }));
 vi.mock('../firebase', () => ({ auth: { currentUser: { getIdToken } }, db: {} }));
 
-import { getYo } from '../services/identidadService';
+import { asegurarMembresia, getYo } from '../services/identidadService';
 
 const fetchSimulado = vi.fn();
 
@@ -26,5 +26,23 @@ describe('getYo', () => {
     expect(url).toBe('http://localhost:8080/api/me');
     expect(opciones.method ?? 'GET').toBe('GET');
     expect(resultado).toEqual(yo);
+  });
+});
+
+describe('asegurarMembresia', () => {
+  it('asegurarMembresiaHacePost: POST /api/membresias/yo sin cuerpo (el servidor lee la familia)', async () => {
+    const membresia = { familyId: 'f1', papel: 'ADULTO' };
+    fetchSimulado.mockResolvedValue(
+      new Response(JSON.stringify(membresia), { status: 200, headers: { 'Content-Type': 'application/json' } }),
+    );
+
+    const resultado = await asegurarMembresia();
+
+    const [url, opciones] = fetchSimulado.mock.calls[0];
+    expect(url).toBe('http://localhost:8080/api/membresias/yo');
+    expect(opciones.method).toBe('POST');
+    // Nunca se manda familyId desde el navegador: no es de fiar.
+    expect(opciones.body).toBeUndefined();
+    expect(resultado).toEqual(membresia);
   });
 });

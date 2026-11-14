@@ -13,3 +13,14 @@ export type Yo = {
 
 /** Pregunta a la API a quien identifica el token que mandamos. */
 export const getYo = (): Promise<Yo> => apiFetch<Yo>('/api/me');
+
+export type Membresia = { familyId: string; papel: string };
+
+/**
+ * Pide al servidor que cree (o confirme) la membresia de esta cuenta. Sin cuerpo
+ * a proposito: el servidor lee la familia en Firestore con el token de la propia
+ * cuenta, asi que el navegador no puede declararse de una familia que no es la suya.
+ * Es idempotente: repetirla no cambia nada.
+ */
+export const asegurarMembresia = (): Promise<Membresia> =>
+  apiFetch<Membresia>('/api/membresias/yo', { method: 'POST' });

@@ -184,11 +184,27 @@ describe("AuthProvider", () => {
       expect(asegurarMembresia).toHaveBeenCalledTimes(2);
     });
 
-    it("en StrictMode tampoco se llama dos veces para el mismo uid", () => {
+    it("el perfil de A, emitido tarde con B conectado, no asegura nada para B", () => {
+      renderHook(() => useSesion(), { wrapper: envoltorio });
+      act(() => emitirUsuario(ana));
+      act(() => suscripciones[0].emitir(listo("f1")));
+      expect(asegurarMembresia).toHaveBeenCalledTimes(1);
+
+      // B entra y su perfil aun no llega: no debe pedirse nada con el perfil de A.
+      act(() => emitirUsuario(beto));
+      expect(asegurarMembresia).toHaveBeenCalledTimes(1);
+
+      // Emision tardia de la suscripcion de A (ya dada de baja): sigue sin contar.
+      act(() => suscripciones[0].emitir(listo("f1")));
+      expect(asegurarMembresia).toHaveBeenCalledTimes(1);
+    });
+
+    it("el efecto se re-ejecuta con el mismo uid (cambia familyId) y no repite la llamada, tambien en StrictMode", () => {
       renderHook(() => useSesion(), { wrapper: envoltorioStrict });
       act(() => emitirUsuario(ana));
-      const viva = suscripciones.filter((s) => s.baja.mock.calls.length === 0);
-      act(() => viva[0].emitir(listo("f1")));
+      const viva = suscripciones.filter((s) => s.baja.mock.calls.length === 0)[0];
+      act(() => viva.emitir(listo("f1")));
+      act(() => viva.emitir(listo("f2")));
       expect(asegurarMembresia).toHaveBeenCalledTimes(1);
     });
 
@@ -208,6 +224,19 @@ describe("AuthProvider", () => {
       act(() => suscripciones[0].emitir({ tipo: "sin-documento" }));
       act(() => suscripciones[0].emitir(listo("")));
       expect(asegurarMembresia).not.toHaveBeenCalled();
+    });
+
+    it("un throw sincrono de asegurarMembresia tambien se registra y no rompe nada", () => {
+      const error = vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.mocked(asegurarMembresia).mockImplementation(() => {
+        throw new Error("sync");
+      });
+      const { result } = renderHook(() => useSesion(), { wrapper: envoltorio });
+      act(() => emitirUsuario(ana));
+      act(() => suscripciones[0].emitir(listo("f1")));
+      expect(error).toHaveBeenCalled();
+      expect(result.current.tipo === "autenticado" && result.current.perfil.tipo).toBe("listo");
+      error.mockRestore();
     });
 
     it("unFalloNoRompeLaSesion: se registra y la sesion sigue autenticada con perfil listo", async () => {

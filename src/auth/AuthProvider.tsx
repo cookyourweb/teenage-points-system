@@ -82,7 +82,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // El backend exige membresia para las tareas. El servidor la crea leyendo la
     // familia en Firestore con nuestro token (idempotente). Un fallo no tumba la
     // sesion: solo se registra; la siguiente entrada lo reintenta.
-    asegurarMembresia().catch((e: unknown) => console.error("No se pudo asegurar la membresia", e));
+    // async + try/catch (y no solo .catch) para que tambien un throw sincrono quede registrado.
+    void (async () => {
+      try {
+        await asegurarMembresia();
+      } catch (e) {
+        console.error("No se pudo asegurar la membresia", e);
+      }
+    })();
   }, [uid, familyId]);
 
   const iniciarAlta = useCallback(() => {

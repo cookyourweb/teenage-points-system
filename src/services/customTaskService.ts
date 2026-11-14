@@ -10,7 +10,8 @@
 // venian los datos; solo conocian estas funciones. El puerto ya estaba construido y
 // solo habia que escribir otro adaptador.
 
-import { apiFetch } from './http';
+import { ErrorHttp, apiFetch } from './http';
+import { asegurarMembresia } from './identidadService';
 
 export interface CustomTask {
   id?: string;
@@ -28,12 +29,44 @@ export interface CustomTask {
   updatedAt?: string;
 }
 
+// Promesa en curso de asegurarMembresia: si N peticiones fallan a la vez con
+// "Familia no encontrada" (varias pantallas piden tareas en el primer acceso),
+// comparten UNA llamada a /api/membresias/yo en vez de disparar N.
+let asegurando: Promise<unknown> | null = null;
+
+const asegurarUnaVez = (): Promise<unknown> => {
+  asegurando ??= asegurarMembresia().finally(() => {
+    asegurando = null;
+  });
+  return asegurando;
+};
+
+const esFamiliaNoEncontrada = (e: unknown): boolean =>
+  e instanceof ErrorHttp && e.status === 404 && e.titulo === 'Familia no encontrada';
+
 /**
  * Una llamada a la API. Delega en apiFetch, que pone el token de Firebase y
  * centraliza errores y el 204 sin cuerpo (ver http.ts).
+ *
+ * En el primer acceso de una cuenta la membresia puede no existir todavia (los
+ * efectos de las pantallas corren antes que el alta, y /yo hace un viaje a
+ * Firestore): la API contesta 404 "Familia no encontrada". Entonces se asegura la
+ * membresia UNA vez y se repite la peticion UNA vez. Si sigue fallando, o si
+ * asegurar falla, se propaga el error original: no hay bucles.
  */
-const peticion = <T>(ruta: string, opciones: RequestInit = {}): Promise<T> =>
-  apiFetch<T>(ruta, opciones);
+const peticion = async <T>(ruta: string, opciones: RequestInit = {}): Promise<T> => {
+  try {
+    return await apiFetch<T>(ruta, opciones);
+  } catch (error) {
+    if (!esFamiliaNoEncontrada(error)) throw error;
+    try {
+      await asegurarUnaVez();
+      return await apiFetch<T>(ruta, opciones);
+    } catch {
+      throw error;
+    }
+  }
+};
 
 // Los ids van escapados: uno con espacios o con & romperia la URL en silencio
 // y la peticion acabaria preguntando por otra cosa.

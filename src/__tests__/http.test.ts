@@ -86,6 +86,16 @@ describe('apiFetch', () => {
     expect(fallo.message).toBe('no existe');
   });
 
+  it('conservaElTituloDelProblema: el title identifica el tipo de 404', async () => {
+    getIdToken.mockResolvedValue('tok');
+    fetchSimulado.mockResolvedValue(json({ title: 'Familia no encontrada', detail: 'no hay familia' }, 404));
+
+    const fallo = await apiFetch('/api/x').catch((e) => e);
+
+    expect(fallo.titulo).toBe('Familia no encontrada');
+    expect(fallo.message).toBe('no hay familia');
+  });
+
   it('204SinCuerpo', async () => {
     getIdToken.mockResolvedValue('tok');
     fetchSimulado.mockResolvedValue(new Response(null, { status: 204 }));

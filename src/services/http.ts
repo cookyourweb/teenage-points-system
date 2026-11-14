@@ -14,11 +14,14 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 /** Error de la API con su codigo HTTP, para que quien llama pueda decidir por status. */
 export class ErrorHttp extends Error {
   status: number;
+  /** El "title" del ProblemDetail, si lo hubo: identifica el tipo de error (ej. "Familia no encontrada"). */
+  titulo?: string;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, titulo?: string) {
     super(message);
     this.name = 'ErrorHttp';
     this.status = status;
+    this.titulo = titulo;
   }
 }
 
@@ -47,11 +50,11 @@ const errorDesde = async (respuesta: Response): Promise<ErrorHttp> => {
       const motivos = Object.values(porCampo).filter(Boolean);
       // Se muestran todos, no solo el primero: si fallan tres campos y solo
       // se ensena uno, se corrige, se reenvia y vuelve a fallar. Tres veces.
-      if (motivos.length > 0) return new ErrorHttp(respuesta.status, motivos.join('. '));
+      if (motivos.length > 0) return new ErrorHttp(respuesta.status, motivos.join('. '), problema.title);
     }
 
     const motivo = problema.detail ?? problema.title;
-    if (motivo) return new ErrorHttp(respuesta.status, motivo);
+    if (motivo) return new ErrorHttp(respuesta.status, motivo, problema.title);
   } catch {
     // No era JSON: un 502 de un proxy, o la API caida. Se usa el texto tal cual.
   }

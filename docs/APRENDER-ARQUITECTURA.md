@@ -234,3 +234,26 @@ Como un extracto del banco.
 
 **Probar reglas con el emulador.** `npm run test:rules` levanta un Firestore falso en local y
 comprueba cada regla (permite / deniega) sin tocar producción. Corre también en CI en cada push.
+
+**JWT (el token de Firebase).** Un texto en tres partes: cabecera, datos (`sub` = el `uid`, `iss`, `aud`,
+`exp`) y firma. Cualquiera puede **leerlo**; solo Google puede **firmarlo**. El servidor no pregunta a
+Firebase en cada petición: comprueba la firma con las claves públicas de Google (el **JWKS**).
+
+**Qué valida la API y por qué** (`backend/.../config/TokenFirebase.java`):
+- **Firma RS256** con el JWKS de Google → nadie puede fabricar un token.
+- **`iss` y `aud` = nuestro proyecto** → Google firma con las mismas claves los tokens de TODOS los
+  proyectos de Firebase; sin esto, un token de la app de otro valdría aquí.
+- **`exp`** → un token robado caduca en 1 hora.
+- **`alg=none`** es un ataque clásico: un token "sin firma" que algunas librerías aceptaban. Aquí se rechaza.
+
+**Resource server.** La API no tiene login ni sesión: solo recibe un token en la cabecera
+`Authorization: Bearer ...` y decide. Sin token → **401** ("¿quién sos?"). Con token pero sin derecho → **403**.
+
+**Un bug que solo se ve con el servidor de verdad.** Con `denyAll()` al final de la cadena, Spring Security
+también bloqueaba la página interna de errores (`/error`): un JSON mal formado salía como 403 en vez de
+400. Los tests con MockMvc (servidor simulado) no lo vieron; un test que arranca el servidor real sí.
+
+**Sesión en un solo sitio (`AuthProvider`).** Antes había cuatro formas de preguntar "¿hay sesión?". Ahora
+una, con estados explícitos (`cargando`, `anonimo`, `autenticado`) y el perfil **observado en vivo**
+(`onSnapshot`): el panel ya no lee el usuario una vez, reacciona cuando el dato aparece. Así se cerró la
+carrera del alta.

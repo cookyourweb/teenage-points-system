@@ -5,7 +5,7 @@
 
 ## Estado actual
 
-- `develop`: push 14-nov `028ce8a` con CI ✅. 💚 **309/309 tests** + **26/26 reglas** (emulador, también en CI).
+- `develop`: sesión 2 en local (`a5d1f59`, sin push). 💚 **338/338 tests** + **26/26 reglas** + **32 backend** (lint/typecheck 0).
 - **Reglas de Firestore desplegadas 14-nov** (producción == `firestore.rules`, verificado): alta limitada (nadie se hace admin ni entra en familia ajena), `categorias` pide sesión (HTTP 403 sin ella), `privileges` por familia y `privilegeHistory` append-only. Diseño y orden S0-S6: `docs/superpowers/specs/2026-11-13-arquitectura-front-back-design.md` §8.
 - Backend: `./mvnw test` verde sin Mongo (11 tests); la traza `ConnectException` del log es ruido, no fallo.
 - Plan coach: traspaso en `.opencode/plan/sesion-2026-10-17-coach-acuerdos.md` (**gitignored**: lleva contenido del método).
@@ -27,12 +27,12 @@
 - El backend arranca con Mongo caído y no se reconecta: levantar Mongo después = reiniciar backend.
 - **`categorias` ya NO se lee sin sesión** (reglas 14-nov): el REST con la key de `.env` da 403. Contenido sucio (duplicados/typos): limpiar antes de dárselo al LLM.
 - **Leer las reglas desplegadas**: la consola pide MFA (pendiente de la dueña); la CLI `firebase` logueada sí lee por la API de Rules (solo lectura).
-- **Bug conocido (carrera en el alta)**: tras registrarse, el panel muestra un error un instante (`Dashboard.tsx:72` lee `usuarios` antes de que `Signup.tsx:87` lo cree). Se arregla en S1 con `/api/me`, no con parches.
+- **La API exige `FIREBASE_PROJECT_ID`** en su terminal (sin default; vacía no arranca). Errores de Spring tras `denyAll` → hay que permitir el despacho ERROR (si no, todo sale 403); MockMvc no lo ve, test con RANDOM_PORT.
 - **Este archivo envejece**: si un commit cambia el estado y no toca `MEMORY.md`, el próximo agente arranca con datos falsos (19-oct propuso rehacer `NOTICE.md`). Contrastar con `git log` antes de proponer.
 
 ## Próximos pasos
 
-1. **Sesión 2 (S1 auth `/api/me`)** del plan de 6 sesiones; arregla la carrera del alta. Abiertos: `redeemPrivilege` no se llama desde la UI (los canjes no se registran); privilegios viejos sin `familyId` ya no se ven.
+1. **Sesión 3 (propiedad)**: `Membresia` + `requireMember` en `task/` (hoy cualquier cuenta lee tareas de otra familia por la API). Sesión 2 ✅ (14-nov, probada en local: 401 sin token, 200 con token, alta sin error). Límites: `/child-view` sin sesión ya no ve tareas personalizadas (se retira en S6); `useUserRole` sigue en 4 componentes. Abiertos: `redeemPrivilege` no se llama desde la UI (los canjes no se registran); privilegios viejos sin `familyId` ya no se ven.
 2. AWS fase 1 ⏳: cuenta propia **Ready Set Build** (plan gratuito, 0 $, eu-north-1; `hello.cookyourweb` es miembro invitado, NO usuario IAM). AWS CLI instalado. **Bloqueado** hasta que AWS verifique la cuenta (≤2 días): después `aws login` (elegir la sesión existente) y CloudShell. Pendientes de la dueña: MFA, correo de recuperación y teléfono. **Nunca** "Plan de actualización". Detalle: engram `aws/cuenta-elegida`.
 3. CI avisa deprecaciones: `actions/setup-java@v4`→v5 y acciones en Node 20; login sin `h1` y título "Vite + React + TS"; pantallas autenticadas sin auditar (falta usuario de prueba).
 4. Plan coach: limpieza de `categorias` (con OK de la dueña) y seguir iteración 1 (perfil del padre: cuestionario + guardado).

@@ -4,6 +4,7 @@ import { getDoc, setDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { addFamily } from "../services/familyService";
 import useAuth from "../hooks/useAuth";
+import { AuthProvider } from "../auth/AuthProvider";
 
 const navigate = vi.fn();
 
@@ -21,6 +22,7 @@ vi.mock("firebase/firestore", () => ({
   getDoc: vi.fn(),
   setDoc: vi.fn(),
 }));
+vi.mock("../services/usersService", () => ({ observarPerfil: vi.fn(() => () => {}) }));
 vi.mock("../services/familyService", () => ({ addFamily: vi.fn() }));
 
 beforeEach(() => {
@@ -35,7 +37,7 @@ beforeEach(() => {
 
 describe("useAuth", () => {
   it("un usuario sin documento no recibe una familia nueva", async () => {
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
     await waitFor(() => expect(result.current.loading).toBe(false));
     await new Promise((r) => setTimeout(r, 0));
     expect(addFamily).not.toHaveBeenCalled();
@@ -43,7 +45,7 @@ describe("useAuth", () => {
   });
 
   it("cerrar sesión lleva a la entrada", async () => {
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
     await act(async () => {
       await result.current.logout();
     });

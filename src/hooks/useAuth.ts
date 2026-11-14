@@ -1,36 +1,28 @@
-//useAuth.tsx
-import { useState, useEffect } from "react";
-import { onAuthStateChanged, User, signOut } from "firebase/auth";
+//useAuth.ts
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase";
+import { useSesion } from "../auth/useSesion";
 
-// Este hook solo observa la sesión. La familia y el documento de `usuarios`
-// los crea Signup.tsx, único sitio del alta: si también los creaba aquí, una
-// cuenta nueva acababa con dos familias.
+// Fachada sobre el AuthProvider: mantiene la API { user, loading, logout } para
+// no tocar los componentes que ya la usan. La familia y el documento de
+// `usuarios` los crea Signup.tsx, único sitio del alta.
 const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const sesion = useSesion();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      await sesion.cerrarSesion();
       navigate("/");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
   };
 
-  return { user, loading, logout };
+  return {
+    user: sesion.tipo === "autenticado" ? sesion.user : null,
+    loading: sesion.tipo === "cargando",
+    logout,
+  };
 };
 
 export default useAuth;

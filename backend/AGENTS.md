@@ -12,10 +12,10 @@ Código en `es.cookyourweb.points`, organizado por feature:
 
 - `./mvnw spring-boot:run` — API en http://localhost:8080 (puerto por defecto;
   `application.properties` no hay override).
-- `./mvnw --batch-mode test` — 11 tests. **Pasa sin Mongo levantado** (verificado
-  16-oct-2026: BUILD SUCCESS con Mongo apagado). Con la conexión caida el log
-  escupe una traza `ConnectException` del monitor de conexión de Mongo: es
-  ruido conocido, no un fallo del test.
+- `./mvnw --batch-mode test` — 71 tests (14-nov-2026). `PropiedadIntegracionTest`
+  necesita **Docker** (Testcontainers levanta su propio Mongo); el resto pasa sin
+  Mongo levantado. Con la conexión caida el log escupe una traza `ConnectException`
+  del monitor de conexión de Mongo: es ruido conocido, no un fallo del test.
 
 Ojo con el arranque: Tomcat dice "Started" aunque Mongo esté caído y **no se
 reconecta solo** — si levantas Mongo después, hay que reiniciar el backend.

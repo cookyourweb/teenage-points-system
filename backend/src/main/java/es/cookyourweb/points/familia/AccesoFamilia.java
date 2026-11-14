@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 /**
  * La unica funcion de pertenencia de todo el backend.
  *
- * Todas las rutas que tocan datos de una familia pasan por requireMember: asi
- * la regla vive en un solo sitio y no se puede olvidar en una ruta nueva sin
- * que se note. El uid debe venir SIEMPRE del JWT verificado.
+ * Las rutas que reciben un familyId (p. ej. GET /api/tasks?familyId=) pasan por
+ * requireMember. Las rutas por id de recurso (p. ej. /api/tasks/{id}) no traen
+ * familyId: cargan el recurso y usan esMiembro sobre la familia GUARDADA en el
+ * recurso, nunca sobre la que diga la peticion. Asi la regla vive en un solo
+ * sitio. El uid debe venir SIEMPRE del JWT verificado.
  */
 @Service
 public class AccesoFamilia {

@@ -2,6 +2,9 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { setDoc } from "firebase/firestore";
+import { addFamily } from "../services/familyService";
+import { updateProfile } from "firebase/auth";
 import SignUp from "../components/auth/Signup";
 import { useSesion } from "../auth/useSesion";
 
@@ -45,5 +48,22 @@ describe("Signup y la marca de alta", () => {
     rellenarYEnviar();
     await waitFor(() => expect(terminarAlta).toHaveBeenCalledTimes(1));
     expect(orden).toEqual(["iniciar", "crear", "terminar"]);
+  });
+
+  it("camino feliz: iniciarAlta, crear cuenta, setDoc de usuarios y terminarAlta, en ese orden", async () => {
+    vi.mocked(createUserWithEmailAndPassword).mockImplementation((() => {
+      orden.push("crear");
+      return Promise.resolve({ user: { uid: "u1", email: "a@a.com" } });
+    }) as never);
+    vi.mocked(addFamily).mockResolvedValue({ familyId: "f1" } as never);
+    vi.mocked(setDoc).mockImplementation((() => {
+      orden.push("setDoc");
+      return Promise.resolve();
+    }) as never);
+    vi.mocked(updateProfile).mockResolvedValue(undefined as never);
+    render(<SignUp />);
+    rellenarYEnviar();
+    await waitFor(() => expect(terminarAlta).toHaveBeenCalledTimes(1));
+    expect(orden).toEqual(["iniciar", "crear", "setDoc", "terminar"]);
   });
 });

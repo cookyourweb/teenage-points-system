@@ -61,6 +61,15 @@ describe("Dashboard y la sesión", () => {
     expect(screen.getByText(/Tu cuenta no está configurada/)).toBeInTheDocument();
   });
 
+  it("perfilSinFamiliaMuestraNoConfigurada", () => {
+    sesionCon({ tipo: "listo", perfil: { nombre: "x", rol: "padre", familyId: "" } });
+    pintar();
+    expect(screen.getByText(/Tu cuenta no está configurada/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Cerrar Sesión/ })).toBeInTheDocument();
+    expect(screen.queryByText("resumen-puntos")).not.toBeInTheDocument();
+    expect(fetchFamilyById).not.toHaveBeenCalled();
+  });
+
   it("errorDeCargaNoEsNoConfigurada", () => {
     sesionCon({ tipo: "error" });
     pintar();

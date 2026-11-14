@@ -16,6 +16,10 @@ export const observarPerfil = (uid: string, alCambiar: (e: EstadoPerfil) => void
   onSnapshot(
     doc(db, "usuarios", uid),
     (snap) => {
+      // NO se filtra `snap.metadata.hasPendingWrites` a propósito: la escritura
+      // local de Signup (setDoc de usuarios) dispara este snapshot `listo` antes
+      // de que setDoc resuelva en el servidor. Eso evita que parpadee "cuenta no
+      // configurada" cuando Signup llama a terminarAlta. Filtrarlo reabriría la carrera.
       if (!snap.exists()) return alCambiar({ tipo: "sin-documento" });
       const d = snap.data();
       alCambiar({

@@ -170,6 +170,8 @@ const Dashboard: React.FC = () => {
     setShowCompleteProfile(false);
   }, []);
 
+  // Ojo: renderTabContent y los modales solo se alcanzan tras los guardas de
+  // arriba, que garantizan un familyId no vacío; TS no lo puede deducir, de ahí los `!`.
   // Función para renderizar el contenido de cada pestaña
   const renderTabContent = () => {
     switch (activeTab) {
@@ -457,8 +459,10 @@ const Dashboard: React.FC = () => {
     return pantalla("⏳", "Preparando tu cuenta…", "Estamos creando tu familia. Un momento.");
   }
 
-  // Sin documento y sin alta: cuenta huérfana de verdad.
-  if (estadoPerfil.tipo === "sin-documento") {
+  // Cuenta huérfana de verdad: sin documento y sin alta en curso, o con
+  // documento pero sin familia (observarPerfil mapea el hueco a ""). Si no se
+  // frena aquí, el panel se abriría con familyId "" y los `!` de abajo lo taparían.
+  if (estadoPerfil.tipo === "sin-documento" || (estadoPerfil.tipo === "listo" && !estadoPerfil.perfil.familyId)) {
     return pantalla(
       "⚠️",
       "Tu cuenta no está configurada",

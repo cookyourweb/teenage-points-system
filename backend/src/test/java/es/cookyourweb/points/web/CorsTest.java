@@ -1,15 +1,19 @@
 package es.cookyourweb.points.web;
 
+import es.cookyourweb.points.config.SeguridadConfig;
 import es.cookyourweb.points.task.TaskService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import es.cookyourweb.points.task.TaskController;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -31,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * si te pilla desprevenida.
  */
 @WebMvcTest(TaskController.class)
+@Import(SeguridadConfig.class)
 class CorsTest {
 
     private static final String ORIGEN_DEL_FRONTEND = "http://localhost:5173";
@@ -42,6 +47,11 @@ class CorsTest {
     // la logica de negocio, solo las cabeceras, asi que un doble basta.
     @MockitoBean
     private TaskService service;
+
+    // La firma del token no se prueba aqui (eso es TokenFirebaseTest): un doble evita
+    // que la cadena de seguridad intente descargar el JWKS de Google.
+    @MockitoBean
+    private JwtDecoder jwtDecoder;
 
     @Test
     @DisplayName("la preflight OPTIONS desde el frontend recibe permiso")
@@ -76,6 +86,7 @@ class CorsTest {
         // aunque el servidor haya respondido 200.
         mockMvc.perform(get("/api/tasks")
                         .param("familyId", "familia-1")
+                        .with(jwt())
                         .header("Origin", ORIGEN_DEL_FRONTEND))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", ORIGEN_DEL_FRONTEND));
@@ -90,5 +101,26 @@ class CorsTest {
                         .header("Origin", "http://sitio-que-no-es-mio.com")
                         .header("Access-Control-Request-Method", "GET"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("la preflight que anuncia la cabecera Authorization recibe permiso, sin token")
+    void preflightConAuthorizationPermitida() throws Exception {
+        // El navegador manda la preflight SIN credenciales. Si la seguridad la parara
+        // con un 401, el frontend jamas llegaria a enviar el token.
+        mockMvc.perform(options("/api/tasks")
+                        .header("Origin", ORIGEN_DEL_FRONTEND)
+                        .header("Access-Control-Request-Method", "GET")
+                        .header("Access-Control-Request-Headers", "authorization"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Headers",
+                        org.hamcrest.Matchers.containsStringIgnoringCase("authorization")));
+    }
+
+    @Test
+    @DisplayName("una peticion a la API sin token recibe 401")
+    void peticionSinTokenDa401() throws Exception {
+        mockMvc.perform(get("/api/tasks").param("familyId", "f"))
+                .andExpect(status().isUnauthorized());
     }
 }

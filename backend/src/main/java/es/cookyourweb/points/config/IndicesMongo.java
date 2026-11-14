@@ -1,10 +1,12 @@
 package es.cookyourweb.points.config;
 
+import com.mongodb.MongoException;
 import es.cookyourweb.points.familia.Membresia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.IndexOperations;
 import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver;
@@ -50,7 +52,24 @@ public class IndicesMongo {
                     .resolveIndexFor(Membresia.class)
                     .forEach(ops::createIndex);
         } catch (RuntimeException e) {
-            log.warn("No se pudieron crear los indices de Mongo (reinicia la API con Mongo arriba): {}", e.getMessage());
+            // La excepcion va como ultimo argumento para que el log lleve la traza entera.
+            // Sin token ni datos de personas: solo el mensaje fijo y la excepcion del driver.
+            if (esClaveDuplicada(e)) {
+                log.warn("No se pudo crear el indice unico de membresias: hay membresias duplicadas "
+                        + "(mismo uid y familyId) que limpiar en Mongo antes del proximo arranque", e);
+            } else {
+                log.warn("No se pudieron crear los indices de Mongo (reinicia la API con Mongo arriba)", e);
+            }
         }
+    }
+
+    /** Clave duplicada = DuplicateKeyException de Spring o codigo 11000 del driver, en cualquier causa. */
+    private static boolean esClaveDuplicada(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof DuplicateKeyException) return true;
+            if (t instanceof MongoException m && m.getCode() == 11000) return true;
+            if (t.getCause() == t) break;
+        }
+        return false;
     }
 }

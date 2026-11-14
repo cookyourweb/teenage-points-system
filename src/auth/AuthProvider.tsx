@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { auth } from "../firebase";
 import { observarPerfil } from "../services/usersService";
@@ -27,8 +27,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // terminarAlta, la siguiente cuenta no debe heredar el "Preparando…".
   const [altaDe, setAltaDe] = useState<string | null>(null);
 
+  // Alta pedida cuando todavía no había usuario (Signup llama a iniciarAlta
+  // ANTES de crear la cuenta, así que no hay uid al que atarla). Se ata al
+  // primer usuario que entregue Firebase. Es un ref y no estado porque debe
+  // leerse en el mismo callback de onAuthStateChanged, sin esperar a un render.
+  const altaPendiente = useRef(false);
+  // uid vigente para que iniciarAlta (callback estable) sepa si ya hay usuario.
+  const uidActual = useRef<string | undefined>(undefined);
+
   useEffect(() => {
     const baja = onAuthStateChanged(auth, (u) => {
+      uidActual.current = u?.uid;
+      // setAltaDe antes de setUser: React los agrupa y el primer render
+      // autenticado ya trae altaEnCurso true (sin un instante de "sin-documento").
+      if (u && altaPendiente.current) setAltaDe(u.uid);
+      altaPendiente.current = false;
       // Al quedar sin sesión se borra todo lo de la cuenta anterior: si la misma
       // cuenta vuelve a entrar no debe verse un instante su perfil viejo.
       if (!u) {
@@ -48,8 +61,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return observarPerfil(uid, (estado) => setPerfilDe({ uid, estado }));
   }, [uid]);
 
-  const iniciarAlta = useCallback(() => setAltaDe(uid ?? null), [uid]);
-  const terminarAlta = useCallback(() => setAltaDe(null), []);
+  const iniciarAlta = useCallback(() => {
+    if (uidActual.current) setAltaDe(uidActual.current);
+    else altaPendiente.current = true;
+  }, []);
+  const terminarAlta = useCallback(() => {
+    altaPendiente.current = false;
+    setAltaDe(null);
+  }, []);
   const cerrarSesion = useCallback(() => signOut(auth), []);
 
   const valor = useMemo<SesionConAcciones>(() => {

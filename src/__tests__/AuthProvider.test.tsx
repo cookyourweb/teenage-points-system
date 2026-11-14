@@ -131,6 +131,34 @@ describe("AuthProvider", () => {
     expect(result.current.tipo === "autenticado" && result.current.altaEnCurso).toBe(false);
   });
 
+  it("altaPendienteSeAtaAlPrimerUsuario: el primer estado autenticado ya tiene altaEnCurso", () => {
+    // Se anota cada estado autenticado que llegaría a ver un componente.
+    const vistos: boolean[] = [];
+    const { result } = renderHook(
+      () => {
+        const s = useSesion();
+        if (s.tipo === "autenticado") vistos.push(s.altaEnCurso);
+        return s;
+      },
+      { wrapper: envoltorio },
+    );
+    act(() => emitirUsuario(null));
+    // En el alta aún no hay usuario cuando se llama a iniciarAlta.
+    act(() => result.current.iniciarAlta());
+    act(() => emitirUsuario(ana));
+    expect(vistos.length).toBeGreaterThan(0);
+    expect(vistos.every(Boolean)).toBe(true);
+  });
+
+  it("altaFallidaNoSeCuela: iniciarAlta y terminarAlta antes de que llegue ninguna cuenta", () => {
+    const { result } = renderHook(() => useSesion(), { wrapper: envoltorio });
+    act(() => emitirUsuario(null));
+    act(() => result.current.iniciarAlta());
+    act(() => result.current.terminarAlta());
+    act(() => emitirUsuario(ana));
+    expect(result.current.tipo === "autenticado" && result.current.altaEnCurso).toBe(false);
+  });
+
   it("la misma cuenta que vuelve a entrar no ve su perfil viejo", () => {
     const { result } = renderHook(() => useSesion(), { wrapper: envoltorio });
     act(() => emitirUsuario(ana));

@@ -9,6 +9,10 @@ import {
   deleteCustomTask,
 } from '../services/customTaskService';
 
+// Sin sesion: estos tests comprueban URL, metodo y cuerpo, no el token (eso vive en
+// http.test.ts). El mock evita arrancar Firebase de verdad al importar apiFetch.
+vi.mock('../firebase', () => ({ auth: { currentUser: null }, db: {} }));
+
 /**
  * El adaptador HTTP de tareas.
  *

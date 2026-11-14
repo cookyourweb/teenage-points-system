@@ -46,5 +46,11 @@
     "tema": "AWS fase 1: cuenta propia en plan gratuito (0 $), AWS CLI instalado; aws login y CloudShell bloqueados por la verificación de la cuenta nueva",
     "minutos": 104,
     "creado": "2026-11-13T06:29:00.000Z"
+  },
+  {
+    "fecha": "2026-11-14",
+    "tema": "Sesión 1 reglas: push con CI verde, reglas de Firestore desplegadas (agujero de alta cerrado, categorias con sesión), privilegios arreglados (privileges por familia, privilegeHistory append-only), carrera del alta documentada",
+    "minutos": 180,
+    "creado": "2026-11-14T12:05:00.000Z"
   }
 ]

@@ -206,3 +206,31 @@ Firestore ──(cada noche)──▶ Lambda ──▶ S3 ──▶ Glue + Athen
 - **Asíncrono** si es un efecto lateral (anotar, copiar, avisar).
 - Al pasar a asíncrono pierdes: poder bloquear, ver los fallos y el orden (carreras).
 - Regla corta: **si es un guardia, síncrono; si es un escriba, asíncrono.**
+
+**Condición de carrera.** Dos procesos corren a la vez y el resultado depende de cuál llega primero.
+- Ejemplo real (bug conocido, 14-nov): `createUserWithEmailAndPassword` inicia sesión en el acto
+  (`Signup.tsx:72`), la app salta al panel y `Dashboard.tsx:72` busca `usuarios/{uid}` **antes**
+  de que el alta lo cree (`Signup.tsx:87`) → "No se encontró el documento del usuario"; un instante
+  después recarga bien.
+- Con red rápida a veces no se ve; con red lenta, siempre. Por eso "a mí me funciona" no prueba nada.
+- Arreglo bueno (sesión 2): el panel pregunta "¿quién soy?" (`/api/me`) y distingue "creándose" de
+  "sin familia". Un `setTimeout` taparía el síntoma, no la causa.
+
+**Reglas de seguridad: denegar por defecto (fail-closed).** La última regla de `firestore.rules`
+es `allow read, write: if false` para todo. Una colección nueva queda **cerrada** hasta que alguien
+decide quién la toca. Lo contrario (abrir por defecto) deja agujeros por olvido.
+
+**El nombre de la colección se compara letra por letra.** La regla decía `privilegios` y el código
+usaba `privileges`: para Firestore son dos colecciones distintas, así que `privileges` caía en el
+"denegar por defecto" y la pantalla no funcionaba.
+
+**Firestore no filtra por vos.** Si pedís "todos los privilegios", no te devuelve "solo los tuyos":
+**rechaza la consulta entera**. La consulta tiene que probar de entrada que solo pide lo permitido
+(`where("familyId", "==", miFamilia)`).
+
+**Libro de registro (append-only).** `privilegeHistory` se puede crear pero nunca modificar ni
+borrar: un canje pasó y queda escrito. Si hay un error, se anota un movimiento nuevo que lo corrige.
+Como un extracto del banco.
+
+**Probar reglas con el emulador.** `npm run test:rules` levanta un Firestore falso en local y
+comprueba cada regla (permite / deniega) sin tocar producción. Corre también en CI en cada push.

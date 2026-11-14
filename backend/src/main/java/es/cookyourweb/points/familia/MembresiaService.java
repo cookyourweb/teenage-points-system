@@ -31,7 +31,7 @@ public class MembresiaService {
                 .filter(f -> !f.isBlank())
                 .orElseThrow(FamiliaNoEncontradaException::new);
 
-        return repository.findByUidAndFamilyId(uid, familyId).orElseGet(() -> crear(uid, familyId));
+        return repository.findFirstByUidAndFamilyId(uid, familyId).orElseGet(() -> crear(uid, familyId));
     }
 
     private Membresia crear(String uid, String familyId) {
@@ -40,7 +40,7 @@ public class MembresiaService {
                     null, uid, familyId, Papel.ADULTO, EstadoMembresia.ACTIVA, clock.instant()));
         } catch (DuplicateKeyException carrera) {
             // El indice unico (uid, familyId) paro a la segunda: se devuelve la que gano.
-            return repository.findByUidAndFamilyId(uid, familyId).orElseThrow(() -> carrera);
+            return repository.findFirstByUidAndFamilyId(uid, familyId).orElseThrow(() -> carrera);
         }
     }
 }

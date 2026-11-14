@@ -37,7 +37,7 @@ class MembresiaServiceTest {
     @Test
     void creaLaMembresiaDeLaFamiliaQueDiceFirestore() {
         when(perfil.familyIdDe("ana", "tok-ana")).thenReturn(Optional.of("f1"));
-        when(repository.findByUidAndFamilyId("ana", "f1")).thenReturn(Optional.empty());
+        when(repository.findFirstByUidAndFamilyId("ana", "f1")).thenReturn(Optional.empty());
         when(repository.save(any(Membresia.class))).thenAnswer(i -> i.getArgument(0));
 
         Membresia m = servicio.asegurarMiMembresia("ana", "tok-ana");
@@ -53,7 +53,7 @@ class MembresiaServiceTest {
     void esIdempotente() {
         Membresia existente = new Membresia("m1", "ana", "f1", Papel.ADULTO, EstadoMembresia.ACTIVA, AHORA);
         when(perfil.familyIdDe("ana", "tok-ana")).thenReturn(Optional.of("f1"));
-        when(repository.findByUidAndFamilyId("ana", "f1"))
+        when(repository.findFirstByUidAndFamilyId("ana", "f1"))
                 .thenReturn(Optional.empty(), Optional.of(existente));
         when(repository.save(any(Membresia.class))).thenReturn(existente);
 
@@ -93,10 +93,20 @@ class MembresiaServiceTest {
     void duplicadoPorCarreraDevuelveLaExistente() {
         Membresia ganadora = new Membresia("m1", "ana", "f1", Papel.ADULTO, EstadoMembresia.ACTIVA, AHORA);
         when(perfil.familyIdDe("ana", "tok-ana")).thenReturn(Optional.of("f1"));
-        when(repository.findByUidAndFamilyId("ana", "f1"))
+        when(repository.findFirstByUidAndFamilyId("ana", "f1"))
                 .thenReturn(Optional.empty(), Optional.of(ganadora));
         when(repository.save(any(Membresia.class))).thenThrow(new DuplicateKeyException("dup"));
 
         assertThat(servicio.asegurarMiMembresia("ana", "tok-ana")).isEqualTo(ganadora);
+    }
+
+    @Test
+    void conMembresiasDuplicadasPreexistentesDevuelveUnaYNoLanza() {
+        Membresia a = new Membresia("m1", "ana", "f1", Papel.ADULTO, EstadoMembresia.ACTIVA, AHORA);
+        when(perfil.familyIdDe("ana", "tok-ana")).thenReturn(Optional.of("f1"));
+        when(repository.findFirstByUidAndFamilyId("ana", "f1")).thenReturn(Optional.of(a));
+
+        assertThat(servicio.asegurarMiMembresia("ana", "tok-ana")).isEqualTo(a);
+        verify(repository, never()).save(any(Membresia.class));
     }
 }

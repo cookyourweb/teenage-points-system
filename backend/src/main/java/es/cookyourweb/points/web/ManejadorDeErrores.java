@@ -1,6 +1,7 @@
 package es.cookyourweb.points.web;
 
 import es.cookyourweb.points.familia.FamiliaNoEncontradaException;
+import es.cookyourweb.points.familia.ServicioExternoException;
 import es.cookyourweb.points.task.TaskNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -37,6 +38,15 @@ public class ManejadorDeErrores {
     public ProblemDetail familiaNoEncontrada(FamiliaNoEncontradaException e) {
         ProblemDetail p = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
         p.setTitle("Familia no encontrada");
+        return p;
+    }
+
+    /** 502 y no 404: que Firestore falle no significa que no seas de la familia. */
+    @ExceptionHandler(ServicioExternoException.class)
+    public ProblemDetail servicioExterno(ServicioExternoException e) {
+        ProblemDetail p = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_GATEWAY, "un servicio externo no respondio, reintenta");
+        p.setTitle("Servicio externo no disponible");
         return p;
     }
 

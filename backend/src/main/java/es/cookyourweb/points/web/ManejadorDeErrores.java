@@ -1,5 +1,6 @@
 package es.cookyourweb.points.web;
 
+import es.cookyourweb.points.familia.FamiliaNoEncontradaException;
 import es.cookyourweb.points.task.TaskNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -28,6 +29,14 @@ public class ManejadorDeErrores {
     public ProblemDetail noEncontrada(TaskNotFoundException e) {
         ProblemDetail p = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
         p.setTitle("Tarea no encontrada");
+        return p;
+    }
+
+    /** 404 y no 403: no se confirma que la familia exista a quien no es de ella. */
+    @ExceptionHandler(FamiliaNoEncontradaException.class)
+    public ProblemDetail familiaNoEncontrada(FamiliaNoEncontradaException e) {
+        ProblemDetail p = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+        p.setTitle("Familia no encontrada");
         return p;
     }
 

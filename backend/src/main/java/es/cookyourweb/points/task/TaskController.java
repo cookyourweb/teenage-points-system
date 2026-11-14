@@ -1,6 +1,8 @@
 package es.cookyourweb.points.task;
 
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,32 +32,33 @@ public class TaskController {
 
     @GetMapping
     public List<Task> listar(
+            @AuthenticationPrincipal Jwt jwt,
             @RequestParam String familyId,
             @RequestParam(defaultValue = "false") boolean soloActivas) {
         return soloActivas
-                ? service.activasDeFamilia(familyId)
-                : service.deFamilia(familyId);
+                ? service.activasDeFamilia(jwt.getSubject(), familyId)
+                : service.deFamilia(jwt.getSubject(), familyId);
     }
 
     @GetMapping("/{id}")
-    public Task porId(@PathVariable String id) {
-        return service.porId(id);
+    public Task porId(@AuthenticationPrincipal Jwt jwt, @PathVariable String id) {
+        return service.porId(jwt.getSubject(), id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Task crear(@Valid @RequestBody Task nueva) {
-        return service.crear(nueva);
+    public Task crear(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody Task nueva) {
+        return service.crear(jwt.getSubject(), nueva);
     }
 
     @PutMapping("/{id}")
-    public Task actualizar(@PathVariable String id, @Valid @RequestBody Task cambios) {
-        return service.actualizar(id, cambios);
+    public Task actualizar(@AuthenticationPrincipal Jwt jwt, @PathVariable String id, @Valid @RequestBody Task cambios) {
+        return service.actualizar(jwt.getSubject(), id, cambios);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void borrar(@PathVariable String id) {
-        service.borrar(id);
+    public void borrar(@AuthenticationPrincipal Jwt jwt, @PathVariable String id) {
+        service.borrar(jwt.getSubject(), id);
     }
 }

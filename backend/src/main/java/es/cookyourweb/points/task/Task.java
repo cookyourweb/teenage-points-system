@@ -35,7 +35,8 @@ public record Task(
         @NotBlank(message = "toda tarea pertenece a una familia")
         String familyId,
 
-        @NotBlank(message = "toda tarea tiene un creador")
+        // Sin @NotBlank: lo pone el servidor con el uid del token; si el cliente
+        // manda uno, se ignora (nadie puede firmar una tarea como otra persona).
         String createdBy,
 
         boolean isActive,
@@ -45,9 +46,9 @@ public record Task(
         Instant createdAt,
         Instant updatedAt
 ) {
-    /** Copia con id y fechas de alta. Se usa al crear. */
-    public Task creada(String nuevoId, Instant ahora) {
-        return new Task(nuevoId, nombre, tipo, puntos, familyId, createdBy,
+    /** Copia con id, creador y fechas de alta. Se usa al crear; el creador es el uid del token. */
+    public Task creada(String nuevoId, String creador, Instant ahora) {
+        return new Task(nuevoId, nombre, tipo, puntos, familyId, creador,
                 isActive, description, ahora, ahora);
     }
 

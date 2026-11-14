@@ -4,7 +4,7 @@
 
 **Goal:** que una cuenta solo vea y toque las tareas de las familias a las que pertenece, comprobado en el servidor en cada petición.
 
-**Architecture:** nuevo feature `familia/` con `Membresia(uid, familyId, papel, estado)` en Mongo (índice único `(uid, familyId)`) y una sola función `requireMember(uid, familyId)`. `TaskService` recibe el `uid` del token en sus cinco operaciones y la llama; si no eres miembro, **404** (no se revela si la familia o la tarea existen). `createdBy` sale del token, nunca del cuerpo. La membresía de la familia de la dueña se crea con un script; las altas nuevas la tendrán con las invitaciones (S4).
+**Architecture:** nuevo feature `familia/` con `Membresia(uid, familyId, papel, estado)` en Mongo (índice único `(uid, familyId)`) y una sola función `requireMember(uid, familyId)`. `TaskService` recibe el `uid` del token en sus cinco operaciones y la llama; si no eres miembro, **404** (no se revela si la familia o la tarea existen). `createdBy` sale del token, nunca del cuerpo. **La membresía se obtiene sola**: `POST /api/membresias/yo` lee en Firestore, **con el token de la propia persona**, su documento `usuarios/{uid}` y crea la membresía para el `familyId` que dice Firestore (nunca uno que mande el navegador). Es seguro porque las reglas desplegadas en la sesión 1 impiden crearse un usuario en una familia ajena y cambiar `familyId` después. El `AuthProvider` la pide una vez cuando el perfil está `listo`.
 
 **Tech Stack:** Java 17, Spring Boot 4.1, Spring Data MongoDB, Testcontainers (Mongo), JUnit 5.
 
@@ -18,14 +18,15 @@
 - El `uid` sale **solo** del JWT verificado (`@AuthenticationPrincipal Jwt` → `sub`). Nada de autorización viaja en el cuerpo ni en la URL (§1.2).
 - `Membresia` con **índice único `(uid, familyId)`** (§3).
 - **1 test de integración con Testcontainers** que recorre las 5 rutas de `task/` con una segunda cuenta (§8, §10).
-- Repo público: ningún `uid`, `familyId` ni email real en ficheros versionados; el script los recibe como argumentos.
+- Repo público: ningún `uid`, `familyId`, id de proyecto ni email real en ficheros versionados.
 - Repo: TDD estricto (rojo por aserción), un commit por tarea en español con el porqué, **sin Co-Authored-By ni atribución a IA**, sin push, sin desplegar. `git log --oneline -5 -- <ruta>` antes de editar. Verificación: `cd backend && ./mvnw test`; al final también `npm run lint`, `npm run typecheck`, `npx vitest run`.
 - Gotcha conocido (application.properties): en Boot 4 varias propiedades de Mongo cambiaron de `spring.data.mongodb.*` a `spring.mongodb.*` y la vieja **se ignora sin avisar**. Cualquier propiedad nueva (p. ej. creación automática de índices) se verifica con un test, no a ojo.
 
 ## Rulings tomados al escribir el plan
 
 - **`createdBy` deja de ser obligatorio en el cuerpo** (se quita su `@NotBlank`): lo pone el servidor con el `uid` del token. Si un cliente lo manda, se ignora. Coste si es incorrecto: volver a poner la validación.
-- **Cuentas nuevas sin membresía** reciben 404 en tareas personalizadas hasta S4 (invitaciones / crear familia). Se declara como límite; la demo es con la familia de la dueña, sembrada por script. Coste: las cuentas de prueba nuevas no usan esa pestaña hasta S4.
+- **La membresía la crea el servidor verificando en Firestore** (decisión de la dueña, 14-nov: "quien crea la familia tiene que poder ser miembro"), en vez de un script. Sin Firebase Admin SDK (§4): se usa la API REST de Firestore con el **token de la persona**, así que las reglas de Firestore deciden qué puede leer. Coste si es incorrecto: una llamada de red más por cuenta y sesión; en S4 la creación de familias pasa a Java y esto se simplifica.
+- **Errores de esa lectura:** Firestore responde 404/403, o el documento no tiene `familyId` → **404** "Familia no encontrada". Cualquier otro fallo (red, 5xx) → **502** con `ProblemDetail`, para no confundirlo con "no eres de la familia".
 - **`papel` y `estado`** como enums mínimos (`ADULTO`; `ACTIVA`) — solo lo que S3 usa. `etiqueta` no entra todavía (YAGNI).
 
 ## Review Focus
@@ -34,7 +35,8 @@
 2. **`PUT` que intenta mover la tarea a otra familia** cambiando `familyId` en el cuerpo: la tarea se queda en su familia original (ya lo hace `actualizadaDesde`; debe seguir así). → test en Task 2.
 3. **`POST` con `familyId` de una familia ajena**: 404, y no se guarda nada. → Task 2 y Task 3.
 4. **`POST` con `createdBy` falso en el cuerpo**: se guarda el `uid` del token. → Task 2.
-5. **Membresía duplicada** (el script se ejecuta dos veces): no crea dos documentos. → Task 3 (índice único) y Task 4 (upsert).
+5. **Membresía duplicada** (`POST /api/membresias/yo` dos veces, o dos pestañas a la vez): no crea dos documentos. → Task 3 (índice único) y Task 4 (operación idempotente que tolera `DuplicateKeyException`).
+6. **El navegador intenta elegir familia** mandando un `familyId` en el cuerpo de `POST /api/membresias/yo`: se ignora; solo cuenta lo que dice Firestore. → Task 4.
 
 ---
 
@@ -111,23 +113,62 @@
 - [ ] **Step 5:** `./mvnw test` → verde (requiere Docker; en CI los runners de GitHub lo tienen).
 - [ ] **Step 6: Commit** `test(api): una segunda cuenta recorre las cinco rutas de tareas y no ve ni toca nada de otra familia`
 
-### Task 4: script de membresía para la familia de la dueña
+### Task 4: `POST /api/membresias/yo` crea tu membresía verificando en Firestore
 
 **Files:**
-- Create: `backend/scripts/sembrar-membresia.sh` (ejecutable)
-- Modify: `docs/LEVANTAR-EN-LOCAL.md` (cómo y por qué)
+- Create: `.../familia/PerfilFirestore.java` (interfaz: el puerto)
+- Create: `.../familia/PerfilFirestoreRest.java` (adaptador con `RestClient`)
+- Create: `.../familia/MembresiaController.java`
+- Modify: `.../familia/AccesoFamilia.java` (o un `MembresiaService` en `familia/` si queda más claro: una sola clase decide)
+- Create: `.../familia/ServicioExternoException.java` + handler en `ManejadorDeErrores` → 502
+- Modify: `backend/src/main/resources/application.properties` (`app.firestore.url-base=https://firestore.googleapis.com/v1`, sobreescribible en tests)
+- Test: `backend/src/test/java/es/cookyourweb/points/familia/PerfilFirestoreRestTest.java`, `.../familia/MembresiaControllerTest.java`, ampliar `AccesoFamiliaTest`
 
 **Interfaces:**
-- `backend/scripts/sembrar-membresia.sh <uid> <familyId>`: falla con uso si falta algún argumento o está en blanco; hace `docker exec points-mongo mongosh points --quiet --eval ...` con un **upsert** sobre `membresias` filtrando por `{uid, familyId}` y `$setOnInsert` de `papel: "ADULTO"`, `estado: "ACTIVA"`, `creadaEn: new Date()`, `_class` igual al que escribe Spring (`es.cookyourweb.points.familia.Membresia`). Los argumentos se pasan a mongosh sin interpolarlos en el código JS (p. ej. por variables de entorno `-e` del `docker exec` y `process.env` en el `--eval`), para que un valor con comillas no rompa ni inyecte nada.
+- Consumes: `Membresia`, `MembresiaRepository` (Task 1); `app.firebase.project-id` (sesión 2).
+- Produces:
+  - `interface PerfilFirestore { Optional<String> familyIdDe(String uid, String tokenDeLaPersona); }` — `Optional.empty()` si Firestore responde 404 o 403 o el documento no trae `familyId`; lanza `ServicioExternoException` ante cualquier otro fallo.
+  - `PerfilFirestoreRest`: `GET {url-base}/projects/{proyecto}/databases/(default)/documents/usuarios/{uid}` con `Authorization: Bearer <token de la persona>`; lee `fields.familyId.stringValue`. El `uid` va escapado en la ruta.
+  - `asegurarMiMembresia(String uid, String token): Membresia` — pide el `familyId` a `PerfilFirestore`; si vacío → `FamiliaNoEncontradaException`; si ya hay membresía `(uid, familyId)` la devuelve; si no, la crea `ADULTO`/`ACTIVA`; si salta `DuplicateKeyException` (carrera entre dos pestañas) relee y devuelve la existente.
+  - `POST /api/membresias/yo` (sin cuerpo; si llega uno, se ignora) → `200 {"familyId": "...", "papel": "ADULTO"}`. El token se toma de `jwt.getTokenValue()`.
 
-- [ ] **Step 1:** test manual documentado en el informe: sin argumentos → sale con código ≠ 0 y el uso; dos ejecuciones con los mismos valores de prueba (`uid-prueba`, `familia-prueba`) → `db.membresias.countDocuments({uid:"uid-prueba"})` = 1; después borrar ese documento de prueba.
-- [ ] **Step 2:** implementar y documentar en `LEVANTAR-EN-LOCAL.md`.
-- [ ] **Step 3: Commit** `chore(api): script para dar de alta la membresia de una familia mientras no existan las invitaciones`
+- [ ] **Step 1: Tests que fallan** en `PerfilFirestoreRestTest` (servidor HTTP falso: `MockRestServiceServer` sobre el `RestClient.Builder`, o `com.sun.net.httpserver.HttpServer` del JDK — el que encaje sin dependencias nuevas):
+  - `leeElFamilyIdConElTokenDeLaPersona`: responde `{"fields":{"familyId":{"stringValue":"f1"}}}` → `Optional.of("f1")`, y la petición llevó `Authorization: Bearer tok-ana` a `/projects/proyecto-test/databases/(default)/documents/usuarios/ana`.
+  - `documentoInexistenteEsVacio` (404) y `sinPermisoEsVacio` (403) → `Optional.empty()`.
+  - `sinCampoFamilyIdEsVacio`.
+  - `errorDelServidorLanza502` (500) → `ServicioExternoException`.
+- [ ] **Step 2: Tests que fallan** del servicio (puerto falso):
+  - `creaLaMembresiaDeLaFamiliaQueDiceFirestore`.
+  - `esIdempotente`: dos llamadas → una sola membresía (`save` una vez).
+  - `sinFamiliaEnFirestoreDa404`.
+  - `duplicadoPorCarreraDevuelveLaExistente`.
+- [ ] **Step 3: Tests que fallan** en `MembresiaControllerTest` (`@WebMvcTest`, `@Import(SeguridadConfig.class)`, `@MockitoBean JwtDecoder`):
+  - `sinTokenDa401`.
+  - `ignoraElFamilyIdDelCuerpo` (Review Focus 6): cuerpo `{"familyId":"ajena"}` → el servicio recibe solo `uid` y token; respuesta con el `familyId` del puerto.
+- [ ] **Step 4:** `./mvnw test` → rojo por aserción; implementar; verde.
+- [ ] **Step 5: Commit** `feat(familia): la membresia se crea sola leyendo tu familia en Firestore con tu propio token, sin fiarse del navegador`
 
-### Task 5: prueba de punta a punta (la dueña con el controlador)
+### Task 5: el frontend pide su membresía al entrar
+
+**Files:**
+- Modify: `src/services/identidadService.ts` (`asegurarMembresia(): Promise<{ familyId: string; papel: string }>` = `apiFetch` `POST /api/membresias/yo`)
+- Modify: `src/auth/AuthProvider.tsx` (cuando `perfil.tipo === 'listo'` y hay `familyId`, llama **una vez por uid** a `asegurarMembresia`; un fallo se registra con `console.error` y no rompe la sesión)
+- Test: `src/__tests__/identidadService.test.ts`, `src/__tests__/AuthProvider.test.tsx`
+
+**Interfaces:**
+- Consumes: `apiFetch` (sesión 2), `POST /api/membresias/yo` (Task 4).
+
+- [ ] **Step 1: Tests que fallan:**
+  - `asegurarMembresiaHacePost`: `apiFetch` llamado con `'/api/membresias/yo'` y `method: 'POST'`, sin `familyId` en el cuerpo.
+  - `seAseguraUnaVezPorCuenta`: perfil `listo` emitido dos veces para `ana` → una sola llamada; cambio a `beto` con perfil `listo` → una llamada más.
+  - `noSeLlamaSinFamilia`: perfil `sin-documento` o `listo` con `familyId` vacío → ninguna llamada.
+  - `unFalloNoRompeLaSesion`: la llamada rechaza → la sesión sigue `autenticado` con perfil `listo`.
+- [ ] **Step 2:** rojo por aserción; implementar; `npm run lint`, `npm run typecheck`, `npx vitest run` en verde.
+- [ ] **Step 3: Commit** `feat(auth): al entrar se asegura la membresia de tu familia para que la API te deje ver tus tareas`
+
+### Task 6: prueba de punta a punta (la dueña con el controlador)
 
 - [ ] Reiniciar el backend con `FIREBASE_PROJECT_ID`.
-- [ ] Sembrar la membresía de la cuenta de la dueña con el script (uid y familyId leídos en el momento, no escritos en ningún fichero).
-- [ ] Con esa cuenta: la pestaña de tareas personalizadas carga (200) y se puede crear una tarea.
-- [ ] Con la cuenta de prueba nueva (sin membresía): la misma pestaña recibe 404 de la API.
-- [ ] `MEMORY.md`, `docs/APRENDER-ARQUITECTURA.md` (autorización vs autenticación, por qué 404 y no 403, índice único, Testcontainers) y log de sesiones.
+- [ ] Entrar con la cuenta de la dueña: en Mongo aparece **una** membresía suya (`db.membresias.countDocuments`), la pestaña de tareas carga (200) y se puede crear una tarea con `createdBy` = su uid.
+- [ ] Registrar una cuenta nueva: obtiene su membresía sola y su pestaña de tareas funciona, sin ver las tareas de la otra familia.
+- [ ] `MEMORY.md`, `docs/APRENDER-ARQUITECTURA.md` (autorización vs autenticación, por qué 404 y no 403, índice único, Testcontainers, verificar con el token de la persona en vez de fiarse del navegador) y log de sesiones.

@@ -113,4 +113,30 @@ describe("AuthProvider", () => {
     const vivas = suscripciones.filter((s) => s.baja.mock.calls.length === 0);
     expect(vivas.length).toBe(1);
   });
+
+  it("altaEnCurso no se cuela a otra cuenta tras cerrar sesion", () => {
+    const { result } = renderHook(() => useSesion(), { wrapper: envoltorio });
+    act(() => emitirUsuario(ana));
+    act(() => result.current.iniciarAlta());
+    act(() => emitirUsuario(null));
+    act(() => emitirUsuario(beto));
+    expect(result.current.tipo === "autenticado" && result.current.altaEnCurso).toBe(false);
+  });
+
+  it("altaEnCurso no se cuela al cambiar de cuenta directamente", () => {
+    const { result } = renderHook(() => useSesion(), { wrapper: envoltorio });
+    act(() => emitirUsuario(ana));
+    act(() => result.current.iniciarAlta());
+    act(() => emitirUsuario(beto));
+    expect(result.current.tipo === "autenticado" && result.current.altaEnCurso).toBe(false);
+  });
+
+  it("la misma cuenta que vuelve a entrar no ve su perfil viejo", () => {
+    const { result } = renderHook(() => useSesion(), { wrapper: envoltorio });
+    act(() => emitirUsuario(ana));
+    act(() => suscripciones[0].emitir(listo("f1")));
+    act(() => emitirUsuario(null));
+    act(() => emitirUsuario(ana));
+    expect(result.current.tipo === "autenticado" && result.current.perfil.tipo).toBe("cargando");
+  });
 });

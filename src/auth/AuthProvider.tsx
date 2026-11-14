@@ -23,10 +23,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // actual se considera 'cargando'. Así, al cambiar de cuenta, el perfil de la
   // anterior nunca se muestra ni durante un render.
   const [perfilDe, setPerfilDe] = useState<{ uid: string; estado: EstadoPerfil } | null>(null);
-  const [altaEnCurso, setAltaEnCurso] = useState(false);
+  // La alta en curso también pertenece a un uid: si el alta falla sin llamar a
+  // terminarAlta, la siguiente cuenta no debe heredar el "Preparando…".
+  const [altaDe, setAltaDe] = useState<string | null>(null);
 
   useEffect(() => {
-    const baja = onAuthStateChanged(auth, (u) => setUser(u));
+    const baja = onAuthStateChanged(auth, (u) => {
+      // Al quedar sin sesión se borra todo lo de la cuenta anterior: si la misma
+      // cuenta vuelve a entrar no debe verse un instante su perfil viejo.
+      if (!u) {
+        setPerfilDe(null);
+        setAltaDe(null);
+      }
+      setUser(u);
+    });
     return baja;
   }, []);
 
@@ -38,8 +48,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return observarPerfil(uid, (estado) => setPerfilDe({ uid, estado }));
   }, [uid]);
 
-  const iniciarAlta = useCallback(() => setAltaEnCurso(true), []);
-  const terminarAlta = useCallback(() => setAltaEnCurso(false), []);
+  const iniciarAlta = useCallback(() => setAltaDe(uid ?? null), [uid]);
+  const terminarAlta = useCallback(() => setAltaDe(null), []);
   const cerrarSesion = useCallback(() => signOut(auth), []);
 
   const valor = useMemo<SesionConAcciones>(() => {
@@ -48,8 +58,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (user === null) return { tipo: "anonimo", ...acciones };
     const perfil: EstadoPerfil =
       perfilDe && perfilDe.uid === user.uid ? perfilDe.estado : { tipo: "cargando" };
-    return { tipo: "autenticado", user, perfil, altaEnCurso, ...acciones };
-  }, [user, perfilDe, altaEnCurso, iniciarAlta, terminarAlta, cerrarSesion]);
+    return { tipo: "autenticado", user, perfil, altaEnCurso: altaDe === user.uid, ...acciones };
+  }, [user, perfilDe, altaDe, iniciarAlta, terminarAlta, cerrarSesion]);
 
   return <SesionContext.Provider value={valor}>{children}</SesionContext.Provider>;
 };

@@ -23,7 +23,10 @@ export const observarPerfil = (uid: string, alCambiar: (e: EstadoPerfil) => void
         perfil: { nombre: d.nombre ?? "", rol: d.rol ?? "", familyId: d.familyId ?? "" },
       });
     },
-    // Si Firestore rechaza la lectura (reglas, red) lo tratamos como sin perfil
-    // para no dejar la pantalla en 'cargando' para siempre.
-    () => alCambiar({ tipo: "sin-documento" }),
+    // Un error termina el listener en Firestore: distinguirlo de "sin documento"
+    // evita decirle a alguien con la red caida que su cuenta no esta configurada.
+    (error) => {
+      console.error("Error observando el perfil:", error);
+      alCambiar({ tipo: "error" });
+    },
   );

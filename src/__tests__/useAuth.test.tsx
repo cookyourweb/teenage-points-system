@@ -1,8 +1,6 @@
-import { renderHook, waitFor, act } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getDoc, setDoc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-import { addFamily } from "../services/familyService";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import useAuth from "../hooks/useAuth";
 import { AuthProvider } from "../auth/AuthProvider";
 
@@ -17,13 +15,7 @@ vi.mock("firebase/auth", () => ({
   onAuthStateChanged: vi.fn(),
   signOut: vi.fn().mockResolvedValue(undefined),
 }));
-vi.mock("firebase/firestore", () => ({
-  doc: vi.fn(),
-  getDoc: vi.fn(),
-  setDoc: vi.fn(),
-}));
 vi.mock("../services/usersService", () => ({ observarPerfil: vi.fn(() => () => {}) }));
-vi.mock("../services/familyService", () => ({ addFamily: vi.fn() }));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -31,17 +23,23 @@ beforeEach(() => {
     cb({ uid: "u1", displayName: "Ana", email: "a@a.com" });
     return () => {};
   }) as never);
-  vi.mocked(getDoc).mockResolvedValue({ exists: () => false } as never);
-  vi.mocked(addFamily).mockResolvedValue({ familyId: "f1" } as never);
 });
 
 describe("useAuth", () => {
-  it("un usuario sin documento no recibe una familia nueva", async () => {
+  it("expone el usuario de la sesion y loading=false cuando hay sesion", () => {
     const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    await new Promise((r) => setTimeout(r, 0));
-    expect(addFamily).not.toHaveBeenCalled();
-    expect(setDoc).not.toHaveBeenCalled();
+    expect(result.current.loading).toBe(false);
+    expect(result.current.user?.uid).toBe("u1");
+  });
+
+  it("sin sesion devuelve user null", () => {
+    vi.mocked(onAuthStateChanged).mockImplementation(((_a: unknown, cb: (u: unknown) => void) => {
+      cb(null);
+      return () => {};
+    }) as never);
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+    expect(result.current.loading).toBe(false);
+    expect(result.current.user).toBeNull();
   });
 
   it("cerrar sesión lleva a la entrada", async () => {
@@ -49,6 +47,7 @@ describe("useAuth", () => {
     await act(async () => {
       await result.current.logout();
     });
+    expect(signOut).toHaveBeenCalled();
     expect(navigate).toHaveBeenCalledWith("/");
   });
 });

@@ -6,6 +6,7 @@ export type Perfil = { nombre: string; rol: string; familyId: string };
 export type EstadoPerfil =
   | { tipo: "cargando" }
   | { tipo: "sin-documento" }
+  | { tipo: "error" }
   | { tipo: "listo"; perfil: Perfil };
 
 export type Sesion =

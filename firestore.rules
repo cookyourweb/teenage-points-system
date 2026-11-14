@@ -73,7 +73,12 @@ service cloud.firestore {
 
     // ---------- Familias ----------
     match /familias/{familyId} {
-      allow read, update, delete: if esMiFamilia(familyId);
+      allow read, update: if esMiFamilia(familyId);
+
+      // Borrar: nadie. El id de la familia es el que ata sus tareas y membresias
+      // en la API; si se pudiera borrar, otra cuenta podria recrearla con el mismo
+      // id y heredar todo lo que colgaba de ella.
+      allow delete: if false;
 
       // Crear: aún no existe `usuarios/{uid}`, así que `esMiFamilia` no sirve
       // (el alta crea la familia antes que el usuario). Se exige que el único

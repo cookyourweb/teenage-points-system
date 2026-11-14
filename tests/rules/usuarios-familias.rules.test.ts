@@ -4,7 +4,7 @@ import {
   assertSucceeds,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { como, crearEntorno, sembrar } from './entorno'
 
 let env: RulesTestEnvironment
@@ -83,5 +83,11 @@ describe('alta de familias', () => {
   it('un miembro lee su familia y un extraño no', async () => {
     await assertSucceeds(getDoc(doc(como(env, 'ana'), 'familias/F1')))
     await assertFails(getDoc(doc(como(env, 'eva'), 'familias/F1')))
+  })
+})
+
+describe('borrado de familias', () => {
+  it('un padre de la familia no puede borrarla: otra cuenta la recrearia con el mismo id y heredaria sus tareas', async () => {
+    await assertFails(deleteDoc(doc(como(env, 'ana'), 'familias/F1')))
   })
 })

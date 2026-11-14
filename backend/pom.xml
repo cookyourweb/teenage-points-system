@@ -78,6 +78,24 @@
 			<artifactId>spring-boot-starter-security-oauth2-resource-server-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Mongo real en un contenedor para los tests de integracion (requiere Docker).
+		     Versiones gestionadas por el parent (BOM de Boot -> testcontainers-bom 2.x, donde
+		     los modulos se llaman testcontainers-*, no los antiguos junit-jupiter/mongodb). -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-mongodb</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

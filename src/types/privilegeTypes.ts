@@ -8,6 +8,7 @@ export interface PrivilegeHistory {
 export interface Privilege {
   id?: string;  // ID principal del privilegio
   privilegioId?: string;  // ID alternativo para compatibilidad (corregido sin "s")
+  familyId?: string;  // Familia dueña: las reglas de Firestore deciden el acceso por este campo. Opcional porque las plantillas de rewardConfig aún no pertenecen a ninguna; addPrivilege sí lo exige
   name: string;
   description: string;
   points: number;  // Puntos necesarios unificados

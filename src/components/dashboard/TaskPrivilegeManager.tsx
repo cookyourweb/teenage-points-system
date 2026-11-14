@@ -4,24 +4,25 @@ import { getPrivilegeHistory } from "../../services/privilegesService";
 import { PrivilegeHistory } from "../../types/privilegeTypes";
 
 interface TaskPrivilegeManagerProps {
+  familyId: string;
   childId: string;
 }
 
-const TaskPrivilegeManager: React.FC<TaskPrivilegeManagerProps> = ({ childId }) => {
+const TaskPrivilegeManager: React.FC<TaskPrivilegeManagerProps> = ({ familyId, childId }) => {
   const [privilegeHistory, setPrivilegeHistory] = useState<PrivilegeHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPrivilegeHistory = async () => {
-      if (!childId) return;
+      if (!familyId || !childId) return;
       
       try {
         setLoading(true);
         setError(null);
         
         // Obtener historial de privilegios del child específico
-        const history = await getPrivilegeHistory(childId);
+        const history = await getPrivilegeHistory(familyId, childId);
         setPrivilegeHistory(history);
       } catch (err) {
         console.error('Error fetching privilege history:', err);
@@ -32,7 +33,7 @@ const TaskPrivilegeManager: React.FC<TaskPrivilegeManagerProps> = ({ childId }) 
     };
 
     fetchPrivilegeHistory();
-  }, [childId]);
+  }, [familyId, childId]);
 
   if (loading) {
     return (

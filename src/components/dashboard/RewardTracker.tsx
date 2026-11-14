@@ -1,5 +1,5 @@
 //src/components/dashboard/RewardTracker.tsx
-// Rutas Firebase: /weeklyTasks/{familyId}_{childId}_{weekId}, /privilegios/{privilegeId}, /familias/{familyId}
+// Rutas Firebase: /weeklyTasks/{familyId}_{childId}_{weekId}, /privileges/{privilegeId}, /familias/{familyId}
 import React, { useState, useEffect } from "react";
 import PrivilegeRedeemDialog from './PrivilegeRedeemDialog';
 import TaskDayCell from './TaskDayCell';
@@ -38,7 +38,7 @@ import {
   updatePrivilege, 
   addPrivilege, 
   deletePrivilege,
-  fetchPrivileges 
+  getPrivilegesByFamily 
 } from "../../services/privilegesService";
 
 interface EditablePrivilege {
@@ -123,11 +123,12 @@ const RewardTracker: React.FC = () => {
     fetchChildName();
   }, [user, familyId, childId]);
 
-  // Cargar privilegios personalizados - ruta: /privilegios/{privilegeId}
+  // Cargar privilegios personalizados de la familia - ruta: /privileges/{privilegeId}
   useEffect(() => {
+    if (!familyId) return;
     const loadCustomPrivileges = async () => {
       try {
-        const privileges = await fetchPrivileges();
+        const privileges = await getPrivilegesByFamily(familyId);
         const editablePrivileges = privileges.map(p => ({
           id: p.id || p.privilegioId || '', // Usar id principal o privilegioId como fallback
           name: p.name,
@@ -141,7 +142,7 @@ const RewardTracker: React.FC = () => {
     };
 
     loadCustomPrivileges();
-  }, []);
+  }, [familyId]);
 
   // Migrar datos desde localStorage si existen
   useEffect(() => {
@@ -284,7 +285,7 @@ const RewardTracker: React.FC = () => {
     });
   };
 
-  // Funciones para gestión de privilegios - ruta: /privilegios/{privilegeId}
+  // Funciones para gestión de privilegios - ruta: /privileges/{privilegeId}
   const handleAddPrivilege = async () => {
     if (!newPrivilege.name.trim() || newPrivilege.points <= 0) {
       toast.error("Por favor completa todos los campos correctamente");
@@ -292,7 +293,9 @@ const RewardTracker: React.FC = () => {
     }
 
     try {
+      if (!familyId) return;
       const privilege = await addPrivilege({
+        familyId,
         // id y privilegioId no van aquí: los asigna addPrivilege, y su firma
         // (Omit<Privilege, "id" | "privilegioId">) los excluye a proposito.
         name: newPrivilege.name,
@@ -347,7 +350,7 @@ const RewardTracker: React.FC = () => {
     }
   };
 
-  // Redimir privilegio con calendario - ruta: /privilegios/{privilegeId}
+  // Redimir privilegio con calendario - ruta: /privileges/{privilegeId}
   const handlePrivilegeRedeem = async (privilege: Canjeable, date: string) => {
     if (!familyId || !childId || weeklyTotal < privilege.points || syncing || !user?.uid) return;
 

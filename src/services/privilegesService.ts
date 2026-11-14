@@ -9,29 +9,10 @@ import {
   doc, 
   query, 
   where, 
-  orderBy,
   Timestamp 
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { Privilege, PrivilegeHistory } from "../types/privilegeTypes";
-
-// Obtener todos los privilegios
-export const fetchPrivileges = async (): Promise<Privilege[]> => {
-  try {
-    const privilegesCollection = collection(db, "privileges");
-    const q = query(privilegesCollection, orderBy("points", "asc"));
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map((docSnap) => ({
-      id: docSnap.id,
-      privilegioId: docSnap.id,
-      ...docSnap.data(),
-    })) as Privilege[];
-  } catch (error) {
-    console.error("Error fetching privileges:", error);
-    throw new Error("Failed to fetch privileges");
-  }
-};
 
 // Obtener privilegio por ID
 export const getPrivilegeById = async (id: string): Promise<Privilege | null> => {
@@ -54,7 +35,9 @@ export const getPrivilegeById = async (id: string): Promise<Privilege | null> =>
 };
 
 // Agregar un nuevo privilegio
-export const addPrivilege = async (privilege: Omit<Privilege, 'id' | 'privilegioId'>): Promise<Privilege> => {
+export const addPrivilege = async (
+  privilege: Omit<Privilege, 'id' | 'privilegioId' | 'familyId'> & { familyId: string }
+): Promise<Privilege> => {
   try {
     const privilegesCollection = collection(db, "privileges");
     const privilegeData = {
@@ -103,55 +86,53 @@ export const deletePrivilege = async (id: string): Promise<void> => {
   }
 };
 
-// Obtener historial de privilegios
-export const getPrivilegeHistory = async (childId?: string): Promise<PrivilegeHistory[]> => {
+// Obtener historial de canjes de una familia (y, si se pasa, de un hijo).
+// Siempre filtra por familyId: las reglas de Firestore rechazan la consulta
+// entera si no lo lleva. Se ordena aquí y no con orderBy porque where + orderBy
+// sobre otro campo exigiría un índice compuesto que habría que desplegar aparte.
+export const getPrivilegeHistory = async (familyId: string, childId?: string): Promise<PrivilegeHistory[]> => {
   try {
     const historyCollection = collection(db, "privilegeHistory");
-    let q;
-    
-    if (childId) {
-      q = query(
-        historyCollection, 
-        where("childId", "==", childId),
-        orderBy("dateUnlocked", "desc")
-      );
-    } else {
-      q = query(historyCollection, orderBy("dateUnlocked", "desc"));
-    }
-    
+    const q = childId
+      ? query(historyCollection, where("familyId", "==", familyId), where("childId", "==", childId))
+      : query(historyCollection, where("familyId", "==", familyId));
+
     const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map((docSnap) => {
-      const data = docSnap.data();
-      return {
-        id: docSnap.id,
-        ...data,
-        dateUnlocked: data.dateUnlocked,
-        unlockedBy: data.unlockedBy,
-      } as PrivilegeHistory;
-    });
+
+    return querySnapshot.docs
+      .map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          ...data,
+          dateUnlocked: data.dateUnlocked,
+          unlockedBy: data.unlockedBy,
+        } as PrivilegeHistory;
+      })
+      .sort((a, b) => String(b.dateUnlocked ?? "").localeCompare(String(a.dateUnlocked ?? "")));
   } catch (error) {
     console.error("Error fetching privilege history:", error);
     throw new Error("Failed to fetch privilege history");
   }
 };
 
-// Obtener privilegios por familia
+// Obtener privilegios de una familia, de menos a más puntos. Es la única forma
+// de listar `privileges`: sin el filtro de familia las reglas rechazan la
+// consulta. Ordena en cliente para no depender de un índice compuesto.
 export const getPrivilegesByFamily = async (familyId: string): Promise<Privilege[]> => {
   try {
     const privilegesCollection = collection(db, "privileges");
     const q = query(
       privilegesCollection, 
-      where("familyId", "==", familyId),
-      orderBy("points", "asc")
+      where("familyId", "==", familyId)
     );
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map((docSnap) => ({
+    return (querySnapshot.docs.map((docSnap) => ({
       id: docSnap.id,
       privilegioId: docSnap.id,
       ...docSnap.data(),
-    })) as Privilege[];
+    })) as Privilege[]).sort((a, b) => (a.points ?? 0) - (b.points ?? 0));
   } catch (error) {
     console.error("Error fetching family privileges:", error);
     throw new Error("Failed to fetch family privileges");
@@ -160,6 +141,7 @@ export const getPrivilegesByFamily = async (familyId: string): Promise<Privilege
 
 // Registrar redención de privilegio
 export const redeemPrivilege = async (
+  familyId: string,
   privilegeId: string, 
   childId: string, 
   redeemedBy: string,
@@ -168,6 +150,7 @@ export const redeemPrivilege = async (
   try {
     const historyCollection = collection(db, "privilegeHistory");
     const historyData = {
+      familyId, // las reglas comprueban este campo: sin él el canje se rechaza
       privilegeId,
       childId,
       redeemedBy,

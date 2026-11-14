@@ -257,3 +257,23 @@ también bloqueaba la página interna de errores (`/error`): un JSON mal formado
 una, con estados explícitos (`cargando`, `anonimo`, `autenticado`) y el perfil **observado en vivo**
 (`onSnapshot`): el panel ya no lee el usuario una vez, reacciona cuando el dato aparece. Así se cerró la
 carrera del alta.
+
+**Autenticación ≠ autorización.** Autenticación: ¿quién sos? (el token, sesión 2). Autorización: ¿qué
+podés tocar? (la membresía, sesión 3). Una API con solo la primera deja a cualquier cuenta leer todo.
+
+**404 y no 403 entre familias.** Un 403 ("no tenés permiso") le confirma a un extraño que esa familia o esa
+tarea **existe**. Un 404 no le dice nada. Por eso una tarea ajena y una inexistente responden lo mismo.
+El 403 queda para papeles dentro de la misma familia.
+
+**No fiarse del navegador.** `POST /api/membresias/yo` no acepta un `familyId` del cliente: la API lee en
+Firestore, **con el token de la propia persona**, su `usuarios/{uid}`. Es seguro porque las reglas
+(sesión 1) impiden apuntarse a una familia ajena y cambiar `familyId` después.
+
+**Índice único = la regla vive en la base de datos.** `(uid, familyId)` único: aunque dos pestañas pidan
+la membresía a la vez, Mongo rechaza la segunda. Se crea al arrancar en un hilo aparte, para que la API
+siga arrancando con Mongo caído (si estaba caído, no hay índice hasta reiniciar).
+
+**Testcontainers.** Un test levanta un Mongo de verdad en Docker, arranca la API y recorre las cinco rutas
+con una segunda cuenta. Los mocks no ven lo que solo pasa con la base de datos real (como el índice).
+
+**Idempotente.** Repetir la operación da el mismo resultado: `/yo` llamado dos veces deja una sola membresía.

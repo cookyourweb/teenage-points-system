@@ -16,10 +16,17 @@ de **un mes** desde la solicitud: anotá la fecha de la petición.
    `gcloud auth application-default login`
 2. Variables de entorno (obligatorias, no hay valores por defecto):
    - `FIREBASE_PROJECT_ID`: el proyecto de Firebase.
-   - `MONGODB_URI`: la URI de Mongo (con la base de datos incluida).
+   - `MONGODB_URI`: la URI de Mongo (`mongodb://` o `mongodb+srv://`, con o
+     sin query string). **Tiene que incluir el nombre de la base** y no puede
+     ser `test`: sin base el cliente usa `test`, que está vacía, y el script
+     no vería las membresías de otras familias; un adulto compartido perdería
+     su cuenta de Auth. Si falta, el script avisa y sale con código `2` antes
+     de conectar. Ejemplo: `mongodb://host:27017/points`.
 
-   Si apuntan a un emulador se respetan `FIRESTORE_EMULATOR_HOST` y
-   `FIREBASE_AUTH_EMULATOR_HOST`.
+   Emuladores: `FIRESTORE_EMULATOR_HOST` y `FIREBASE_AUTH_EMULATOR_HOST` van
+   **las dos o ninguna**. Con solo una, el otro SDK iría contra producción: el
+   script sale con código `2`. Con emuladores y un `MONGODB_URI` que no apunta a
+   `localhost`/`127.0.0.1`, avisa de que tocaría el Mongo real.
 
 ## Uso
 
@@ -40,9 +47,13 @@ firestore/childPoints: 1
 ENSAYO: no se ha borrado nada. Repite con --confirmar para borrar.
 ```
 
+Tanto el ensayo como la constancia terminan con
+`cuentas conservadas por pertenecer a otra familia: N` (solo el recuento, nunca
+los uid).
+
 Con `--confirmar` el script muestra el proyecto y la familia a los que apunta
-(si el proyecto no empieza por `demo-` y no hay emulador, avisa de que es
-**producción**), borra y termina con una constancia.
+(siempre que no haya emuladores avisa de que es **producción**, tenga o no el
+proyecto prefijo `demo-`), borra y termina con una constancia.
 
 Códigos de salida: `0` bien, `1` familia inexistente o fallo, `2` uso
 incorrecto o faltan variables.
@@ -83,3 +94,16 @@ blanca (`COLECCIONES_PERMITIDAS` en `scripts/baja-familia/plan.ts`).
 Informa qué pasos se completaron y sale con código distinto de 0. **Volvé a
 ejecutar el mismo comando**: es idempotente y termina lo que falte (gracias al
 orden, `familias` sigue existiendo hasta el final).
+
+## Límites conocidos
+
+- **Ids de hijo no únicos entre familias.** Los hijos se crean con
+  `new-${Date.now()}`; dos familias podrían, con probabilidad despreciable,
+  tener el mismo id. Como los `tasks` y canjes antiguos se buscan por `childId`,
+  ese caso mezclaría datos. El ensayo muestra los recuentos: si algo no cuadra,
+  no confirmes.
+- **Hijos ya quitados de la familia.** Si un hijo se eliminó de
+  `miembros.hijos` antes de la baja, sus `tasks` y canjes antiguos (sin
+  `familyId`) ya no se encuentran y quedan sin borrar.
+- **`tareas` es catálogo común** aunque algún documento tenga `childId`: el
+  script nunca la toca (no está en la lista blanca).

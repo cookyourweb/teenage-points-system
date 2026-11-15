@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom";
@@ -25,6 +26,11 @@ vi.mock("../components/dashboard/PrivilegeManagement", () => ({ default: () => n
 vi.mock("../components/dashboard/Faqs", () => ({ default: () => null }));
 vi.mock("../components/Footer", () => ({ default: () => null }));
 vi.mock("../components/ShareChildLink", () => ({ default: () => null }));
+vi.mock("../components/tipo/DescubrirTipo", () => ({
+  default: ({ familyId, hijoId }: { familyId: string; hijoId: string }) => (
+    <div>descubrir-{familyId}-{hijoId}</div>
+  ),
+}));
 
 const sesionCon = (perfil: EstadoPerfil, altaEnCurso = false) =>
   vi.mocked(useSesion).mockReturnValue({
@@ -84,5 +90,23 @@ describe("Dashboard y la sesión", () => {
     pintar();
     await waitFor(() => expect(fetchFamilyById).toHaveBeenCalledWith("f1"));
     expect(await screen.findByText("resumen-puntos")).toBeInTheDocument();
+  });
+
+  it("descubrirSusColoresAbreLaPantallaDelHijo", async () => {
+    vi.mocked(fetchFamilyById).mockResolvedValue({
+      familyId: "f1",
+      miembros: {
+        padres: {},
+        hijos: { h1: { id: "h1", nombre: "Leo", edad: 14, tiposAdolescente: [], rewardLink: "" } },
+      },
+    } as never);
+    sesionCon({ tipo: "listo", perfil: { nombre: "Ana", rol: "padre", familyId: "f1" } });
+    pintar();
+    await screen.findByText("resumen-puntos");
+    await userEvent.click(screen.getByRole("tab", { name: /Hijos/ }));
+
+    await userEvent.click(await screen.findByRole("button", { name: "Descubrir sus colores" }));
+
+    expect(await screen.findByText("descubrir-f1-h1")).toBeInTheDocument();
   });
 });

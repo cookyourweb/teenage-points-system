@@ -1,4 +1,9 @@
 import '@testing-library/jest-dom'; // Extensiones de Testing Library
+import { expect } from 'vitest';
+import * as matchersAxe from 'vitest-axe/matchers';
+
+// toHaveNoViolations para las pantallas nuevas (vitest-axe)
+expect.extend(matchersAxe);
 
 // Mock de import.meta.env
 Object.defineProperty(import.meta, 'env', {

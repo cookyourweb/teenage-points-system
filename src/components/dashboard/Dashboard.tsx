@@ -35,6 +35,7 @@ import {
   updateChildInFamily 
 } from "../../services/familyService";
 import ShareChildLink from "../ShareChildLink";
+import DescubrirTipo from "../tipo/DescubrirTipo";
 
 const Dashboard: React.FC = () => {
   // La familia y el rol salen del perfil que observa el AuthProvider, no de
@@ -51,6 +52,7 @@ const Dashboard: React.FC = () => {
   // Estados principales
   const [children, setChildren] = useState<Child[]>([]);
   const [childToEdit, setChildToEdit] = useState<Child | null>(null);
+  const [childToDiscover, setChildToDiscover] = useState<Child | null>(null);
   
   // Estados de UI - Pestañas principales
   const [activeTab, setActiveTab] = useState<'overview' | 'children' | 'tasks' | 'privileges' | 'faqs'>('overview');
@@ -354,6 +356,11 @@ const Dashboard: React.FC = () => {
                         >
                           Ver Sistema de Puntos
                         </Button>
+                        <Button layout="full" variant="neutral"
+                          onClick={() => setChildToDiscover(child)}
+                        >
+                          Descubrir sus colores
+                        </Button>
                         <div className="grid grid-cols-3 gap-2">
                           <ShareChildLink child={child} familyId={familyId!} />
                           <Button variant="primary"
@@ -596,6 +603,20 @@ const Dashboard: React.FC = () => {
             familyId={familyId!}
             onSave={handleSaveChild}
             onCancel={handleCloseAddChild}
+          />
+        </Modal>
+      )}
+
+      {childToDiscover && (
+        <Modal
+          onClose={() => setChildToDiscover(null)}
+          isOpen={!!childToDiscover}
+          title={`Descubrir los colores de ${childToDiscover.nombre}`}
+        >
+          <DescubrirTipo
+            familyId={familyId!}
+            hijoId={childToDiscover.id}
+            nombreHijo={childToDiscover.nombre}
           />
         </Modal>
       )}

@@ -64,4 +64,13 @@ class ContenidoFicticioTest {
                 secuencia.indexOf(c) + 5 == secuencia.lastIndexOf(c));
         assertThat(todosA5).isFalse();
     }
+
+    @Test
+    void textosDeAfirmacionNoNombranElColor() {
+        assertThat(contenido.afirmaciones()).hasSize(10).allSatisfy(a ->
+                contenido.colores().forEach(c -> {
+                    assertThat(a.texto().toLowerCase()).doesNotContain(c.id().toLowerCase());
+                    assertThat(a.texto().toLowerCase()).doesNotContain(c.nombre().toLowerCase());
+                }));
+    }
 }

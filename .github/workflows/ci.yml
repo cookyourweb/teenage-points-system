@@ -1,4 +1,4 @@
-# CI del proyecto: tres jobs, front, back y reglas de Firestore.
+# CI del proyecto: cuatro jobs, front, back, reglas de Firestore y script de baja.
 #
 # Sin --passWithNoTests y sin continue-on-error: si un paso falla, falla.
 #
@@ -121,3 +121,27 @@ jobs:
 
       - name: Reglas
         run: npx firebase-tools@13.13.0 emulators:exec --only firestore --project demo-teenage-points "npx vitest run --config vitest.rules.config.ts"
+
+  # El script de baja de una familia borra datos de verdad (RGPD): se prueba
+  # entero contra los emuladores de Firestore y Auth y un Mongo en memoria
+  # (mongodb-memory-server descarga su mongod, no necesita Docker).
+  baja-familia:
+    name: Script de baja de familia (emuladores)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - run: npm ci
+
+      - name: Baja de familia
+        run: npx firebase-tools@13.13.0 emulators:exec --only firestore,auth --project demo-teenage-points "npx vitest run --config vitest.baja.config.ts"

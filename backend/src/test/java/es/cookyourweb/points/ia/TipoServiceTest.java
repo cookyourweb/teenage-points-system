@@ -112,4 +112,23 @@ class TipoServiceTest {
             assertThat(servicio.perfil(r)).isEqualTo(primero);
         }
     }
+
+    @Test
+    void respuestasNulasLanzanConTodasLasFaltantes() {
+        assertThatThrownBy(() -> servicio.perfil(null))
+                .isInstanceOfSatisfying(RespuestasInvalidasException.class,
+                        e -> assertThat(e.ids()).containsExactlyInAnyOrderElementsOf(
+                                contenido.afirmaciones().stream().map(Afirmacion::id).toList()));
+    }
+
+    @Test
+    void faltanteYDesconocidaJuntasAparecenAmbas() {
+        Map<String, Frecuencia> r = todas(Frecuencia.NUNCA);
+        String falta = contenido.afirmaciones().get(0).id();
+        r.remove(falta);
+        r.put("no-existe", Frecuencia.A_VECES);
+        assertThatThrownBy(() -> servicio.perfil(r))
+                .isInstanceOfSatisfying(RespuestasInvalidasException.class,
+                        e -> assertThat(e.ids()).containsExactlyInAnyOrder(falta, "no-existe"));
+    }
 }

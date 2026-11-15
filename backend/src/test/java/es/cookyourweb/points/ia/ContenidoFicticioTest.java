@@ -38,4 +38,13 @@ class ContenidoFicticioTest {
         assertThat(contenido.colores()).isNotEmpty().allSatisfy(c ->
                 assertThat(contenido.afirmaciones()).anyMatch(a -> a.colorId().equals(c.id())));
     }
+
+    @Test
+    void idsDeAfirmacionNoRevelanElColor() {
+        assertThat(contenido.afirmaciones()).hasSize(10).allSatisfy(a ->
+                contenido.colores().forEach(c -> {
+                    assertThat(a.id().toLowerCase()).doesNotContain(c.id().toLowerCase());
+                    assertThat(a.id().toLowerCase()).doesNotContain(c.nombre().toLowerCase());
+                }));
+    }
 }

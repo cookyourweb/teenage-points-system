@@ -3,8 +3,11 @@ package es.cookyourweb.points.ia;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Calcula el perfil de colores a partir de las frecuencias respondidas.
@@ -24,7 +27,8 @@ public class TipoService {
 
     public Perfil perfil(Map<String, Frecuencia> respuestas) {
         ContenidoTipo contenido = puerto.contenidoDeTipo();
-        validar(contenido, respuestas);
+        Map<String, Frecuencia> dadas = respuestas == null ? Map.of() : respuestas;
+        validar(contenido, dadas);
 
         List<Perfil.NivelDeColor> niveles = new ArrayList<>();
         for (Color color : contenido.colores()) {
@@ -32,7 +36,7 @@ public class TipoService {
             int max = 0;
             for (Afirmacion a : contenido.afirmaciones()) {
                 if (a.colorId().equals(color.id())) {
-                    suma += respuestas.get(a.id()).valor();
+                    suma += dadas.get(a.id()).valor();
                     max += Frecuencia.A_MENUDO.valor();
                 }
             }
@@ -58,7 +62,8 @@ public class TipoService {
 
     private static void validar(ContenidoTipo contenido, Map<String, Frecuencia> respuestas) {
         List<String> problemas = new ArrayList<>();
-        List<String> conocidos = contenido.afirmaciones().stream().map(Afirmacion::id).toList();
+        Set<String> conocidos = contenido.afirmaciones().stream().map(Afirmacion::id)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
         for (String id : conocidos) {
             if (respuestas.get(id) == null) {
                 problemas.add(id);

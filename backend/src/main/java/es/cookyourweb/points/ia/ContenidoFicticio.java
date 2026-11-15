@@ -13,12 +13,14 @@ import java.util.List;
 @Component
 public class ContenidoFicticio implements ContenidoMetodoPort {
 
-    private static final List<String[]> COLORES = List.of(
-            new String[] {"verde", "Verde"},
-            new String[] {"rojo", "Rojo"},
-            new String[] {"azul", "Azul"},
-            new String[] {"negro", "Negro"},
-            new String[] {"amarillo", "Amarillo"});
+    private record Def(String id, String nombre) {}
+
+    private static final List<Def> COLORES = List.of(
+            new Def("verde", "Verde"),
+            new Def("rojo", "Rojo"),
+            new Def("azul", "Azul"),
+            new Def("negro", "Negro"),
+            new Def("amarillo", "Amarillo"));
 
     private static final int AFIRMACIONES_POR_COLOR = 2;
 
@@ -29,17 +31,23 @@ public class ContenidoFicticio implements ContenidoMetodoPort {
         return contenido;
     }
 
+    /**
+     * Los ids de afirmacion son opacos (a01..a10) y van intercalados por color:
+     * el navegador recibe {id, texto} y no debe poder deducir a que color apunta cada una.
+     */
     private static ContenidoTipo construir() {
         List<Color> colores = new ArrayList<>();
         List<Afirmacion> afirmaciones = new ArrayList<>();
-        for (String[] c : COLORES) {
-            String id = c[0];
-            colores.add(new Color(id, c[1], "[FICTICIO] Descripcion de ejemplo del color " + id));
-            for (int i = 1; i <= AFIRMACIONES_POR_COLOR; i++) {
+        for (Def c : COLORES) {
+            colores.add(new Color(c.id(), c.nombre(), "[FICTICIO] Descripcion de ejemplo del color " + c.id()));
+        }
+        int n = 1;
+        for (int ronda = 1; ronda <= AFIRMACIONES_POR_COLOR; ronda++) {
+            for (Def c : COLORES) {
                 afirmaciones.add(new Afirmacion(
-                        id + "-" + i,
-                        "[FICTICIO] Afirmacion de ejemplo " + i + " para el color " + id,
-                        id));
+                        String.format("a%02d", n++),
+                        "[FICTICIO] Afirmacion de ejemplo " + ronda + " para el color " + c.id(),
+                        c.id()));
             }
         }
         return new ContenidoTipo(List.copyOf(colores), List.copyOf(afirmaciones));

@@ -26,6 +26,8 @@ const inventario = (): Inventario => ({
 
 const ENTORNO = { FIREBASE_PROJECT_ID: 'demo-proyecto', MONGODB_URI: `mongodb://${EMAIL}:${NOMBRE}@host/db` }
 
+const EMULADORES = { FIRESTORE_EMULATOR_HOST: 'localhost:8080', FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099' }
+
 // Adaptadores falsos: cuentan cuantas veces se pide borrar y no tocan red.
 const montar = (sobre: Partial<DepsCli> = {}) => {
   const leerInventario = vi.fn(async () => inventario())
@@ -57,7 +59,7 @@ describe('ejecutarCli', () => {
 
   it('confirmarEjecuta: con --confirmar borra, muestra el destino y la constancia', async () => {
     const m = montar()
-    const codigo = await ejecutarCli(['--familia', 'F', '--confirmar'], ENTORNO, m.deps, m.salida)
+    const codigo = await ejecutarCli(['--familia', 'F', '--confirmar'], { ...ENTORNO, ...EMULADORES }, m.deps, m.salida)
     expect(codigo).toBe(0)
     expect(m.ejecutar).toHaveBeenCalledTimes(1)
     const t = m.texto()
@@ -68,14 +70,49 @@ describe('ejecutarCli', () => {
     expect(t).not.toContain('PRODUCCION')
   })
 
-  it('avisaProduccion: proyecto sin demo- y sin emulador advierte en --confirmar', async () => {
-    const m = montar()
-    const entorno = { ...ENTORNO, FIREBASE_PROJECT_ID: 'mi-proyecto-real' }
-    await ejecutarCli(['--familia', 'F', '--confirmar'], entorno, m.deps, m.salida)
-    expect(m.texto()).toContain('PRODUCCION')
+  it('avisaProduccion: sin emuladores advierte en --confirmar, tenga o no prefijo demo-', async () => {
+    for (const proyecto of ['mi-proyecto-real', 'demo-proyecto']) {
+      const m = montar()
+      await ejecutarCli(['--familia', 'F', '--confirmar'], { ...ENTORNO, FIREBASE_PROJECT_ID: proyecto }, m.deps, m.salida)
+      expect(m.texto(), proyecto).toContain('PRODUCCION')
+    }
     const m2 = montar()
-    await ejecutarCli(['--familia', 'F', '--confirmar'], { ...entorno, FIRESTORE_EMULATOR_HOST: 'localhost:8080' }, m2.deps, m2.salida)
+    await ejecutarCli(['--familia', 'F', '--confirmar'], { ...ENTORNO, ...EMULADORES }, m2.deps, m2.salida)
     expect(m2.texto()).not.toContain('PRODUCCION')
+  })
+
+  describe('emuladoresAMedias', () => {
+    // Con solo uno, el otro SDK iria contra produccion y ademas se callaria el aviso.
+    it.each([
+      ['solo Firestore', { FIRESTORE_EMULATOR_HOST: 'localhost:8080' }, 'FIREBASE_AUTH_EMULATOR_HOST'],
+      ['solo Auth', { FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099' }, 'FIRESTORE_EMULATOR_HOST'],
+    ])('%s: mensaje y codigo 2 sin leer nada', async (_caso, emul, falta) => {
+      for (const args of [['--familia', 'F'], ['--familia', 'F', '--confirmar']]) {
+        const m = montar()
+        expect(await ejecutarCli(args, { ...ENTORNO, ...emul }, m.deps, m.salida)).toBe(2)
+        expect(m.texto()).toContain(`Falta ${falta}`)
+        expect(m.leerInventario).not.toHaveBeenCalled()
+        expect(m.ejecutar).not.toHaveBeenCalled()
+      }
+    })
+
+    it('con emuladores y Mongo que no es local avisa, sin imprimir la URI', async () => {
+      const m = montar()
+      const codigo = await ejecutarCli(['--familia', 'F', '--confirmar'], { ...ENTORNO, ...EMULADORES }, m.deps, m.salida)
+      expect(codigo).toBe(0)
+      expect(m.texto()).toContain('AVISO: hay emuladores pero MONGODB_URI no apunta a localhost')
+      expect(m.texto()).not.toContain('host/db')
+    })
+
+    it.each([
+      ['mongodb://localhost:27017/points'],
+      ['mongodb://127.0.0.1:27017/points?x=y'],
+      ['mongodb://usuario:clave@localhost:27017,127.0.0.1:27018/points'],
+    ])('con emuladores y Mongo local (%s) no avisa', async (uri) => {
+      const m = montar()
+      await ejecutarCli(['--familia', 'F', '--confirmar'], { ...ENTORNO, ...EMULADORES, MONGODB_URI: uri }, m.deps, m.salida)
+      expect(m.texto()).not.toContain('AVISO')
+    })
   })
 
   it('faltaFamiliaMuestraUso: sin --familia o vacia, uso y codigo 2', async () => {

@@ -61,6 +61,19 @@ const baseValida = (uri: string): boolean => {
   return nombre !== null && nombre !== 'test'
 }
 
+// Hosts de una URI de Mongo (puede traer varios, separados por coma).
+const hostsMongo = (uri: string): string[] => {
+  const m = /^mongodb(?:\+srv)?:\/\/([^/?#]*)/.exec(uri.trim())
+  if (!m) return []
+  const sinCredenciales = m[1].slice(m[1].lastIndexOf('@') + 1)
+  return sinCredenciales.split(',').map((h) => h.replace(/:\d+$/, '').replace(/^\[|\]$/g, ''))
+}
+const LOCALES = new Set(['localhost', '127.0.0.1', '::1'])
+const mongoEsLocal = (uri: string): boolean => {
+  const hosts = hostsMongo(uri)
+  return hosts.length > 0 && hosts.every((h) => LOCALES.has(h))
+}
+
 const linea = (paso: Paso, n: number) => `  ${paso.fuente}/${paso.coleccion}: ${n}`
 
 // Los errores de los SDK pueden traer rutas con uid (`.../documents/usuarios/<uid>`),
@@ -96,8 +109,21 @@ export async function ejecutarCli(
     )
     return 2
   }
+  // Los emuladores van los dos o ninguno: con uno solo, el otro SDK iria contra
+  // produccion y ademas se suprimiria el aviso de PRODUCCION.
+  const emuladorFirestore = Boolean(entorno.FIRESTORE_EMULATOR_HOST)
+  const emuladorAuth = Boolean(entorno.FIREBASE_AUTH_EMULATOR_HOST)
+  if (emuladorFirestore !== emuladorAuth) {
+    const falta = emuladorFirestore ? 'FIREBASE_AUTH_EMULATOR_HOST' : 'FIRESTORE_EMULATOR_HOST'
+    salida.error(`Falta ${falta}: los emuladores de Firestore y Auth van los dos o ninguno (si no, uno iria contra produccion).`)
+    return 2
+  }
+  const emulador = emuladorFirestore && emuladorAuth
   const { familia, confirmar } = parsed
   const proyecto = entorno.FIREBASE_PROJECT_ID as string
+  if (emulador && !mongoEsLocal(entorno.MONGODB_URI as string)) {
+    salida.info('AVISO: hay emuladores pero MONGODB_URI no apunta a localhost: la baja tocaria el Mongo real.')
+  }
 
   let plan: PlanBaja
   try {
@@ -119,9 +145,8 @@ export async function ejecutarCli(
     return 0
   }
 
-  const emulador = Boolean(entorno.FIRESTORE_EMULATOR_HOST)
-  if (!proyecto.startsWith('demo-') && !emulador) {
-    salida.info(`ATENCION: el proyecto "${proyecto}" parece PRODUCCION (no es demo- ni emulador).`)
+  if (!emulador) {
+    salida.info(`ATENCION: el proyecto "${proyecto}" es PRODUCCION (sin emuladores): el borrado sera real.`)
   }
   salida.info(`Borrando la familia ${familia} del proyecto ${proyecto}...`)
 

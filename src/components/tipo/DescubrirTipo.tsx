@@ -14,6 +14,7 @@ import type {
   PreguntasTipo,
 } from '../../services/coachService';
 import Button from '../ui/Button';
+import { ErrorHttp } from '../../services/http';
 import Checkbox from '../ui/Checkbox';
 import Field from '../ui/Field';
 
@@ -41,7 +42,10 @@ const OPCIONES_FRECUENCIA = [
 
 const NIVEL: Record<Nivel, string> = { NADA: 'Nada', ALGO: 'Algo', MUCHO: 'Mucho' };
 
-const mensaje = (e: unknown) => (e instanceof Error ? e.message : 'Algo salió mal. Inténtalo de nuevo.');
+// Un fallo de red llega como TypeError("Failed to fetch") en ingles: solo los
+// ErrorHttp traen un mensaje del servidor que merece mostrarse tal cual.
+const mensaje = (e: unknown) =>
+  e instanceof ErrorHttp ? e.message : 'Sin conexión con el servidor. Probá de nuevo en un rato.';
 
 const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreHijo }) => {
   const [preguntas, setPreguntas] = useState<PreguntasTipo | null>(null);
@@ -51,17 +55,20 @@ const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreH
   const [marcados, setMarcados] = useState<string[]>([]);
   const [principal, setPrincipal] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorElecciones, setErrorElecciones] = useState<string | null>(null);
+  const [guardado, setGuardado] = useState(false);
+  const [avisoLista, setAvisoLista] = useState(false);
   const [ocupado, setOcupado] = useState(false);
 
   useEffect(() => {
     let vigente = true;
-    Promise.all([getPreguntasTipo(), getEleccionesTipo(familyId, hijoId)])
-      .then(([p, e]) => {
-        if (!vigente) return;
-        setPreguntas(p);
-        setElecciones(e);
-      })
+    // Independientes: si fallan las elecciones, el cuestionario sigue disponible.
+    getPreguntasTipo()
+      .then((p) => vigente && setPreguntas(p))
       .catch((e: unknown) => vigente && setError(mensaje(e)));
+    getEleccionesTipo(familyId, hijoId)
+      .then((e) => vigente && setElecciones(e))
+      .catch((e: unknown) => vigente && setErrorElecciones(mensaje(e)));
     return () => {
       vigente = false;
     };
@@ -99,14 +106,25 @@ const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreH
   const guardar = async () => {
     if (!perfil) return;
     setError(null);
+    setGuardado(false);
+    setAvisoLista(false);
     setOcupado(true);
     try {
       // Se conserva el orden del perfil, no el orden en que se fue marcando.
       const colores = perfil.colores.filter((c) => marcados.includes(c.id)).map((c) => c.id);
       await guardarEleccionTipo(familyId, hijoId, { colores, principal });
-      setElecciones(await getEleccionesTipo(familyId, hijoId));
     } catch (e) {
       setError(mensaje(e));
+      setOcupado(false);
+      return;
+    }
+    // Ya esta guardado: si solo falla el refresco, no es un error de guardado.
+    setGuardado(true);
+    try {
+      setElecciones(await getEleccionesTipo(familyId, hijoId));
+      setErrorElecciones(null);
+    } catch {
+      setAvisoLista(true);
     } finally {
       setOcupado(false);
     }
@@ -188,10 +206,26 @@ const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreH
             />
           )}
 
+          {guardado && (
+            <p role="status" className="text-sm text-content">
+              Elección guardada
+            </p>
+          )}
+          {avisoLista && (
+            <p className="text-sm text-content-muted">
+              No pudimos actualizar la lista de elecciones; recarga para verla.
+            </p>
+          )}
           <Button onClick={guardar} disabled={marcados.length === 0 || ocupado} loading={ocupado}>
             Guardar mi elección
           </Button>
         </section>
+      )}
+
+      {errorElecciones && (
+        <p role="alert" className="text-sm text-negative-text">
+          {errorElecciones}
+        </p>
       )}
 
       {elecciones && elecciones.elecciones.length > 0 && (

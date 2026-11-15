@@ -5,8 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import DescubrirTipo from '../components/tipo/DescubrirTipo';
 import * as coach from '../services/coachService';
+import { ErrorHttp } from '../services/http';
 
 vi.mock('../services/coachService');
+vi.mock('../firebase', () => ({ auth: {}, db: {} }));
 
 const COLORES = [
   { id: 'k1', nombre: 'Rojo', descripcion: 'Impulso y accion' },
@@ -179,15 +181,50 @@ describe('DescubrirTipo', () => {
   });
 
   it('errorDeRedSeMuestra', async () => {
-    vi.mocked(coach.getPreguntasTipo).mockRejectedValue(new Error('Sin conexión con el servidor'));
+    vi.mocked(coach.getPreguntasTipo).mockRejectedValue(new TypeError('Failed to fetch'));
     pintar();
 
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Sin conexión con el servidor. Probá de nuevo en un rato.',
+    );
+  });
+
+  it('siFallanLasEleccionesElCuestionarioSigue', async () => {
+    vi.mocked(coach.getEleccionesTipo).mockRejectedValue(new TypeError('Failed to fetch'));
+    pintar();
+
+    expect(await screen.findByLabelText(AFIRMACIONES[0].texto)).toBeInTheDocument();
     expect(await screen.findByRole('alert')).toHaveTextContent('Sin conexión con el servidor');
+  });
+
+  it('errorHttpMuestraSuMensaje', async () => {
+    const user = userEvent.setup();
+    vi.mocked(coach.pedirPerfil).mockRejectedValue(new ErrorHttp(400, 'Faltan respuestas'));
+    pintar();
+    await responderTodo(user);
+    await user.click(screen.getByRole('button', { name: 'Ver perfil' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Faltan respuestas');
+  });
+
+  it('guardarConfirmaYSiFallaElRefrescoNoEsUnError', async () => {
+    const user = userEvent.setup();
+    vi.mocked(coach.getEleccionesTipo)
+      .mockResolvedValueOnce({ elecciones: [], coinciden: true })
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    pintar();
+    await verPerfil(user);
+
+    await user.click(screen.getByRole('button', { name: 'Guardar mi elección' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Elección guardada');
+    expect(screen.getByText(/no pudimos actualizar la lista/i)).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('errorAlGuardarSeMuestra', async () => {
     const user = userEvent.setup();
-    vi.mocked(coach.guardarEleccionTipo).mockRejectedValue(new Error('No eres miembro'));
+    vi.mocked(coach.guardarEleccionTipo).mockRejectedValue(new ErrorHttp(404, 'No eres miembro'));
     pintar();
     await verPerfil(user);
 

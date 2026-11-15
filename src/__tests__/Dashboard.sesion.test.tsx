@@ -93,7 +93,7 @@ describe("Dashboard y la sesión", () => {
   });
 
   it("descubrirSusColoresAbreLaPantallaDelHijo", async () => {
-    vi.mocked(fetchFamilyById).mockResolvedValue({
+    vi.mocked(fetchFamilyById).mockResolvedValueOnce({
       familyId: "f1",
       miembros: {
         padres: {},

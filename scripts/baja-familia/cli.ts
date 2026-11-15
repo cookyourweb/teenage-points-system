@@ -8,7 +8,7 @@ import { getFirestore } from 'firebase-admin/firestore'
 import { MongoClient } from 'mongodb'
 import { pathToFileURL } from 'node:url'
 import { ejecutar, leerInventario, type Fuentes, type Resumen } from './adaptadores'
-import { planificarBaja } from './plan'
+import { contarCuentasConservadas, planificarBaja } from './plan'
 import { FamiliaNoEncontrada, type Inventario, type Paso, type PlanBaja } from './tipos'
 
 export type DepsCli = {
@@ -126,8 +126,12 @@ export async function ejecutarCli(
   }
 
   let plan: PlanBaja
+  let conservadas = 0
+  const lineaConservadas = () => `  cuentas conservadas por pertenecer a otra familia: ${conservadas}`
   try {
-    plan = planificarBaja(await deps.leerInventario(familia))
+    const inventario = await deps.leerInventario(familia)
+    plan = planificarBaja(inventario)
+    conservadas = contarCuentasConservadas(inventario)
   } catch (e) {
     if (e instanceof FamiliaNoEncontrada) {
       salida.error(e.message)
@@ -141,6 +145,7 @@ export async function ejecutarCli(
   if (!confirmar) {
     salida.info(`Ensayo de baja de la familia ${familia} (proyecto ${proyecto}). Se borraria:`)
     for (const paso of plan.pasos) salida.info(linea(paso, paso.ids.length))
+    salida.info(lineaConservadas())
     salida.info('ENSAYO: no se ha borrado nada. Repite con --confirmar para borrar.')
     return 0
   }
@@ -157,6 +162,7 @@ export async function ejecutarCli(
     salida.info(`  fecha: ${resumen.fecha}`)
     salida.info(`  familyId: ${resumen.familyId}`)
     for (const [clave, n] of Object.entries(resumen.recuentos)) salida.info(`  ${clave}: ${n}`)
+    salida.info(lineaConservadas())
     return 0
   } catch (e) {
     salida.error(`FALLO a mitad de la baja: ${describirError(e, entorno)}`)

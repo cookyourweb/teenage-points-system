@@ -115,6 +115,37 @@ describe('ejecutarCli', () => {
     })
   })
 
+  describe('cuentasConservadas', () => {
+    const FRASE = 'cuentas conservadas por pertenecer a otra familia'
+    // La misma madre aparece en padres y en usuarios: cuenta una vez. Solo el recuento.
+    const conCompartida = (): Inventario => {
+      const inv = inventario()
+      inv.familia!.adultos.push({ uid: 'uidCompartida', enOtraFamilia: true })
+      inv.firestore.usuariosPorFamilia.push({ uid: 'uidCompartida', enOtraFamilia: true })
+      return inv
+    }
+
+    it('el ensayo imprime el recuento, sin el uid', async () => {
+      const m = montar({ leerInventario: async () => conCompartida() })
+      await ejecutarCli(['--familia', 'F'], ENTORNO, m.deps, m.salida)
+      expect(m.texto()).toContain(`${FRASE}: 1`)
+      expect(m.texto()).not.toContain('uidCompartida')
+    })
+
+    it('la constancia imprime el recuento, sin el uid', async () => {
+      const m = montar({ leerInventario: async () => conCompartida() })
+      await ejecutarCli(['--familia', 'F', '--confirmar'], { ...ENTORNO, ...EMULADORES }, m.deps, m.salida)
+      expect(m.texto()).toContain(`${FRASE}: 1`)
+      expect(m.texto()).not.toContain('uidCompartida')
+    })
+
+    it('sin cuentas compartidas dice 0', async () => {
+      const m = montar()
+      await ejecutarCli(['--familia', 'F'], ENTORNO, m.deps, m.salida)
+      expect(m.texto()).toContain(`${FRASE}: 0`)
+    })
+  })
+
   it('faltaFamiliaMuestraUso: sin --familia o vacia, uso y codigo 2', async () => {
     for (const args of [[], ['--familia'], ['--familia', ''], ['--confirmar'], ['--familia', '--confirmar'], ['--familia=-x']]) {
       const m = montar()

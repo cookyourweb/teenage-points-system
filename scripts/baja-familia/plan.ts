@@ -23,6 +23,14 @@ export const COLECCIONES_PERMITIDAS = {
   auth: ['usuarios'],
 } as const satisfies Record<Fuente, readonly string[]>
 
+// Cuantas cuentas se CONSERVAN por pertenecer a otra familia (solo el recuento,
+// nunca los uid: la salida del CLI acaba en un fichero). Un uid que sale como
+// padre y como usuario cuenta una vez.
+export function contarCuentasConservadas(inv: Inventario): number {
+  const cuentas = [...(inv.familia?.adultos ?? []), ...inv.firestore.usuariosPorFamilia]
+  return new Set(cuentas.filter((c) => c.enOtraFamilia).map((c) => c.uid)).size
+}
+
 // Decide QUE se borra y en QUE orden, sin tocar la red.
 //
 // El orden importa porque el script debe poder reanudarse tras un fallo:

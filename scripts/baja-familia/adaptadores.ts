@@ -1,4 +1,4 @@
-import type { Adulto, Inventario, PlanBaja } from './tipos'
+import type { Adulto, Inventario, Paso, PlanBaja } from './tipos'
 import { COLECCIONES_PERMITIDAS } from './plan'
 import type { Auth } from 'firebase-admin/auth'
 import type { Firestore } from 'firebase-admin/firestore'
@@ -77,6 +77,9 @@ export async function ejecutar(
   plan: PlanBaja,
   { firestore, auth, mongo }: Fuentes,
   ahora: () => Date = () => new Date(),
+  // Aviso opcional tras cada paso terminado: el CLI lo usa para informar que
+  // pasos se completaron si algo falla a mitad, sin duplicar esta logica.
+  alCompletar?: (paso: Paso, borrados: number) => void,
 ): Promise<Resumen> {
   for (const paso of plan.pasos) {
     if (!(COLECCIONES_PERMITIDAS[paso.fuente] as readonly string[] | undefined)?.includes(paso.coleccion)) {
@@ -87,12 +90,14 @@ export async function ejecutar(
   const recuentos: Record<string, number> = {}
   for (const paso of plan.pasos) {
     const clave = `${paso.fuente}.${paso.coleccion}`
-    recuentos[clave] =
+    const borrados =
       paso.fuente === 'mongo'
         ? await borrarPorIds(mongo, paso.coleccion, paso.ids)
         : paso.fuente === 'auth'
           ? await borrarCuentas(auth, paso.ids)
           : await borrarDocumentos(firestore, paso.coleccion, paso.ids)
+    recuentos[clave] = borrados
+    alCompletar?.(paso, borrados)
   }
 
   // El plan no lleva el familyId: se saca del ancla (el paso que borra familias/F).

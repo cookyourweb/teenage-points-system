@@ -178,6 +178,16 @@ describe('baja de una familia contra emuladores', () => {
     expect(segunda.familyId).toBe(F)
   })
 
+  it('avisaDeCadaPasoCompletadoEnOrden', async () => {
+    const plan = planificarBaja(await leerInventario(F, fuentes))
+    const vistos: string[] = []
+    await ejecutar(plan, fuentes, undefined, (paso, borrados) => {
+      expect(borrados).toBeLessThanOrEqual(paso.ids.length)
+      vistos.push(`${paso.fuente}.${paso.coleccion}`)
+    })
+    expect(vistos).toEqual(plan.pasos.map((p) => `${p.fuente}.${p.coleccion}`))
+  })
+
   it('calculaElInventarioConEnOtraFamiliaParaTodosLosUid', async () => {
     const inv = await leerInventario(F, fuentes)
     expect(inv.familia?.hijos.sort()).toEqual(['hijoF1', 'hijoF2'])

@@ -124,3 +124,9 @@ npx vitest run      # los tests
 `{ "files": [], "references": [...] }`, así que compila cero ficheros y sale
 con 0 diga lo que diga el código. Por eso existe el script `typecheck`, que usa
 `tsc -b` y sí sigue las referencias.
+
+---
+
+## Dar de baja a una familia
+
+El script de borrado RGPD tiene su propia guía: [BAJA-DE-FAMILIA.md](./BAJA-DE-FAMILIA.md).

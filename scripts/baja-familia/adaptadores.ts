@@ -92,7 +92,7 @@ export async function ejecutar(
     const clave = `${paso.fuente}.${paso.coleccion}`
     const borrados =
       paso.fuente === 'mongo'
-        ? await borrarPorIds(mongo, paso.coleccion, paso.ids)
+        ? await borrarPorIds(mongo, paso.coleccion, paso.ids, plan.familyId)
         : paso.fuente === 'auth'
           ? await borrarCuentas(auth, paso.ids)
           : await borrarDocumentos(firestore, paso.coleccion, paso.ids)
@@ -100,7 +100,5 @@ export async function ejecutar(
     alCompletar?.(paso, borrados)
   }
 
-  // El plan no lleva el familyId: se saca del ancla (el paso que borra familias/F).
-  const ancla = plan.pasos.find((p) => p.fuente === 'firestore' && p.coleccion === 'familias')
-  return { familyId: ancla?.ids[0] ?? '', fecha: ahora().toISOString(), recuentos }
+  return { familyId: plan.familyId, fecha: ahora().toISOString(), recuentos }
 }

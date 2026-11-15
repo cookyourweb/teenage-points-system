@@ -83,5 +83,5 @@ export function planificarBaja(inv: Inventario): PlanBaja {
     { fuente: 'firestore', coleccion: 'familias', ids: [inv.familyId] },
   ]
 
-  return { pasos }
+  return { familyId: inv.familyId, pasos }
 }

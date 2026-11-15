@@ -9,7 +9,9 @@ export type Paso = {
   ids: string[]
 }
 
-export type PlanBaja = { pasos: Paso[] }
+// `familyId` va explicito en el plan (no se deduce del ancla): lo usan los
+// adaptadores para acotar cada borrado a la familia, ademas de los ids.
+export type PlanBaja = { familyId: string; pasos: Paso[] }
 
 // Una cuenta (uid) de la familia y si cuelga de OTRA familia. Vale para
 // los padres de `miembros.padres` Y para cada uid de `usuarios` con

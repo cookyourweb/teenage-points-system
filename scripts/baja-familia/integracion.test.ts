@@ -8,6 +8,7 @@ import { MongoClient, ObjectId, type Db } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { ejecutar, leerInventario, type Fuentes } from './adaptadores'
+import { borrarPorIds } from './mongo'
 import { planificarBaja } from './plan'
 import type { PlanBaja } from './tipos'
 
@@ -212,6 +213,7 @@ describe('baja de una familia contra emuladores', () => {
 
   it('seNiegaABorrarColeccionesFueraDeLaListaBlanca', async () => {
     const plan: PlanBaja = {
+      familyId: F,
       pasos: [
         { fuente: 'firestore', coleccion: 'tareas', ids: ['comun'] },
         { fuente: 'mongo', coleccion: 'catalogo', ids: [] },
@@ -223,6 +225,7 @@ describe('baja de una familia contra emuladores', () => {
 
   it('unaCuentaDeAuthInexistenteNoEsUnError', async () => {
     const plan: PlanBaja = {
+      familyId: F,
       pasos: [{ fuente: 'auth', coleccion: 'usuarios', ids: ['padreF', 'nuncaExistio'] }],
     }
     const resumen = await ejecutar(plan, fuentes)
@@ -236,5 +239,14 @@ describe('baja de una familia contra emuladores', () => {
     expect(inv.mongo.tasks).toContain('texto-libre')
     await ejecutar(planificarBaja(inv), fuentes)
     expect(await mongo.collection('tasks').countDocuments({ familyId: F })).toBe(0)
+  })
+
+  it('mongoNoBorraUnDocumentoDeOtraFamiliaAunqueSuIdEstePedido', async () => {
+    const ajeno = await mongo.collection('tasks').findOne({ familyId: G })
+    const propio = await mongo.collection('tasks').findOne({ familyId: F })
+    const borrados = await borrarPorIds(mongo, 'tasks', [String(ajeno!._id), String(propio!._id)], F)
+    expect(borrados).toBe(1)
+    expect(await mongo.collection('tasks').countDocuments({ familyId: G })).toBe(1)
+    expect(await mongo.collection('tasks').countDocuments({ _id: propio!._id })).toBe(0)
   })
 })

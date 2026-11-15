@@ -54,6 +54,10 @@ describe('planificarBaja', () => {
     ])
   })
 
+  it('elPlanLlevaElFamilyIdExplicito', () => {
+    expect(planificarBaja(base()).familyId).toBe('F')
+  })
+
   it('familiaInexistenteLanza', () => {
     const inv = { ...base(), familia: null }
     expect(() => planificarBaja(inv)).toThrow(FamiliaNoEncontrada)

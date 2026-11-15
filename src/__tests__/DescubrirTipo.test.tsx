@@ -11,15 +11,15 @@ vi.mock('../services/coachService');
 vi.mock('../firebase', () => ({ auth: {}, db: {} }));
 
 const COLORES = [
-  { id: 'k1', nombre: 'Rojo', descripcion: 'Impulso y accion' },
-  { id: 'k2', nombre: 'Azul', descripcion: 'Calma y analisis' },
-  { id: 'k3', nombre: 'Verde', descripcion: 'Cuidado de los demas' },
-  { id: 'k4', nombre: 'Amarillo', descripcion: 'Alegria y juego' },
-  { id: 'k5', nombre: 'Violeta', descripcion: 'Intuicion y creatividad' },
+  { id: 'k1', nombre: 'Rojo', descripcion: '[FICTICIO] descripción 1' },
+  { id: 'k2', nombre: 'Azul', descripcion: '[FICTICIO] descripción 2' },
+  { id: 'k3', nombre: 'Verde', descripcion: '[FICTICIO] descripción 3' },
+  { id: 'k4', nombre: 'Amarillo', descripcion: '[FICTICIO] descripción 4' },
+  { id: 'k5', nombre: 'Violeta', descripcion: '[FICTICIO] descripción 5' },
 ];
 const AFIRMACIONES = [
-  { id: 'x1', texto: 'Se enfada rapido' },
-  { id: 'x2', texto: 'Le gusta ordenar' },
+  { id: 'x1', texto: '[FICTICIO] frase 1' },
+  { id: 'x2', texto: '[FICTICIO] frase 2' },
 ];
 const PERFIL = {
   colores: [
@@ -80,7 +80,7 @@ describe('DescubrirTipo', () => {
     expect(screen.getByRole('checkbox', { name: /Rojo.*Mucho/ })).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: /Azul.*Algo/ })).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: /Verde.*Nada/ })).toBeInTheDocument();
-    expect(screen.getByText('Calma y analisis')).toBeInTheDocument();
+    expect(screen.getByText('[FICTICIO] descripción 2')).toBeInTheDocument();
   });
 
   it('premarcaAlgoYMucho', async () => {
@@ -180,12 +180,31 @@ describe('DescubrirTipo', () => {
     expect(screen.queryByText(/No coincidís/)).not.toBeInTheDocument();
   });
 
+  it('verPerfilQuedaDeshabilitadoMientrasHayUnaPeticionEnVuelo', async () => {
+    const user = userEvent.setup();
+    let resolver: () => void = () => {};
+    vi.mocked(coach.guardarEleccionTipo).mockReturnValue(
+      new Promise((r) => {
+        resolver = () => r({ colores: [], elegidaEn: 'x' });
+      }),
+    );
+    pintar();
+    await verPerfil(user);
+
+    await user.click(screen.getByRole('button', { name: 'Guardar mi elección' }));
+
+    expect(screen.getByRole('button', { name: 'Ver perfil' })).toBeDisabled();
+    resolver();
+    await screen.findByRole('status');
+    expect(screen.getByRole('button', { name: 'Ver perfil' })).toBeEnabled();
+  });
+
   it('errorDeRedSeMuestra', async () => {
     vi.mocked(coach.getPreguntasTipo).mockRejectedValue(new TypeError('Failed to fetch'));
     pintar();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Sin conexión con el servidor. Probá de nuevo en un rato.',
+      'Sin conexión con el servidor. Prueba de nuevo en un rato.',
     );
   });
 

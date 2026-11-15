@@ -45,7 +45,7 @@ const NIVEL: Record<Nivel, string> = { NADA: 'Nada', ALGO: 'Algo', MUCHO: 'Mucho
 // Un fallo de red llega como TypeError("Failed to fetch") en ingles: solo los
 // ErrorHttp traen un mensaje del servidor que merece mostrarse tal cual.
 const mensaje = (e: unknown) =>
-  e instanceof ErrorHttp ? e.message : 'Sin conexión con el servidor. Probá de nuevo en un rato.';
+  e instanceof ErrorHttp ? e.message : 'Sin conexión con el servidor. Prueba de nuevo en un rato.';
 
 const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreHijo }) => {
   const [preguntas, setPreguntas] = useState<PreguntasTipo | null>(null);
@@ -162,7 +162,7 @@ const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreH
           {!completo && (
             <p className="text-sm text-content-muted">Responde todas las frases para ver el perfil.</p>
           )}
-          <Button onClick={verPerfil} disabled={!completo} loading={ocupado && !perfil}>
+          <Button onClick={verPerfil} disabled={!completo || ocupado} loading={ocupado && !perfil}>
             Ver perfil
           </Button>
         </section>

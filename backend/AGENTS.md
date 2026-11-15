@@ -12,7 +12,7 @@ Código en `es.cookyourweb.points`, organizado por feature:
 
 - `./mvnw spring-boot:run` — API en http://localhost:8080 (puerto por defecto;
   `application.properties` no hay override).
-- `./mvnw --batch-mode test` — 71 tests (14-nov-2026). `PropiedadIntegracionTest`
+- `./mvnw --batch-mode test` — 122 tests (15-nov-2026). `PropiedadIntegracionTest`
   necesita **Docker** (Testcontainers levanta su propio Mongo); el resto pasa sin
   Mongo levantado. Con la conexión caida el log escupe una traza `ConnectException`
   del monitor de conexión de Mongo: es ruido conocido, no un fallo del test.
@@ -57,3 +57,7 @@ Mongo se levanta con Docker (`docker start mongo-points`, el 27017; ver
 | `POST /api/tasks` | crear → `201` |
 | `PUT /api/tasks/{id}` | reemplazo completo |
 | `DELETE /api/tasks/{id}` | borrar → `204` |
+| `GET /api/ia/tipo/preguntas` | colores y afirmaciones `{id, texto}`, sin el color al que apunta cada una |
+| `POST /api/ia/tipo/perfil` | respuestas → nivel por color (`id`, `nombre`, `nivel`); `400` con `campos` `{id: motivo}` |
+| `PUT /api/familias/{f}/hijos/{h}/tipo` | el adulto guarda sus colores (+ principal opcional); `400` con `campos` `{campo: motivo}` |
+| `GET /api/familias/{f}/hijos/{h}/tipo` | elecciones de la familia sobre ese hijo y si coinciden |

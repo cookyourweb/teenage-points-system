@@ -11,8 +11,10 @@ export type Paso = {
 
 export type PlanBaja = { pasos: Paso[] }
 
-// Un adulto (padre/madre) de la familia y si cuelga de OTRA familia.
-// La tarea 2 lo rellena mirando Mongo `membresias` y `usuarios.familyId`.
+// Una cuenta (uid) de la familia y si cuelga de OTRA familia. Vale para
+// los padres de `miembros.padres` Y para cada uid de `usuarios` con
+// familyId == F. La tarea 2 calcula `enOtraFamilia` para todos ellos:
+// membresia en Mongo de otra familia, o usuarios.familyId distinto de F.
 export type Adulto = {
   uid: string
   enOtraFamilia: boolean
@@ -25,7 +27,9 @@ export type Inventario = {
   // null = el documento familias/F no existe
   familia: {
     adultos: Adulto[]
-    // ids de miembros.hijos (el mapa esta indexado por id de hijo)
+    // ids de miembros.hijos (el mapa esta indexado por id de hijo). El
+    // adaptador los usa para buscar privilegeHistory antiguos (sin familyId)
+    // y tasks de Firestore por childId.
     hijos: string[]
   } | null
   mongo: {
@@ -44,8 +48,8 @@ export type Inventario = {
     childPoints: string[]
     // tasks de Firestore halladas por childId in hijos
     tasks: string[]
-    // usuarios con familyId == F
-    usuariosPorFamilia: string[]
+    // usuarios con familyId == F, cada uno con su enOtraFamilia
+    usuariosPorFamilia: Adulto[]
   }
 }
 

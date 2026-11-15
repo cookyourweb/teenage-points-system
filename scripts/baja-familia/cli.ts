@@ -38,6 +38,29 @@ function leerArgs(args: string[]): { familia: string; confirmar: boolean } | nul
   return familia === '' || familia.startsWith('-') ? null : { familia, confirmar }
 }
 
+// Nombre de la base de datos de una URI de Mongo (mongodb:// o mongodb+srv://,
+// con o sin query string), o null si la URI no trae ninguno. Sin `new URL`: una
+// URI con varios hosts (`h1:27017,h2:27017`) no es una URL valida.
+export function nombreDeBaseMongo(uri: string): string | null {
+  const m = /^mongodb(?:\+srv)?:\/\/[^/?#]*\/([^?#]*)/.exec(uri.trim())
+  if (!m) return null
+  let nombre = m[1]
+  try {
+    nombre = decodeURIComponent(nombre)
+  } catch {
+    // un % mal formado se deja tal cual: igualmente no sera un nombre valido
+  }
+  return nombre === '' ? null : nombre
+}
+
+// El cliente de Mongo sin base en la URI usa `test`, que esta vacia: las
+// membresias de otra familia no se verian y se borraria la cuenta de Auth de
+// un adulto compartido. Por eso se exige una base explicita y distinta de `test`.
+const baseValida = (uri: string): boolean => {
+  const nombre = nombreDeBaseMongo(uri)
+  return nombre !== null && nombre !== 'test'
+}
+
 const linea = (paso: Paso, n: number) => `  ${paso.fuente}/${paso.coleccion}: ${n}`
 
 // Los errores de los SDK pueden traer rutas con uid (`.../documents/usuarios/<uid>`),
@@ -64,6 +87,13 @@ export async function ejecutarCli(
   const faltan = ['FIREBASE_PROJECT_ID', 'MONGODB_URI'].filter((v) => !entorno[v])
   if (faltan.length > 0) {
     salida.error(`Faltan variables de entorno obligatorias: ${faltan.join(', ')}`)
+    return 2
+  }
+  if (!baseValida(entorno.MONGODB_URI as string)) {
+    salida.error(
+      'MONGODB_URI debe incluir el nombre de la base de datos y no puede ser "test" ' +
+        '(ej. mongodb://host:27017/points): sin ella no se veria la membresia de otras familias.',
+    )
     return 2
   }
   const { familia, confirmar } = parsed
@@ -128,7 +158,7 @@ async function main(): Promise<number> {
       const app = initializeApp({ projectId: entorno.FIREBASE_PROJECT_ID })
       mongoClient = new MongoClient(entorno.MONGODB_URI as string)
       await mongoClient.connect()
-      return { firestore: getFirestore(app), auth: getAuth(app), mongo: mongoClient.db() }
+      return { firestore: getFirestore(app), auth: getAuth(app), mongo: mongoClient.db(nombreDeBaseMongo(entorno.MONGODB_URI as string) as string) }
     })())
   try {
     return await ejecutarCli(

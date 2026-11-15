@@ -97,6 +97,38 @@ describe('ejecutarCli', () => {
     }
   })
 
+  describe('validacionDeLaUriDeMongo', () => {
+    // Sin base en la URI el cliente usa `test`: las membresias de otra familia
+    // no se verian y se borraria la cuenta de un adulto compartido.
+    it.each([
+      ['sin base', 'mongodb://usuario:clave@host-mongo:27017'],
+      ['sin base y con barra', 'mongodb://host-mongo:27017/'],
+      ['sin base y con query', 'mongodb://host-mongo:27017/?retryWrites=true'],
+      ['base test', 'mongodb://host-mongo:27017/test'],
+      ['base test con query', 'mongodb+srv://usuario:clave@cluster.example.net/test?x=y'],
+      ['srv sin base', 'mongodb+srv://usuario:clave@cluster.example.net'],
+      ['no es una URI de Mongo', 'http://host-mongo/points'],
+    ])('rechaza %s con codigo 2 antes de leer nada', async (_caso, uri) => {
+      const m = montar()
+      const codigo = await ejecutarCli(['--familia', 'F'], { ...ENTORNO, MONGODB_URI: uri }, m.deps, m.salida)
+      expect(codigo).toBe(2)
+      expect(m.texto()).toContain('MONGODB_URI debe incluir el nombre de la base de datos')
+      expect(m.texto()).not.toContain('usuario:clave')
+      expect(m.leerInventario).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      ['mongodb://host-mongo:27017/points'],
+      ['mongodb+srv://usuario:clave@cluster.example.net/points?x=y'],
+      ['mongodb://h1:27017,h2:27017/points?replicaSet=rs'],
+    ])('acepta %s', async (uri) => {
+      const m = montar()
+      const codigo = await ejecutarCli(['--familia', 'F'], { ...ENTORNO, MONGODB_URI: uri }, m.deps, m.salida)
+      expect(codigo).toBe(0)
+      expect(m.leerInventario).toHaveBeenCalledTimes(1)
+    })
+  })
+
   it('familiaInexistente: mensaje y codigo 1 sin borrar', async () => {
     const m = montar({ leerInventario: async () => ({ ...inventario(), familia: null }) })
     expect(await ejecutarCli(['--familia', 'F', '--confirmar'], ENTORNO, m.deps, m.salida)).toBe(1)

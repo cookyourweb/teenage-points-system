@@ -277,3 +277,23 @@ siga arrancando con Mongo caído (si estaba caído, no hay índice hasta reinici
 con una segunda cuenta. Los mocks no ven lo que solo pasa con la base de datos real (como el índice).
 
 **Idempotente.** Repetir la operación da el mismo resultado: `/yo` llamado dos veces deja una sola membresía.
+
+**Derecho de supresión (RGPD art. 17).** Si una familia pide la baja, hay un mes para borrar **todos** sus
+datos, repartidos en Mongo, Firestore y Auth. Para eso está `npm run baja:familia` (`docs/BAJA-DE-FAMILIA.md`).
+
+**Ensayo por defecto (*dry run*).** Una operación irreversible primero **muestra** lo que haría; borrar exige
+decirlo explícitamente (`--confirmar`). Un error de tipeo nunca confirma.
+
+**Orden de borrado = poder retomar.** Se borra al final el documento `familias/F`, que es el **ancla**: si el
+script se corta, al volver a correrlo lo encuentra y termina el trabajo (idempotente). Borrar el ancla
+primero dejaría restos imposibles de localizar.
+
+**Lista blanca.** El script se niega a borrar cualquier colección que no esté en una lista explícita: el
+catálogo común (`tareas`, `recompensas`, FAQs) no se puede tocar ni por error.
+
+**Credenciales sin fichero de clave.** En vez de descargar una clave de cuenta de servicio (un secreto que
+puede filtrarse), la dueña inicia sesión con `gcloud auth application-default login`.
+
+**Configuración que miente en silencio.** Una URI de Mongo sin nombre de base usa la base `test` sin avisar:
+el script vería 0 datos y podría tomar a alguien de otra familia por propio. Por eso valida la configuración
+**antes** de conectar y se niega a arrancar si algo no cuadra.

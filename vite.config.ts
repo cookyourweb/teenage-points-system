@@ -30,6 +30,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts',
     // Las reglas se prueban contra el emulador: `npm run test:rules`.
-    exclude: [...configDefaults.exclude, 'tests/rules/**'],
+    // El test de integracion del script de baja tambien necesita emuladores.
+    exclude: [...configDefaults.exclude, 'tests/rules/**', 'scripts/**/integracion.test.ts'],
   },
 })

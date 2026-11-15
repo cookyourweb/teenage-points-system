@@ -114,9 +114,25 @@ class EleccionTipoServiceTest {
         verify(repositorio, never()).save(any());
     }
 
+    @Test
+    @DisplayName("cada fallo trae su motivo legible por campo")
+    void motivosPorCampo() {
+        assertMotivo(List.of(), null, "colores", "marca al menos un color");
+        assertMotivo(List.of("morado"), null, "colores", "hay un color que no existe");
+        assertMotivo(List.of("rojo", "rojo"), null, "colores", "hay colores repetidos");
+        assertMotivo(List.of("rojo"), "azul", "principal", "tiene que estar entre los colores marcados");
+    }
+
+    private void assertMotivo(List<String> colores, String principal, String campo, String motivo) {
+        assertThatThrownBy(() -> servicio.guardar("ana", FAMILIA, HIJO, colores, principal))
+                .isInstanceOfSatisfying(EleccionInvalidaException.class,
+                        e -> assertThat(e.campos()).containsEntry(campo, motivo));
+    }
+
     private void assertInvalida(List<String> colores, String principal) {
         assertThatThrownBy(() -> servicio.guardar("ana", FAMILIA, HIJO, colores, principal))
-                .isInstanceOf(EleccionInvalidaException.class);
+                .isInstanceOfSatisfying(EleccionInvalidaException.class,
+                        e -> assertThat(e.campos().values()).isNotEmpty().doesNotContainNull());
     }
 
     @Test

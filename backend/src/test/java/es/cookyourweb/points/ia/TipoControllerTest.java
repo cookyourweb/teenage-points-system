@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -70,8 +69,16 @@ class TipoControllerTest {
         mockMvc.perform(post("/api/ia/tipo/perfil").with(jwt())
                         .contentType(MediaType.APPLICATION_JSON).content(TODAS_A_VECES))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.colores.length()").value(5))
+                .andExpect(jsonPath("$.colores[*].length()").value(org.hamcrest.Matchers.everyItem(
+                        org.hamcrest.Matchers.is(3))))
+                .andExpect(jsonPath("$.colores[0].id").exists())
+                .andExpect(jsonPath("$.colores[0].nombre").exists())
+                .andExpect(jsonPath("$.colores[0].nivel").exists())
                 .andExpect(content().string(not(containsString("a01"))))
                 .andExpect(content().string(not(containsString("a10"))))
+                .andExpect(content().string(not(containsString("a0"))))
+                .andExpect(content().string(not(containsString("afirmacion"))))
                 .andExpect(content().string(not(containsString("descripcion"))));
     }
 
@@ -94,8 +101,35 @@ class TipoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"respuestas\":{\"a01\":\"NUNCA\"}}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.campos", containsInAnyOrder(
-                        "a02", "a03", "a04", "a05", "a06", "a07", "a08", "a09", "a10")));
+                .andExpect(jsonPath("$.campos.length()").value(9))
+                .andExpect(jsonPath("$.campos.a02").value("sin responder"))
+                .andExpect(jsonPath("$.campos.a10").value("sin responder"))
+                .andExpect(jsonPath("$.campos.a01").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("una afirmacion desconocida da 400 con campos como objeto {id: 'no existe'}")
+    void afirmacionDesconocidaDa400() throws Exception {
+        mockMvc.perform(post("/api/ia/tipo/perfil").with(jwt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TODAS_A_VECES.replace("\"a10\"", "\"zz\"")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.zz").value("no existe"))
+                .andExpect(jsonPath("$.campos.a10").value("sin responder"));
+    }
+
+    @Test
+    @DisplayName("campos no devuelve mas de 20 entradas aunque lleguen muchos ids desconocidos")
+    void camposTopeDe20() throws Exception {
+        StringBuilder sb = new StringBuilder("{\"respuestas\":{");
+        for (int i = 0; i < 50; i++) {
+            sb.append(i == 0 ? "" : ",").append("\"x").append(i).append("\":\"NUNCA\"");
+        }
+        sb.append("}}");
+        mockMvc.perform(post("/api/ia/tipo/perfil").with(jwt())
+                        .contentType(MediaType.APPLICATION_JSON).content(sb.toString()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.length()").value(20));
     }
 
     @Test
@@ -114,6 +148,7 @@ class TipoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"respuestas\":{\"a01\":\"SIEMPRE\"}}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title").value("Peticion invalida"));
+                .andExpect(jsonPath("$.title").value("Peticion invalida"))
+                .andExpect(content().string(not(containsString("SIEMPRE"))));
     }
 }

@@ -61,17 +61,17 @@ public class TipoService {
     }
 
     private static void validar(ContenidoTipo contenido, Map<String, Frecuencia> respuestas) {
-        List<String> problemas = new ArrayList<>();
+        Map<String, String> problemas = new java.util.LinkedHashMap<>();
         Set<String> conocidos = contenido.afirmaciones().stream().map(Afirmacion::id)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         for (String id : conocidos) {
             if (respuestas.get(id) == null) {
-                problemas.add(id);
+                problemas.put(id, "sin responder");
             }
         }
         for (String id : respuestas.keySet()) {
             if (!conocidos.contains(id)) {
-                problemas.add(id);
+                problemas.put(id, "no existe");
             }
         }
         if (!problemas.isEmpty()) {

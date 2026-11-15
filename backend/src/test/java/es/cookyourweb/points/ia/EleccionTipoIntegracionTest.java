@@ -168,7 +168,7 @@ class EleccionTipoIntegracionTest {
     void invalidaDa400() throws Exception {
         HttpResponse<String> r = envia("PUT", "ana", "{\"colores\":[\"rojo\"],\"principal\":\"azul\"}");
         assertThat(r.statusCode()).isEqualTo(400);
-        assertThat(r.body()).contains("\"campos\":[\"principal\"]");
+        assertThat(r.body()).contains("\"campos\":{\"principal\":\"tiene que estar entre los colores marcados\"}");
         assertThat(elecciones.count()).isZero();
     }
 }

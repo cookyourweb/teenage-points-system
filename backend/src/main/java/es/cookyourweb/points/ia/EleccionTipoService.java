@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -81,19 +82,23 @@ public class EleccionTipoService {
     }
 
     private List<String> validarYOrdenar(List<String> colores, String principal) {
-        List<String> problemas = new ArrayList<>();
+        Map<String, String> problemas = new java.util.LinkedHashMap<>();
         if (colores == null || colores.isEmpty()) {
-            problemas.add("colores");
+            problemas.put("colores", "marca al menos un color");
         } else {
             Set<String> vistos = new HashSet<>();
             for (String c : colores) {
-                if (!tipos.esColorValido(c) || !vistos.add(c)) {
-                    problemas.add("colores");
+                if (!tipos.esColorValido(c)) {
+                    problemas.put("colores", "hay un color que no existe");
+                    break;
+                }
+                if (!vistos.add(c)) {
+                    problemas.put("colores", "hay colores repetidos");
                     break;
                 }
             }
             if (principal != null && !colores.contains(principal)) {
-                problemas.add("principal");
+                problemas.put("principal", "tiene que estar entre los colores marcados");
             }
         }
         if (!problemas.isEmpty()) {

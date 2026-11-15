@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Crea el indice unico (uid, familyId) de Membresia al arrancar, SIN bloquear el arranque.
+ * Crea los indices unicos de Membresia (uid, familyId) y de EleccionTipo al arrancar, SIN bloquear el arranque.
  *
  * Por que no spring.data.mongodb.auto-index-creation=true: esa propiedad crea los indices
  * dentro del arranque del contexto, y con Mongo caido el contexto no arranca tras ~30 s

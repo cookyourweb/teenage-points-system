@@ -91,7 +91,7 @@ class TipoServiceTest {
         r.remove(falta);
         assertThatThrownBy(() -> servicio.perfil(r))
                 .isInstanceOfSatisfying(RespuestasInvalidasException.class,
-                        e -> assertThat(e.ids()).containsExactly(falta));
+                        e -> assertThat(e.campos()).containsExactly(java.util.Map.entry(falta, "sin responder")));
     }
 
     @Test
@@ -100,7 +100,7 @@ class TipoServiceTest {
         r.put("no-existe", Frecuencia.A_VECES);
         assertThatThrownBy(() -> servicio.perfil(r))
                 .isInstanceOfSatisfying(RespuestasInvalidasException.class,
-                        e -> assertThat(e.ids()).containsExactly("no-existe"));
+                        e -> assertThat(e.campos()).containsExactly(java.util.Map.entry("no-existe", "no existe")));
     }
 
     @Test

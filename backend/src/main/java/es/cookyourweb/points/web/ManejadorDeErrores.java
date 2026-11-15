@@ -82,13 +82,22 @@ public class ManejadorDeErrores {
         return p;
     }
 
-    /** 400 con los ids de afirmaciones que faltan o sobran. */
+    /** Tope de entradas de "campos" que se devuelven: un cliente hostil no obtiene un eco ilimitado. */
+    private static final int MAX_CAMPOS = 20;
+
+    private static Map<String, String> limitar(Map<String, String> campos) {
+        return campos.entrySet().stream().limit(MAX_CAMPOS)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (a, b) -> a, java.util.LinkedHashMap::new));
+    }
+
+    /** 400 con los ids de afirmaciones que faltan o sobran, como {id: motivo}. */
     @ExceptionHandler(RespuestasInvalidasException.class)
     public ProblemDetail respuestasInvalidas(RespuestasInvalidasException e) {
         ProblemDetail p = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST, "faltan respuestas o hay ids desconocidos");
         p.setTitle("Respuestas invalidas");
-        p.setProperty("campos", e.ids());
+        p.setProperty("campos", limitar(e.campos()));
         return p;
     }
 
@@ -98,7 +107,7 @@ public class ManejadorDeErrores {
         ProblemDetail p = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST, "la eleccion de colores no es valida");
         p.setTitle("Eleccion invalida");
-        p.setProperty("campos", e.campos());
+        p.setProperty("campos", limitar(e.campos()));
         return p;
     }
 

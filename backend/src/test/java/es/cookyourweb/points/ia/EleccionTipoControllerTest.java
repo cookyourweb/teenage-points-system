@@ -84,19 +84,19 @@ class EleccionTipoControllerTest {
     @DisplayName("una eleccion invalida da 400 con campos")
     void eleccionInvalidaDa400() throws Exception {
         when(servicio.guardar(any(), any(), any(), any(), any()))
-                .thenThrow(new EleccionInvalidaException(List.of("colores")));
+                .thenThrow(new EleccionInvalidaException(java.util.Map.of("colores", "marca al menos un color")));
 
         mockMvc.perform(put(RUTA).with(jwt().jwt(j -> j.subject("ana")))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"colores\":[]}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.campos[0]").value("colores"));
+                .andExpect(jsonPath("$.campos.colores").value("marca al menos un color"));
     }
 
     @Test
     @DisplayName("un cuerpo sin colores llega como null al servicio, que responde 400")
     void sinColoresLlegaNull() throws Exception {
         when(servicio.guardar("ana", "fA", "h1", null, null))
-                .thenThrow(new EleccionInvalidaException(List.of("colores")));
+                .thenThrow(new EleccionInvalidaException(java.util.Map.of("colores", "marca al menos un color")));
 
         mockMvc.perform(put(RUTA).with(jwt().jwt(j -> j.subject("ana")))
                         .contentType(MediaType.APPLICATION_JSON).content("{}"))

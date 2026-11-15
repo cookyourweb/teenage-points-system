@@ -47,6 +47,12 @@ Con `--confirmar` el script muestra el proyecto y la familia a los que apunta
 Códigos de salida: `0` bien, `1` familia inexistente o fallo, `2` uso
 incorrecto o faltan variables.
 
+## Errores y depuración
+
+Por defecto los errores solo muestran su nombre y `code`, porque el mensaje de
+los SDK puede incluir uid, emails o hosts. Para ver el detalle completo,
+ejecutá con `DEBUG_BAJA=1` (cuidado: no pegues esa salida en sitios públicos).
+
 ## Constancia
 
 Al terminar imprime fecha, `familyId` y recuentos por colección, sin datos

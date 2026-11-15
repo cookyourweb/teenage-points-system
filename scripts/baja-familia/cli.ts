@@ -34,10 +34,21 @@ function leerArgs(args: string[]): { familia: string; confirmar: boolean } | nul
     else return null
   }
   familia = familia.trim()
-  return familia === '' ? null : { familia, confirmar }
+  // Un valor que empieza por `-` es otra opcion (`--familia --confirmar`), no un id.
+  return familia === '' || familia.startsWith('-') ? null : { familia, confirmar }
 }
 
 const linea = (paso: Paso, n: number) => `  ${paso.fuente}/${paso.coleccion}: ${n}`
+
+// Los errores de los SDK pueden traer rutas con uid (`.../documents/usuarios/<uid>`),
+// emails o hosts de Mongo: por defecto solo se muestra nombre y code. El detalle
+// completo exige DEBUG_BAJA=1 (decision consciente de quien ejecuta).
+export function describirError(e: unknown, entorno: Record<string, string | undefined>): string {
+  if (!(e instanceof Error)) return 'error desconocido'
+  if (entorno.DEBUG_BAJA === '1') return e.message
+  const code = (e as { code?: unknown }).code
+  return code === undefined ? e.name : `${e.name} (code ${String(code)})`
+}
 
 export async function ejecutarCli(
   args: string[],
@@ -66,7 +77,7 @@ export async function ejecutarCli(
       salida.error(e.message)
       return 1
     }
-    salida.error(`No se pudo leer el inventario (no se ha borrado nada): ${(e as Error).message}`)
+    salida.error(`No se pudo leer el inventario (no se ha borrado nada): ${describirError(e, entorno)}`)
     return 1
   }
 
@@ -93,7 +104,9 @@ export async function ejecutarCli(
     for (const [clave, n] of Object.entries(resumen.recuentos)) salida.info(`  ${clave}: ${n}`)
     return 0
   } catch (e) {
-    salida.error(`FALLO a mitad de la baja: ${(e as Error).message}`)
+    salida.error(`FALLO a mitad de la baja: ${describirError(e, entorno)}`)
+    const fallo = plan.pasos[hechos.length]
+    if (fallo) salida.error(`Paso que fallo: ${fallo.fuente}/${fallo.coleccion}`)
     salida.error(hechos.length > 0 ? 'Pasos completados antes del fallo:' : 'No se completo ningun paso.')
     for (const h of hechos) salida.error(h)
     salida.error('Vuelve a ejecutar el mismo comando: es idempotente y termina lo que falte.')
@@ -103,30 +116,32 @@ export async function ejecutarCli(
 
 // Arranque real: credenciales por Application Default Credentials
 // (`gcloud auth application-default login`), nunca un fichero de clave.
+// Las conexiones son perezosas: ejecutarCli valida argumentos y variables
+// ANTES de pedir las fuentes, asi un uso erroneo no abre ninguna conexion.
 async function main(): Promise<number> {
   const entorno = process.env
   const salida: Salida = { info: (l) => console.log(l), error: (l) => console.error(l) }
-  // Validamos antes de abrir conexiones: ejecutarCli lo repite, pero asi no se
-  // crean clientes si ya se sabe que falta algo.
-  if (!entorno.FIREBASE_PROJECT_ID || !entorno.MONGODB_URI) {
-    return ejecutarCli(process.argv.slice(2), entorno, {} as DepsCli, salida)
-  }
-  const app = initializeApp({ projectId: entorno.FIREBASE_PROJECT_ID })
-  const mongoClient = new MongoClient(entorno.MONGODB_URI)
+  let mongoClient: MongoClient | undefined
+  let fuentes: Promise<Fuentes> | undefined
+  const obtener = (): Promise<Fuentes> =>
+    (fuentes ??= (async () => {
+      const app = initializeApp({ projectId: entorno.FIREBASE_PROJECT_ID })
+      mongoClient = new MongoClient(entorno.MONGODB_URI as string)
+      await mongoClient.connect()
+      return { firestore: getFirestore(app), auth: getAuth(app), mongo: mongoClient.db() }
+    })())
   try {
-    await mongoClient.connect()
-    const fuentes: Fuentes = { firestore: getFirestore(app), auth: getAuth(app), mongo: mongoClient.db() }
     return await ejecutarCli(
       process.argv.slice(2),
       entorno,
       {
-        leerInventario: (id) => leerInventario(id, fuentes),
-        ejecutar: (plan, alCompletar) => ejecutar(plan, fuentes, undefined, alCompletar),
+        leerInventario: async (id) => leerInventario(id, await obtener()),
+        ejecutar: async (plan, alCompletar) => ejecutar(plan, await obtener(), undefined, alCompletar),
       },
       salida,
     )
   } finally {
-    await mongoClient.close()
+    await mongoClient?.close()
   }
 }
 
@@ -134,7 +149,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   main().then(
     (codigo) => process.exit(codigo),
     (e) => {
-      console.error(`Error inesperado: ${(e as Error).message}`)
+      console.error(`Error inesperado: ${describirError(e, process.env)}`)
       process.exit(1)
     },
   )

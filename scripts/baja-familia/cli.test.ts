@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { Resumen } from './adaptadores'
-import { ejecutarCli, type DepsCli } from './cli'
+import { describirError, ejecutarCli, type DepsCli } from './cli'
 import type { Inventario } from './tipos'
 
 // Datos sembrados que NUNCA pueden aparecer en la salida: la constancia y el
@@ -61,8 +61,8 @@ describe('ejecutarCli', () => {
     expect(codigo).toBe(0)
     expect(m.ejecutar).toHaveBeenCalledTimes(1)
     const t = m.texto()
-    expect(t).toContain('demo-proyecto')
-    expect(t).toContain('F')
+    expect(t).toContain('Borrando la familia F del proyecto demo-proyecto')
+    expect(t).toContain('familyId: F')
     expect(t).toContain('2026-11-15T10:00:00.000Z')
     expect(t).toContain('mongo.tasks: 2')
     expect(t).not.toContain('PRODUCCION')
@@ -79,7 +79,7 @@ describe('ejecutarCli', () => {
   })
 
   it('faltaFamiliaMuestraUso: sin --familia o vacia, uso y codigo 2', async () => {
-    for (const args of [[], ['--familia'], ['--familia', ''], ['--confirmar']]) {
+    for (const args of [[], ['--familia'], ['--familia', ''], ['--confirmar'], ['--familia', '--confirmar'], ['--familia=-x']]) {
       const m = montar()
       expect(await ejecutarCli(args, ENTORNO, m.deps, m.salida)).toBe(2)
       expect(m.texto()).toContain('Uso:')
@@ -125,9 +125,51 @@ describe('ejecutarCli', () => {
     const codigo = await ejecutarCli(['--familia', 'F', '--confirmar'], ENTORNO, m.deps, m.salida)
     expect(codigo).not.toBe(0)
     const t = m.texto()
-    expect(t).toContain('Firestore caido')
+    expect(t).not.toContain('Firestore caido') // el mensaje del SDK ya no se imprime
     expect(t).toContain('mongo/tasks: 2')
     expect(t).toContain('mongo/membresias: 1')
     expect(t).toContain('Vuelve a ejecutar el mismo comando')
+  })
+
+  it('falloAMitadDiceQuePasoFallo: nombra fuente/coleccion del paso que cayo', async () => {
+    const m = montar({
+      ejecutar: async (plan, alCompletar) => {
+        alCompletar(plan.pasos[0], 2)
+        throw new Error('boom')
+      },
+    })
+    await ejecutarCli(['--familia', 'F', '--confirmar'], ENTORNO, m.deps, m.salida)
+    expect(m.texto()).toContain('Paso que fallo: mongo/membresias')
+  })
+
+  describe('erroresSinDatosPersonales', () => {
+    const PELIGRO = `.../documents/usuarios/uidSecreto1 ${EMAIL} host-mongo-interno:27017`
+    const envenenado = () => Object.assign(new Error(PELIGRO), { code: 14 })
+
+    it('en el ensayo (leer inventario)', async () => {
+      const m = montar({ leerInventario: async () => { throw envenenado() } })
+      expect(await ejecutarCli(['--familia', 'F'], ENTORNO, m.deps, m.salida)).toBe(1)
+      for (const x of ['uidSecreto1', EMAIL, 'host-mongo-interno']) expect(m.texto()).not.toContain(x)
+      expect(m.texto()).toContain('Error')
+    })
+
+    it('al ejecutar con --confirmar', async () => {
+      const m = montar({ ejecutar: async () => { throw envenenado() } })
+      expect(await ejecutarCli(['--familia', 'F', '--confirmar'], ENTORNO, m.deps, m.salida)).toBe(1)
+      for (const x of ['uidSecreto1', EMAIL, 'host-mongo-interno']) expect(m.texto()).not.toContain(x)
+    })
+
+    it('describirError: solo nombre y code; el detalle con DEBUG_BAJA=1', () => {
+      const e = envenenado()
+      expect(describirError(e, {})).toBe('Error (code 14)')
+      expect(describirError(e, { DEBUG_BAJA: '1' })).toContain('uidSecreto1')
+      expect(describirError('texto raro con uidSecreto1', {})).not.toContain('uidSecreto1')
+    })
+
+    it('con DEBUG_BAJA=1 el detalle completo si aparece en la salida', async () => {
+      const m = montar({ ejecutar: async () => { throw envenenado() } })
+      await ejecutarCli(['--familia', 'F', '--confirmar'], { ...ENTORNO, DEBUG_BAJA: '1' }, m.deps, m.salida)
+      expect(m.texto()).toContain('uidSecreto1')
+    })
   })
 })

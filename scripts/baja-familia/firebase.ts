@@ -21,7 +21,7 @@ export const idsPorFamilyId = (db: Firestore, coleccion: string, familyId: strin
   ids(db.collection(coleccion).where('familyId', '==', familyId))
 
 // Documentos de `coleccion` cuyo campo `childId` esta en `hijos`. `soloSinFamilyId`
-// se queda con los que NO tienen familyId (canjes antiguos): los que si lo
+// se queda con los que NO tienen familyId o lo tienen null (canjes antiguos): los que si lo
 // tienen ya llegan por familyId, y uno con OTRA familyId no es nuestro.
 export async function idsPorHijos(
   db: Firestore,
@@ -32,7 +32,7 @@ export async function idsPorHijos(
   const out: string[] = []
   for (const grupo of trozos(hijos, MAX_IN)) {
     const snap = await db.collection(coleccion).where('childId', 'in', grupo).select('familyId').get()
-    for (const d of snap.docs) if (!soloSinFamilyId || d.get('familyId') === undefined) out.push(d.id)
+    for (const d of snap.docs) if (!soloSinFamilyId || d.get('familyId') == null) out.push(d.id)
   }
   return out
 }

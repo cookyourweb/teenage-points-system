@@ -211,6 +211,15 @@ describe('baja de una familia contra emuladores', () => {
     expect(a?.enOtraFamilia).toBe(true)
   })
 
+  it('unCanjeConFamilyIdNullEsAntiguoYEntraPorHijo', async () => {
+    await firestore.collection('privilegeHistory').doc('hFnulo').set({ familyId: null, childId: 'hijoF1' })
+    const inv = await leerInventario(F, fuentes)
+    expect(inv.firestore.privilegeHistoryPorHijo.sort()).toEqual(['hFnulo', 'hFviejo'])
+    await ejecutar(planificarBaja(inv), fuentes)
+    expect(await existe('privilegeHistory', 'hFnulo')).toBe(false)
+    expect(await existe('privilegeHistory', 'hG')).toBe(true)
+  })
+
   it('seNiegaABorrarColeccionesFueraDeLaListaBlanca', async () => {
     const plan: PlanBaja = {
       familyId: F,

@@ -42,9 +42,9 @@
 
 | Fecha | Tema | Min |
 |---|---|---|
-| 2026-11-14 | Sesión 1 reglas: desplegadas, privilegios arreglados, carrera del alta | 180 |
+| 2026-11-15 | Regla de familias desplegada; script de baja (RGPD) | 154 |
+| 2026-11-14 | Sesiones 1-3: reglas, token verificado, membresías | 330 |
 | 2026-11-13 | AWS fase 1: plan gratuito, CLI; esperando la verificación | 104 |
 | 2026-11-12 | Push con CI verde, hook salvavidas arreglado, cuenta AWS propia | 37 |
-| 2026-11-11 | /doctor, 12 puntos de tu-vuelta-al-sol, traza del hook | 67 |
 
-**Total: 9 sesiones · 1089 min** (la tabla muestra las 4 últimas; la cuenta verificable: `memoria/sesiones-teenage-points.json`)
+**Total: 10 sesiones · 1393 min** (la tabla muestra las 4 últimas; la cuenta verificable: `memoria/sesiones-teenage-points.json`)

@@ -49,8 +49,14 @@
   },
   {
     "fecha": "2026-11-14",
-    "tema": "Sesión 1 reglas: push con CI verde, reglas de Firestore desplegadas (agujero de alta cerrado, categorias con sesión), privilegios arreglados (privileges por familia, privilegeHistory append-only), carrera del alta documentada",
-    "minutos": 180,
+    "tema": "Sesión 1 reglas desplegadas y privilegios arreglados; sesión 2 (API verifica el token de Firebase, /api/me, AuthProvider, carrera del alta) y sesión 3 (membresías, 404 entre familias, Testcontainers), probadas en local",
+    "minutos": 330,
     "creado": "2026-11-14T12:05:00.000Z"
+  },
+  {
+    "fecha": "2026-11-15",
+    "tema": "Regla familias delete:false desplegada; script de baja de familia (RGPD) con ensayo por defecto, probado contra emuladores y en CI",
+    "minutos": 154,
+    "creado": "2026-11-15T12:10:00.000Z"
   }
 ]

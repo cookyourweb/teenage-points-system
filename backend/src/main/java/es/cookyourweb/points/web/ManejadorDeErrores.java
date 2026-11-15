@@ -2,6 +2,7 @@ package es.cookyourweb.points.web;
 
 import es.cookyourweb.points.familia.FamiliaNoEncontradaException;
 import es.cookyourweb.points.familia.ServicioExternoException;
+import es.cookyourweb.points.ia.EleccionInvalidaException;
 import es.cookyourweb.points.ia.RespuestasInvalidasException;
 import es.cookyourweb.points.task.TaskNotFoundException;
 import org.slf4j.Logger;
@@ -88,6 +89,16 @@ public class ManejadorDeErrores {
                 HttpStatus.BAD_REQUEST, "faltan respuestas o hay ids desconocidos");
         p.setTitle("Respuestas invalidas");
         p.setProperty("campos", e.ids());
+        return p;
+    }
+
+    /** 400 con los campos de la eleccion de colores que fallan. */
+    @ExceptionHandler(EleccionInvalidaException.class)
+    public ProblemDetail eleccionInvalida(EleccionInvalidaException e) {
+        ProblemDetail p = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "la eleccion de colores no es valida");
+        p.setTitle("Eleccion invalida");
+        p.setProperty("campos", e.campos());
         return p;
     }
 

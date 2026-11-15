@@ -2,6 +2,7 @@ package es.cookyourweb.points.config;
 
 import com.mongodb.MongoException;
 import es.cookyourweb.points.familia.Membresia;
+import es.cookyourweb.points.ia.EleccionTipo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -12,6 +13,8 @@ import org.springframework.data.mongodb.core.index.IndexOperations;
 import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Crea el indice unico (uid, familyId) de Membresia al arrancar, SIN bloquear el arranque.
@@ -46,17 +49,25 @@ public class IndicesMongo {
     }
 
     void crear() {
+        // Cada entidad en su propio try: si una falla (p. ej. duplicados), la otra igual se indexa.
+        for (Class<?> entidad : List.of(Membresia.class, EleccionTipo.class)) {
+            crearIndices(entidad);
+        }
+    }
+
+    private void crearIndices(Class<?> entidad) {
         try {
-            IndexOperations ops = mongo.indexOps(Membresia.class);
+            IndexOperations ops = mongo.indexOps(entidad);
             new MongoPersistentEntityIndexResolver(contexto)
-                    .resolveIndexFor(Membresia.class)
+                    .resolveIndexFor(entidad)
                     .forEach(ops::createIndex);
         } catch (RuntimeException e) {
             // La excepcion va como ultimo argumento para que el log lleve la traza entera.
             // Sin token ni datos de personas: solo el mensaje fijo y la excepcion del driver.
             if (esClaveDuplicada(e)) {
-                log.warn("No se pudo crear el indice unico de membresias: hay membresias duplicadas "
-                        + "(mismo uid y familyId) que limpiar en Mongo antes del proximo arranque", e);
+                log.warn("No se pudo crear el indice unico de {}: hay documentos duplicados "
+                        + "(misma clave unica) que limpiar en Mongo antes del proximo arranque",
+                        entidad.getSimpleName(), e);
             } else {
                 log.warn("No se pudieron crear los indices de Mongo (reinicia la API con Mongo arriba)", e);
             }

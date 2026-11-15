@@ -47,4 +47,21 @@ class ContenidoFicticioTest {
                     assertThat(a.id().toLowerCase()).doesNotContain(c.nombre().toLowerCase());
                 }));
     }
+
+    @Test
+    void elOrdenDeLasAfirmacionesNoSigueElDeLosColores() {
+        List<String> orden = contenido.colores().stream().map(Color::id).toList();
+        List<String> secuencia = contenido.afirmaciones().stream().map(Afirmacion::colorId).toList();
+
+        List<String> ciclica = new java.util.ArrayList<>();
+        for (int i = 0; i < secuencia.size(); i++) {
+            ciclica.add(orden.get(i % orden.size()));
+        }
+        assertThat(secuencia).isNotEqualTo(ciclica);
+        assertThat(secuencia.get(0)).isNotEqualTo(orden.get(0));
+
+        boolean todosA5 = orden.stream().allMatch(c ->
+                secuencia.indexOf(c) + 5 == secuencia.lastIndexOf(c));
+        assertThat(todosA5).isFalse();
+    }
 }

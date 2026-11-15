@@ -99,6 +99,36 @@ async function limpiar() {
   if (users.length) await fuentes.auth.deleteUsers(users.map((u) => u.uid))
 }
 
+// Estado esperado tras la baja completa de F: nada de F; G, el catalogo y la
+// madre compartida intactos. Lo comparten el borrado directo y las reanudaciones.
+async function comprobarEstadoFinal() {
+  // Nada de F
+  expect(await mongo.collection('tasks').countDocuments({ familyId: F })).toBe(0)
+  expect(await mongo.collection('membresias').countDocuments({ familyId: F })).toBe(0)
+  for (const [c, id] of [
+    ['familias', F], ['weeklyTasks', 'wF'], ['privileges', 'pF'], ['privilegeHistory', 'hF'],
+    ['privilegeHistory', 'hFviejo'], ['invitaciones', 'iF'], ['childPoints', `${F}_hijoF1`],
+    ['childPoints', `${F}_hijoF2`], ['tasks', 'tF'], ['usuarios', 'padreF'], ['usuarios', 'hijoF1'],
+  ] as const) {
+    expect(await existe(c, id), `${c}/${id} deberia haberse borrado`).toBe(false)
+  }
+  expect(await cuentaExiste('padreF')).toBe(false)
+
+  // Todo lo de G, el catalogo y la madre compartida siguen
+  expect(await mongo.collection('tasks').countDocuments({ familyId: G })).toBe(1)
+  expect(await mongo.collection('membresias').countDocuments({ familyId: G })).toBe(2)
+  for (const [c, id] of [
+    ['familias', G], ['weeklyTasks', 'wG'], ['privileges', 'pG'], ['privilegeHistory', 'hG'],
+    ['invitaciones', 'iG'], ['childPoints', `${G}_hijoG1`], ['tasks', 'tG'],
+    ['usuarios', 'padreG'], ['usuarios', 'compartida'],
+    ['tareas', 'comun'], ['recompensas', 'comun'], ['categorias', 'comun'],
+  ] as const) {
+    expect(await existe(c, id), `${c}/${id} deberia seguir`).toBe(true)
+  }
+  expect(await cuentaExiste('compartida')).toBe(true)
+  expect(await cuentaExiste('padreG')).toBe(true)
+}
+
 beforeAll(async () => {
   if (!process.env.FIRESTORE_EMULATOR_HOST || !process.env.FIREBASE_AUTH_EMULATOR_HOST) {
     throw new Error('Este test solo corre contra emuladores: usa `npm run test:baja`.')
@@ -127,32 +157,32 @@ describe('baja de una familia contra emuladores', () => {
   it('borraTodoYSoloLoDeLaFamilia', async () => {
     const plan = planificarBaja(await leerInventario(F, fuentes))
     await ejecutar(plan, fuentes)
+    await comprobarEstadoFinal()
+  })
 
-    // Nada de F
-    expect(await mongo.collection('tasks').countDocuments({ familyId: F })).toBe(0)
-    expect(await mongo.collection('membresias').countDocuments({ familyId: F })).toBe(0)
-    for (const [c, id] of [
-      ['familias', F], ['weeklyTasks', 'wF'], ['privileges', 'pF'], ['privilegeHistory', 'hF'],
-      ['privilegeHistory', 'hFviejo'], ['invitaciones', 'iF'], ['childPoints', `${F}_hijoF1`],
-      ['childPoints', `${F}_hijoF2`], ['tasks', 'tF'], ['usuarios', 'padreF'], ['usuarios', 'hijoF1'],
-    ] as const) {
-      expect(await existe(c, id), `${c}/${id} deberia haberse borrado`).toBe(false)
+  // Simula una caida tras `k` pasos ejecutando solo el prefijo del plan, y
+  // reanuda con un inventario nuevo: debe llegar al mismo estado final.
+  describe('reanudacionTrasCaida', () => {
+    const indiceDe = (plan: PlanBaja, fuente: string, coleccion: string) => {
+      const i = plan.pasos.findIndex((p) => p.fuente === fuente && p.coleccion === coleccion)
+      expect(i, `${fuente}/${coleccion} deberia estar en el plan`).toBeGreaterThanOrEqual(0)
+      return i
     }
-    expect(await cuentaExiste('padreF')).toBe(false)
+    const casos: [string, (plan: PlanBaja) => number][] = [
+      ['tras borrar las cuentas de Auth', (plan) => indiceDe(plan, 'auth', 'usuarios') + 1],
+      ['tras borrar usuarios', (plan) => indiceDe(plan, 'firestore', 'usuarios') + 1],
+    ]
+    it.each(casos)('cae %s y al reintentar termina igual', async (_caso, cuantos) => {
+      const plan = planificarBaja(await leerInventario(F, fuentes))
+      const k = cuantos(plan)
+      expect(k).toBeLessThan(plan.pasos.length) // familias (el ancla) aun no se ha borrado
+      await ejecutar({ ...plan, pasos: plan.pasos.slice(0, k) }, fuentes)
+      expect(await existe('familias', F)).toBe(true)
 
-    // Todo lo de G, el catalogo y la madre compartida siguen
-    expect(await mongo.collection('tasks').countDocuments({ familyId: G })).toBe(1)
-    expect(await mongo.collection('membresias').countDocuments({ familyId: G })).toBe(2)
-    for (const [c, id] of [
-      ['familias', G], ['weeklyTasks', 'wG'], ['privileges', 'pG'], ['privilegeHistory', 'hG'],
-      ['invitaciones', 'iG'], ['childPoints', `${G}_hijoG1`], ['tasks', 'tG'],
-      ['usuarios', 'padreG'], ['usuarios', 'compartida'],
-      ['tareas', 'comun'], ['recompensas', 'comun'], ['categorias', 'comun'],
-    ] as const) {
-      expect(await existe(c, id), `${c}/${id} deberia seguir`).toBe(true)
-    }
-    expect(await cuentaExiste('compartida')).toBe(true)
-    expect(await cuentaExiste('padreG')).toBe(true)
+      const reanudado = planificarBaja(await leerInventario(F, fuentes))
+      await ejecutar(reanudado, fuentes)
+      await comprobarEstadoFinal()
+    })
   })
 
   it('masDeQuinientos', async () => {

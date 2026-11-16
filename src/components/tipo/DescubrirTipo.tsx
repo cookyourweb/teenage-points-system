@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   getEleccionesTipo,
@@ -16,6 +16,7 @@ import type {
 import Button from '../ui/Button';
 import { ErrorHttp } from '../../services/http';
 import Checkbox from '../ui/Checkbox';
+import ChatAfirmaciones from './ChatAfirmaciones';
 import Field from '../ui/Field';
 
 /**
@@ -32,13 +33,6 @@ export interface DescubrirTipoProps {
   hijoId: string;
   nombreHijo: string;
 }
-
-const OPCIONES_FRECUENCIA = [
-  { value: '', label: 'Elige una opción' },
-  { value: 'NUNCA', label: 'Nunca' },
-  { value: 'A_VECES', label: 'A veces' },
-  { value: 'A_MENUDO', label: 'A menudo' },
-] as const;
 
 const NIVEL: Record<Nivel, string> = { NADA: 'Nada', ALGO: 'Algo', MUCHO: 'Mucho' };
 
@@ -79,14 +73,33 @@ const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreH
     [preguntas],
   );
 
-  const completo =
-    !!preguntas && preguntas.afirmaciones.every((a) => respuestas[a.id] !== undefined);
+  const tituloPerfil = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (perfil) tituloPerfil.current?.focus();
+  }, [perfil]);
 
-  const verPerfil = async () => {
+  const responder = (id: string, valor: Frecuencia) => {
+    const nuevas = { ...respuestas, [id]: valor };
+    setRespuestas(nuevas);
+    // La ultima respuesta pide el perfil sola: no hay boton "Ver perfil".
+    if (preguntas && preguntas.afirmaciones.every((a) => nuevas[a.id] !== undefined)) {
+      void verPerfil(nuevas);
+    }
+  };
+
+  const cambiarAnterior = () => {
+    const ultima = [...(preguntas?.afirmaciones ?? [])].reverse().find((a) => respuestas[a.id] !== undefined);
+    if (!ultima) return;
+    setError(null);
+    const { [ultima.id]: _quitada, ...resto } = respuestas;
+    setRespuestas(resto);
+  };
+
+  const verPerfil = async (enviadas: Record<string, Frecuencia>) => {
     setError(null);
     setOcupado(true);
     try {
-      const p = await pedirPerfil(respuestas);
+      const p = await pedirPerfil(enviadas);
       setPerfil(p);
       setMarcados(p.colores.filter((c) => c.nivel !== 'NADA').map((c) => c.id));
       setPrincipal(null);
@@ -144,33 +157,22 @@ const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreH
             ¿Cuánto se reconoce {nombreHijo} en cada frase?
           </h3>
 
-          {preguntas.afirmaciones.map((a) => (
-            <Field
-              key={a.id}
-              as="select"
-              name={`afirmacion-${a.id}`}
-              label={a.texto}
-              value={respuestas[a.id] ?? ''}
-              onChange={(e) => {
-                const { [a.id]: _quitada, ...resto } = respuestas;
-                setRespuestas(e.target.value ? { ...resto, [a.id]: e.target.value as Frecuencia } : resto);
-              }}
-              options={OPCIONES_FRECUENCIA}
-            />
-          ))}
-
-          {!completo && (
-            <p className="text-sm text-content-muted">Responde todas las frases para ver el perfil.</p>
-          )}
-          <Button onClick={verPerfil} disabled={!completo || ocupado} loading={ocupado && !perfil}>
-            Ver perfil
-          </Button>
+          <ChatAfirmaciones
+            afirmaciones={preguntas.afirmaciones}
+            respuestas={respuestas}
+            ocupado={ocupado}
+            terminado={!!perfil}
+            falloPerfil={!!error}
+            onResponder={responder}
+            onCambiarAnterior={cambiarAnterior}
+            onReintentar={() => void verPerfil(respuestas)}
+          />
         </section>
       )}
 
       {perfil && (
         <section aria-labelledby="tipo-colores" className="space-y-4">
-          <h3 id="tipo-colores" className="text-base font-semibold text-content">
+          <h3 id="tipo-colores" ref={tituloPerfil} tabIndex={-1} className="text-base font-semibold text-content">
             Los colores de {nombreHijo}
           </h3>
           <p className="text-sm text-content-muted">

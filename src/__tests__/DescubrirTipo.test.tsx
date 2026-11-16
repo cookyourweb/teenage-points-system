@@ -33,15 +33,15 @@ const PERFIL = {
 
 const pintar = () => render(<DescubrirTipo familyId="f1" hijoId="h1" nombreHijo="Leo" />);
 
+const responder = async (user: ReturnType<typeof userEvent.setup>, opcion = 'A veces') =>
+  user.click(await screen.findByRole('button', { name: opcion }));
+
 const responderTodo = async (user: ReturnType<typeof userEvent.setup>) => {
-  for (const a of AFIRMACIONES) {
-    await user.selectOptions(await screen.findByLabelText(a.texto), 'A veces');
-  }
+  for (let i = 0; i < AFIRMACIONES.length; i++) await responder(user);
 };
 
 const verPerfil = async (user: ReturnType<typeof userEvent.setup>) => {
   await responderTodo(user);
-  await user.click(screen.getByRole('button', { name: 'Ver perfil' }));
   await screen.findByRole('checkbox', { name: /Rojo/ });
 };
 
@@ -54,21 +54,96 @@ beforeEach(() => {
 });
 
 describe('DescubrirTipo', () => {
-  it('noDejaPedirSinResponderTodo', async () => {
+  it('muestraUnaAfirmacionCadaVez', async () => {
+    pintar();
+
+    const log = await screen.findByRole('log');
+    expect(within(log).getByText('1 de 2')).toBeInTheDocument();
+    expect(within(log).getByText(AFIRMACIONES[0].texto)).toBeInTheDocument();
+    expect(within(log).queryByText(AFIRMACIONES[1].texto)).not.toBeInTheDocument();
+    expect(within(log).queryByText('2 de 2')).not.toBeInTheDocument();
+    expect(log).toHaveAttribute('aria-live', 'polite');
+    for (const n of ['Nunca', 'A veces', 'A menudo']) {
+      expect(screen.getByRole('button', { name: n })).toBeInTheDocument();
+    }
+    expect(screen.queryByRole('button', { name: 'Cambiar la anterior' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ver perfil' })).not.toBeInTheDocument();
+  });
+
+  it('responderAvanzaYMuestraLaRespuesta', async () => {
     const user = userEvent.setup();
     pintar();
-    await user.selectOptions(await screen.findByLabelText(AFIRMACIONES[0].texto), 'Nunca');
+    await responder(user, 'A menudo');
 
-    expect(screen.getByRole('button', { name: 'Ver perfil' })).toBeDisabled();
+    const log = screen.getByRole('log');
+    expect(within(log).getByText('A menudo')).toBeInTheDocument();
+    expect(within(log).getByText('2 de 2')).toBeInTheDocument();
+    expect(within(log).getByText(AFIRMACIONES[1].texto)).toBeInTheDocument();
     expect(coach.pedirPerfil).not.toHaveBeenCalled();
   });
 
-  it('pideElPerfilConTodasLasRespuestas', async () => {
+  it('elFocoVaAlPrimerBotonDeLaNuevaPregunta', async () => {
     const user = userEvent.setup();
     pintar();
-    await verPerfil(user);
+    await responder(user);
 
-    expect(coach.pedirPerfil).toHaveBeenCalledWith({ x1: 'A_VECES', x2: 'A_VECES' });
+    expect(screen.getByRole('button', { name: 'Nunca' })).toHaveFocus();
+  });
+
+  it('cambiarLaAnteriorVuelveAPreguntar', async () => {
+    const user = userEvent.setup();
+    pintar();
+    await responder(user, 'Nunca');
+    await user.click(screen.getByRole('button', { name: 'Cambiar la anterior' }));
+
+    const log = screen.getByRole('log');
+    expect(within(log).getByText('1 de 2')).toBeInTheDocument();
+    expect(within(log).getByText(AFIRMACIONES[0].texto)).toBeInTheDocument();
+    expect(within(log).queryByText('Nunca')).not.toBeInTheDocument();
+    expect(within(log).queryByText('2 de 2')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cambiar la anterior' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Nunca' })).toHaveFocus();
+  });
+
+  it('alTerminarPideElPerfilSolo', async () => {
+    const user = userEvent.setup();
+    pintar();
+    await responder(user, 'Nunca');
+    await responder(user, 'A menudo');
+
+    await screen.findByRole('checkbox', { name: /Rojo/ });
+    expect(coach.pedirPerfil).toHaveBeenCalledTimes(1);
+    expect(coach.pedirPerfil).toHaveBeenCalledWith({ x1: 'NUNCA', x2: 'A_MENUDO' });
+    expect(screen.queryByRole('button', { name: 'Ver perfil' })).not.toBeInTheDocument();
+    expect(within(screen.getByRole('log')).getByText(/perfil/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Los colores de Leo/ })).toHaveFocus();
+  });
+
+  it('errorAlPedirElPerfilPermiteReintentar', async () => {
+    const user = userEvent.setup();
+    vi.mocked(coach.pedirPerfil)
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(PERFIL);
+    pintar();
+    await responderTodo(user);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Sin conexión con el servidor');
+    await user.click(screen.getByRole('button', { name: 'Reintentar' }));
+
+    await screen.findByRole('checkbox', { name: /Rojo/ });
+    expect(coach.pedirPerfil).toHaveBeenCalledTimes(2);
+    expect(coach.pedirPerfil).toHaveBeenLastCalledWith({ x1: 'A_VECES', x2: 'A_VECES' });
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('mientrasSePideElPerfilNoSePuedeCambiarNada', async () => {
+    const user = userEvent.setup();
+    vi.mocked(coach.pedirPerfil).mockReturnValue(new Promise(() => {}));
+    pintar();
+    await responderTodo(user);
+
+    expect(screen.getByRole('button', { name: 'Cambiar la anterior' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'A veces' })).not.toBeInTheDocument();
   });
 
   it('muestraLosCincoColoresConSuNivel', async () => {
@@ -180,25 +255,6 @@ describe('DescubrirTipo', () => {
     expect(screen.queryByText(/No coincidís/)).not.toBeInTheDocument();
   });
 
-  it('verPerfilQuedaDeshabilitadoMientrasHayUnaPeticionEnVuelo', async () => {
-    const user = userEvent.setup();
-    let resolver: () => void = () => {};
-    vi.mocked(coach.guardarEleccionTipo).mockReturnValue(
-      new Promise((r) => {
-        resolver = () => r({ colores: [], elegidaEn: 'x' });
-      }),
-    );
-    pintar();
-    await verPerfil(user);
-
-    await user.click(screen.getByRole('button', { name: 'Guardar mi elección' }));
-
-    expect(screen.getByRole('button', { name: 'Ver perfil' })).toBeDisabled();
-    resolver();
-    await screen.findByRole('status');
-    expect(screen.getByRole('button', { name: 'Ver perfil' })).toBeEnabled();
-  });
-
   it('errorDeRedSeMuestra', async () => {
     vi.mocked(coach.getPreguntasTipo).mockRejectedValue(new TypeError('Failed to fetch'));
     pintar();
@@ -212,7 +268,7 @@ describe('DescubrirTipo', () => {
     vi.mocked(coach.getEleccionesTipo).mockRejectedValue(new TypeError('Failed to fetch'));
     pintar();
 
-    expect(await screen.findByLabelText(AFIRMACIONES[0].texto)).toBeInTheDocument();
+    expect(await screen.findByText(AFIRMACIONES[0].texto)).toBeInTheDocument();
     expect(await screen.findByRole('alert')).toHaveTextContent('Sin conexión con el servidor');
   });
 
@@ -221,7 +277,6 @@ describe('DescubrirTipo', () => {
     vi.mocked(coach.pedirPerfil).mockRejectedValue(new ErrorHttp(400, 'Faltan respuestas'));
     pintar();
     await responderTodo(user);
-    await user.click(screen.getByRole('button', { name: 'Ver perfil' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Faltan respuestas');
   });
@@ -252,7 +307,15 @@ describe('DescubrirTipo', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('No eres miembro');
   });
 
-  it('sinViolacionesDeAccesibilidad', async () => {
+  it('sinViolacionesDeAccesibilidad con el chat a medias', async () => {
+    const user = userEvent.setup();
+    const { container } = pintar();
+    await responder(user);
+
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('sinViolacionesDeAccesibilidad con el perfil', async () => {
     const user = userEvent.setup();
     vi.mocked(coach.getEleccionesTipo).mockResolvedValue({
       coinciden: false,

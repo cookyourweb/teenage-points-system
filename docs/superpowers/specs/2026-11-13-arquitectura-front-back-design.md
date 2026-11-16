@@ -382,6 +382,17 @@ con S4), clave por persona con HKDF y rotación, códigos cortos del adolescente
 4. **¿Quién puede quitar a un adulto de la familia,** y qué pasa si uno intenta
    echar al otro? Hace falta una regla escrita aunque "la app no arbitre".
 5. **Contenido del método:** opción A o B de §7.
+6. **¿Test de colores sin registrarse, para captar familias?** (idea de la dueña,
+   16-nov, revisada por un agente de marketing). Hoy **no**: es uso comercial del
+   método (hace falta el sí de Vicent **por escrito**) y una ruta abierta deja
+   deducir qué afirmación mide cada color. Si Vicent acepta: mini-test de 3-4
+   afirmaciones elegidas con él, solo el color dominante, y registro para ver el
+   perfil completo; propuesta a Vicent como canal hacia sus cursos ("Basado en el
+   método de…", él aprueba los textos, piloto de 3 meses sin dinero). Se haría
+   con una **ruta pública que no guarda nada**, nunca con cuentas anónimas
+   (cerradas el 16-nov en API y reglas). Sin depender de Vicent, ya se puede:
+   **demo con familia ficticia**, contenido propio sobre pactar tareas, lista de
+   espera.
 
 **Dato que tiene que mirar la dueña** (no es una pregunta): qué reglas están
 desplegadas hoy en la consola de Firebase. De eso depende el alcance real de S0.

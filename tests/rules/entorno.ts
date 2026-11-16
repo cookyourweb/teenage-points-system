@@ -31,7 +31,13 @@ export async function sembrar(
   })
 }
 
-// Un cliente autenticado como `uid`, con las reglas en marcha.
+// Un cliente autenticado como `uid` con email y contraseña, con las reglas en
+// marcha. Firebase siempre pone el proveedor en el token; aquí también.
 export function como(env: RulesTestEnvironment, uid: string) {
-  return env.authenticatedContext(uid).firestore()
+  return env.authenticatedContext(uid, { firebase: { sign_in_provider: 'password' } }).firestore()
+}
+
+// Un cliente con cuenta anónima: token válido, pero sin identificar a nadie.
+export function comoAnonima(env: RulesTestEnvironment, uid: string) {
+  return env.authenticatedContext(uid, { firebase: { sign_in_provider: 'anonymous' } }).firestore()
 }

@@ -26,8 +26,12 @@ service cloud.firestore {
 
     // ---------- Ayudas ----------
 
+    // Una cuenta anónima la crea cualquiera con una llamada, sin pasar por la
+    // app: su token es válido pero no identifica a nadie, así que no cuenta
+    // como sesión. Firebase siempre pone `sign_in_provider` en el token.
     function haIniciadoSesion() {
-      return request.auth != null;
+      return request.auth != null
+             && request.auth.token.firebase.sign_in_provider != 'anonymous';
     }
 
     function miDocumento() {

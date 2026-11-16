@@ -297,3 +297,31 @@ puede filtrarse), la dueña inicia sesión con `gcloud auth application-default 
 **Configuración que miente en silencio.** Una URI de Mongo sin nombre de base usa la base `test` sin avisar:
 el script vería 0 datos y podría tomar a alguien de otra familia por propio. Por eso valida la configuración
 **antes** de conectar y se niega a arrancar si algo no cuadra.
+
+### Sesión 4: descubrir los colores del hijo
+
+**Puerto y adaptador.** `ContenidoMetodoPort` dice *qué* contenido hace falta (colores, afirmaciones y a qué
+color apunta cada una); `ContenidoFicticio` es el adaptador de hoy, en memoria y con todo marcado
+`[FICTICIO]`. Cuando llegue el contenido real del curso, otro adaptador leerá Firestore y nada más cambia.
+
+**Función pura y determinista.** `TipoService.perfil` no tiene reloj, red ni modelo: las mismas respuestas
+dan siempre el mismo perfil. Se prueba entera sin mocks y su resultado se puede explicar.
+
+**Perfil, no etiqueta.** El hijo puede ser una mezcla: cada color se mide por separado (nada / algo / mucho)
+con afirmaciones de frecuencia. Si cada pregunta obligara a elegir un color, las respuestas sumarían
+siempre lo mismo y "mucho rojo y mucho amarillo a la vez" sería imposible.
+
+**El adulto decide.** El perfil orienta; el adulto marca los colores que reconoce y, si quiere, el principal.
+Cada adulto elige por separado y, si no coinciden, la pantalla lo muestra sin elegir por ellos.
+
+**Por qué el mapa no sale del servidor.** Qué afirmación apunta a qué color es contenido del método. Se
+filtraba por tres canales que hubo que cerrar uno a uno, cada uno con su test: el **id** (`rojo-1`), el
+**orden** (siempre el mismo ciclo de colores) y el **texto** ("para el color rojo"). Límite declarado: como la
+función es determinista, 10 peticiones bien elegidas permiten deducirlo igual; hay que decidir qué hacer
+**antes** de cargar el contenido real.
+
+**Contenido ficticio.** Mientras no esté el curso, todo texto inventado lleva `[FICTICIO]` y un test falla si
+falta: así nada del método entra al repo público por accidente.
+
+**Chat guiado antes que chat con IA.** Una afirmación por mensaje con tres botones da sensación de
+conversación sin meter el modelo antes de tiempo; el chat con IA (sesión 5) se apoyará en esta pantalla.

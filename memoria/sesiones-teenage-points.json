@@ -55,8 +55,14 @@
   },
   {
     "fecha": "2026-11-15",
-    "tema": "Regla familias delete:false desplegada; script de baja de familia (RGPD) con ensayo por defecto, probado contra emuladores y en CI",
-    "minutos": 154,
+    "tema": "Regla familias delete:false desplegada; script de baja de familia (RGPD) con ensayo por defecto, probado contra emuladores y en CI; sesión 4: perfil de los cinco colores calculado en el servidor (mezcla, no un tipo), elección por adulto en Mongo, pantalla probada en local",
+    "minutos": 434,
     "creado": "2026-11-15T12:10:00.000Z"
+  },
+  {
+    "fecha": "2026-11-16",
+    "tema": "Sesión 4 cerrada: arreglos de la revisión final, chat guiado de afirmaciones (una por mensaje) y foco accesible; falta recuperar contraseña",
+    "minutos": 290,
+    "creado": "2026-11-16T10:25:00.000Z"
   }
 ]

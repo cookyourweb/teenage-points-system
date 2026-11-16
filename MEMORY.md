@@ -5,9 +5,9 @@
 
 ## Estado actual
 
-- `develop`: sesión 3 en local (`16b4a11`, sin push). 💚 **351/351 tests** + **27/27 reglas** + **71 backend** (lint/typecheck 0; un test usa Docker).
+- `develop`: sesión 4 cerrada y subida (16-nov). 💚 **426 tests front** + **27/27 reglas** + **122 backend** (lint/typecheck 0; los de integración usan Docker).
+- **Sesión 4 (colores)**: el hijo es una **mezcla**; `ia/TipoService` (puro) da nada/algo/mucho por color; cada adulto guarda sus colores + principal en Mongo (`eleccionesTipo`, `requireMember`); pantalla en chat guiado. Contenido **[FICTICIO]**: el real sale del curso de Vicent. Plan: `docs/superpowers/plans/2026-11-15-sesion-4-tipo.md`.
 - **Reglas de Firestore desplegadas 14-nov** (producción == `firestore.rules`, verificado): alta limitada (nadie se hace admin ni entra en familia ajena), `categorias` pide sesión (HTTP 403 sin ella), `privileges` por familia y `privilegeHistory` append-only. Diseño y orden S0-S6: `docs/superpowers/specs/2026-11-13-arquitectura-front-back-design.md` §8.
-- Backend: `./mvnw test` verde sin Mongo (11 tests); la traza `ConnectException` del log es ruido, no fallo.
 - Plan coach: traspaso en `.opencode/plan/sesion-2026-10-17-coach-acuerdos.md` (**gitignored**: lleva contenido del método).
 - Iteración 0: ✅ `NOTICE.md` (`0b85f1f`); ⏳ limpieza de `categorias`. Iteración 1 empezada: ✅ `src/utils/perfilPadre.ts` + test (`d3b6fa4`, `aa27b1b`).
 - Riesgo declarado: `ChildView`/`RewardTracker`/`TaskManagement` sin tests propios.
@@ -32,8 +32,8 @@
 
 ## Próximos pasos
 
-1. **Sesión 4 (tipo)** del plan. Sesiones 2 y 3 ✅ (14-nov, probadas en local): token verificado; `Membresia` en Mongo (índice único) y `requireMember` en las 5 rutas de `task/` (404 entre familias); `POST /api/membresias/yo` la crea leyendo tu familia en Firestore con tu token; el front reintenta una vez si falta. Regla `familias delete:false` desplegada (15-nov). **Script de baja** (`npm run baja:familia`, ensayo por defecto; `docs/BAJA-DE-FAMILIA.md`): falta su ensayo real con `gcloud auth application-default login` sobre una familia de prueba. Deuda: cuentas anónimas sin restringir (antes de S5), sin revocación de membresías (invitaciones). Límites: `/child-view` sin sesión ya no ve tareas personalizadas (se retira en S6); `useUserRole` sigue en 4 componentes. Abiertos: `redeemPrivilege` no se llama desde la UI (los canjes no se registran); privilegios viejos sin `familyId` ya no se ven.
-2. AWS fase 1 ⏳: cuenta propia **Ready Set Build** (plan gratuito, 0 $, eu-north-1; `hello.cookyourweb` es miembro invitado, NO usuario IAM). AWS CLI instalado. **Bloqueado** hasta que AWS verifique la cuenta (≤2 días): después `aws login` (elegir la sesión existente) y CloudShell. Pendientes de la dueña: MFA, correo de recuperación y teléfono. **Nunca** "Plan de actualización". Detalle: engram `aws/cuenta-elegida`.
+1. **Contenido real del test de colores** (bloquea el adaptador de Firestore): la dueña recupera el curso de Vicent y escribe las afirmaciones; van en una colección **solo servidor** (NO `categorias`, legible por cualquiera con sesión); **antes** decidir el límite: con 10 peticiones a `POST /api/ia/tipo/perfil` se deduce qué afirmación apunta a qué color. Luego **sesión 5 (coach con IA)** sobre el chat guiado. Falta **"¿Olvidaste tu contraseña?"** en el login. Sesiones 2-3 ✅: token verificado, membresías y 404 entre familias. **Script de baja** (`npm run baja:familia`, ensayo por defecto; `docs/BAJA-DE-FAMILIA.md`): falta su ensayo real con `gcloud auth application-default login` sobre una familia de prueba. Deuda: cuentas anónimas sin restringir (antes de S5), sin revocación de membresías (invitaciones). Límites: `/child-view` sin sesión ya no ve tareas personalizadas (se retira en S6); `useUserRole` sigue en 4 componentes. Abiertos: `redeemPrivilege` no se llama desde la UI (los canjes no se registran); privilegios viejos sin `familyId` ya no se ven.
+2. AWS fase 1 ⏳: cuenta propia **Ready Set Build** (plan gratuito, 0 $, eu-north-1; la cuenta de la dueña es miembro invitado, NO usuario IAM). AWS CLI instalado. **Bloqueado** hasta que AWS verifique la cuenta (≤2 días): después `aws login` (elegir la sesión existente) y CloudShell. Pendientes de la dueña: MFA, correo de recuperación y teléfono. **Nunca** "Plan de actualización". Detalle: engram `aws/cuenta-elegida`.
 3. CI avisa deprecaciones: `actions/setup-java@v4`→v5 y acciones en Node 20; login sin `h1` y título "Vite + React + TS"; pantallas autenticadas sin auditar (falta usuario de prueba).
 4. Plan coach: limpieza de `categorias` (con OK de la dueña) y seguir iteración 1 (perfil del padre: cuestionario + guardado).
 5. Migrar dominios restantes a Java (`docs/MIGRACION-A-JAVA.md`) y rol admin (`docs/PENDIENTES-ADMIN.md`).
@@ -42,9 +42,9 @@
 
 | Fecha | Tema | Min |
 |---|---|---|
-| 2026-11-15 | Regla de familias desplegada; script de baja (RGPD) | 154 |
+| 2026-11-16 | Sesión 4 cerrada: chat guiado, foco accesible, revisión final | 290 |
+| 2026-11-15 | Script de baja (RGPD); sesión 4: perfil de colores | 434 |
 | 2026-11-14 | Sesiones 1-3: reglas, token verificado, membresías | 330 |
 | 2026-11-13 | AWS fase 1: plan gratuito, CLI; esperando la verificación | 104 |
-| 2026-11-12 | Push con CI verde, hook salvavidas arreglado, cuenta AWS propia | 37 |
 
-**Total: 10 sesiones · 1393 min** (la tabla muestra las 4 últimas; la cuenta verificable: `memoria/sesiones-teenage-points.json`)
+**Total: 11 sesiones · 1963 min** (la tabla muestra las 4 últimas; la cuenta verificable: `memoria/sesiones-teenage-points.json`)

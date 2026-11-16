@@ -324,6 +324,31 @@ la familia de la dueña, **sin recortar la seguridad**.
 sesión extra para subir `/api/me` a Lambda y **medir el arranque en frío**, primero
 sin trucos y después con SnapStart (§10).
 
+### Sesión 7: coach con LangGraph (Python), justo después de la demo
+
+**Por qué (dueña, 16-nov):** las ofertas piden Python con LangGraph, y el coach
+lo justifica de verdad. No es una sola llamada: es un flujo con pasos, estado y
+pausas para que decida una persona (conversar → proponer acuerdo → esperar el sí
+del adulto y del hijo → devolver el acuerdo). LangGraph da el grafo, la pausa con
+intervención humana y los *checkpoints* para seguir la conversación otro día.
+La sesión 5 sigue siendo una llamada directa: ahí un grafo no aporta nada.
+
+| Pieza | Decisión |
+|---|---|
+| Servicio | `coach/` en Python con LangGraph, **solo interno**: el navegador nunca lo llama |
+| Entrada | Java sigue siendo la única puerta: token, `requireMember` y topes de gasto, y luego llama al servicio |
+| Encaje | Un adaptador nuevo de `ModeloPort` (sesión 5) que habla con el servicio; el resto de Java no cambia |
+| Contenido del método | Lo lee Java de Firestore y lo manda en cada petición; Python **no toca Firestore** ni lo guarda |
+| Tareas | El grafo **no crea tareas**: devuelve el acuerdo y Java usa el `POST` que ya existe. Python no tiene credenciales |
+| Sí del hijo | 🔶 Hasta la cuenta del adolescente (S6 de después), el adulto marca que el hijo aceptó. Decisión técnica, la dueña la puede cambiar |
+| Estado | *Checkpoints* en Mongo 🔶 (comprobar que el conector oficial de LangGraph para Mongo sirve; si no, SQLite en local) |
+| Tests | `pytest` con un modelo falso: el grafo se prueba sin gastar en la API |
+| Despliegue | Primero en local; en AWS, Lambda de Python dentro de los 5 €/mes (cálculo antes de crear nada) |
+
+**Demo:** un adulto conversa con el coach, recibe un acuerdo, lo acepta, marca el
+sí del hijo, y aparece la tarea. Si vuelve al día siguiente, la conversación
+sigue donde quedó.
+
 ### Después de la demo
 
 | Slice | Qué |
@@ -333,7 +358,7 @@ sin trucos y después con SnapStart (§10).
 | **S6** Cuenta del adolescente | Invitación con QR (token largo); consentimiento según la edad; su zona; se retira `/child-view` |
 | Perfil privado | AES-256-GCM con la clave maestra en SSM y AAD = `uid` + versión. **Hasta que exista, ese dato no se guarda** |
 | Conflicto | Con el detector de riesgo, `SustitutorDeNombres` y mensajes fijos; **apagado hasta la revisión profesional** |
-| Chat del adolescente, coach, RAG | En ese orden |
+| Chat del adolescente, RAG | En ese orden (el coach pasó a la sesión 7) |
 
 ### Decidido: después (no se construye hasta que haga falta)
 

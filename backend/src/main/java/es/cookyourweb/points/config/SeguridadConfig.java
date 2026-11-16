@@ -5,7 +5,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,6 +19,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.util.Assert;
+
+import java.util.Map;
 
 /**
  * Quien puede llamar a la API: solo quien traiga un ID token de Firebase valido.
@@ -45,11 +50,26 @@ public class SeguridadConfig {
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        // /api/me si: el frontend pregunta quien es, aunque sea anonimo.
+                        .requestMatchers("/api/me").authenticated()
+                        // Una cuenta anonima la crea cualquiera sin pasar por la app: token
+                        // valido, pero no identifica a nadie. Fuera del resto de la API.
+                        .requestMatchers("/api/**").access((autenticacion, contexto) ->
+                                new AuthorizationDecision(esCuentaIdentificada(autenticacion.get())))
                         // Lo que no se ha abierto a proposito, cerrado.
                         .anyRequest().denyAll())
                 .oauth2ResourceServer(o -> o.jwt(Customizer.withDefaults()));
         return http.build();
+    }
+
+    // Firebase anida el proveedor dentro del claim "firebase". Sin ese claim no es
+    // anonima: los tokens anonimos de Firebase siempre lo traen.
+    static boolean esCuentaIdentificada(Authentication autenticacion) {
+        if (!(autenticacion instanceof JwtAuthenticationToken token)) {
+            return false;
+        }
+        Map<String, Object> firebase = token.getToken().getClaimAsMap("firebase");
+        return firebase == null || !"anonymous".equals(firebase.get("sign_in_provider"));
     }
 
     /**

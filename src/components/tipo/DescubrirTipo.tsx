@@ -52,6 +52,7 @@ const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreH
   const [errorElecciones, setErrorElecciones] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
   const [avisoLista, setAvisoLista] = useState(false);
+  const [errorPerfil, setErrorPerfil] = useState(false);
   const [ocupado, setOcupado] = useState(false);
 
   useEffect(() => {
@@ -91,12 +92,14 @@ const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreH
     const ultima = [...(preguntas?.afirmaciones ?? [])].reverse().find((a) => respuestas[a.id] !== undefined);
     if (!ultima) return;
     setError(null);
+    setErrorPerfil(false);
     const { [ultima.id]: _quitada, ...resto } = respuestas;
     setRespuestas(resto);
   };
 
   const verPerfil = async (enviadas: Record<string, Frecuencia>) => {
     setError(null);
+    setErrorPerfil(false);
     setOcupado(true);
     try {
       const p = await pedirPerfil(enviadas);
@@ -105,6 +108,7 @@ const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreH
       setPrincipal(null);
     } catch (e) {
       setError(mensaje(e));
+      setErrorPerfil(true);
     } finally {
       setOcupado(false);
     }
@@ -162,7 +166,7 @@ const DescubrirTipo: React.FC<DescubrirTipoProps> = ({ familyId, hijoId, nombreH
             respuestas={respuestas}
             ocupado={ocupado}
             terminado={!!perfil}
-            falloPerfil={!!error}
+            falloPerfil={errorPerfil}
             onResponder={responder}
             onCambiarAnterior={cambiarAnterior}
             onReintentar={() => void verPerfil(respuestas)}

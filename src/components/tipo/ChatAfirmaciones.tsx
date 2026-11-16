@@ -57,6 +57,19 @@ const ChatAfirmaciones: React.FC<ChatAfirmacionesProps> = ({
     botones.current?.querySelector<HTMLButtonElement>('button')?.focus();
   }, [respondidas]);
 
+  // Al responder la ultima, los botones de respuesta se desmontan y el foco
+  // caeria al body: se lleva al mensaje de espera y, si falla, a Reintentar.
+  const espera = useRef<HTMLParagraphElement>(null);
+  const acciones = useRef<HTMLDivElement>(null);
+  const esperando = completo && !terminado && ocupado;
+  const reintentable = falloPerfil && !ocupado && !terminado;
+  useEffect(() => {
+    if (esperando) espera.current?.focus();
+  }, [esperando]);
+  useEffect(() => {
+    if (reintentable) acciones.current?.querySelector<HTMLButtonElement>('button')?.focus();
+  }, [reintentable]);
+
   const responder = (id: string, valor: Frecuencia) => {
     moverFoco.current = true;
     onResponder(id, valor);
@@ -95,9 +108,11 @@ const ChatAfirmaciones: React.FC<ChatAfirmacionesProps> = ({
             <p>Ya tengo el perfil. Marca abajo los colores que reconoces.</p>
           </div>
         )}
-        {completo && !terminado && ocupado && (
+        {esperando && (
           <div className="max-w-[85%] rounded-lg bg-surface-sunken p-3 text-content">
-            <p>Preparando el perfil…</p>
+            <p ref={espera} tabIndex={-1}>
+              Preparando el perfil…
+            </p>
           </div>
         )}
       </div>
@@ -112,8 +127,10 @@ const ChatAfirmaciones: React.FC<ChatAfirmacionesProps> = ({
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        {falloPerfil && !ocupado && !terminado && <Button onClick={onReintentar}>Reintentar</Button>}
+      {/* Con la ultima respuesta los botones de respuesta se desmontan: por eso
+          mientras se pide el perfil solo "Cambiar la anterior" queda deshabilitado. */}
+      <div ref={acciones} className="flex flex-wrap gap-2">
+        {reintentable && <Button onClick={onReintentar}>Reintentar</Button>}
         {respondidas > 0 && !terminado && (
           <Button variant="ghost" disabled={ocupado} onClick={cambiar}>
             Cambiar la anterior

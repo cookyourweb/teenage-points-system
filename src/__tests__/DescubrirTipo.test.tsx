@@ -136,6 +136,29 @@ describe('DescubrirTipo', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
+  it('alTerminarElFocoVaAlMensajeDeEspera', async () => {
+    const user = userEvent.setup();
+    vi.mocked(coach.pedirPerfil).mockReturnValue(new Promise(() => {}));
+    pintar();
+    await responderTodo(user);
+
+    expect(await screen.findByText('Preparando el perfil…')).toHaveFocus();
+  });
+
+  it('siFallaElPerfilElFocoVaAReintentarYVuelveTrasOtroFallo', async () => {
+    const user = userEvent.setup();
+    vi.mocked(coach.pedirPerfil).mockRejectedValue(new TypeError('Failed to fetch'));
+    pintar();
+    await responderTodo(user);
+
+    const reintentar = await screen.findByRole('button', { name: 'Reintentar' });
+    await waitFor(() => expect(reintentar).toHaveFocus());
+
+    await user.click(reintentar);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Reintentar' })).toHaveFocus());
+    expect(coach.pedirPerfil).toHaveBeenCalledTimes(2);
+  });
+
   it('mientrasSePideElPerfilNoSePuedeCambiarNada', async () => {
     const user = userEvent.setup();
     vi.mocked(coach.pedirPerfil).mockReturnValue(new Promise(() => {}));

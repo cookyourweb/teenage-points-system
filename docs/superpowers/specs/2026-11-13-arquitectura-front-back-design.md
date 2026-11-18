@@ -402,8 +402,9 @@ con S4), clave por persona con HKDF y rotación, códigos cortos del adolescente
    consentimiento explícito de ese adulto, que pueda apagar. Si no, la IA no lo
    lee y el momento del conflicto pierde contexto.
 2. **¿Cómo entra un adolescente sin email** (muchos menores de 14 no tienen)?
-   Opciones: un adulto le crea la cuenta, o entra de forma anónima con el código y
-   después vincula un email.
+   Opción que queda: un adulto le crea la cuenta. La de entrar de forma anónima con
+   el código y vincular un email después se cerró el 16-nov: la API da 403 a una
+   cuenta anónima fuera de `/api/me`, y las reglas no la cuentan como sesión.
 3. **Reglas de los puntos:** ¿se reinician cada semana? ¿puede un canje dejar el
    saldo en negativo?
 4. **¿Quién puede quitar a un adulto de la familia,** y qué pasa si uno intenta
@@ -445,7 +446,8 @@ lo viejo de golpe); `vitest-axe`.
 - **Autenticación:** el decodificador usa el JWKS de Firebase **solo con RS256**,
   y valida `iss`, `aud` y que `sub` no esté vacío. El código recibe también
   `sign_in_provider` y `email_verified`. Una cuenta **anónima** no tiene ningún
-  privilegio salvo canjear una invitación válida.
+  privilegio: la API le responde 403 fuera de `/api/me` (16-nov), así que tampoco
+  canjea invitaciones.
 - **404 entre familias, 403 por papel dentro de la misma familia.** Una sola
   función `requireMember(uid, familyId)` para todos los controladores. Un test
   recorre todas las rutas con una segunda cuenta.

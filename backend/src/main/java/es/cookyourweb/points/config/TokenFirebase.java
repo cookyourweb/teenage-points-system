@@ -8,6 +8,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
 import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 
+import java.util.Map;
+
 /**
  * Las reglas que Firebase documenta para aceptar un ID token, sin el Admin SDK.
  *
@@ -42,7 +44,8 @@ public final class TokenFirebase {
                 new JwtTimestampValidator(),
                 new JwtIssuerValidator(emisor(proyecto)),
                 audienciaEs(proyecto),
-                subNoVacio());
+                subNoVacio(),
+                conProveedor());
     }
 
     private static OAuth2TokenValidator<Jwt> audienciaEs(String proyecto) {
@@ -55,6 +58,18 @@ public final class TokenFirebase {
         return token -> token.getSubject() != null && !token.getSubject().isBlank()
                 ? OAuth2TokenValidatorResult.success()
                 : fallo("El token no trae sub");
+    }
+
+    // Firebase siempre anida el proveedor en el claim "firebase". Sin el, no se sabe si
+    // la cuenta es anonima: se rechaza aqui para que SeguridadConfig nunca lo adivine.
+    private static OAuth2TokenValidator<Jwt> conProveedor() {
+        return token -> {
+            Map<String, Object> firebase = token.getClaimAsMap("firebase");
+            Object proveedor = firebase == null ? null : firebase.get("sign_in_provider");
+            return proveedor instanceof String texto && !texto.isBlank()
+                    ? OAuth2TokenValidatorResult.success()
+                    : fallo("El token no trae firebase.sign_in_provider");
+        };
     }
 
     private static OAuth2TokenValidatorResult fallo(String descripcion) {

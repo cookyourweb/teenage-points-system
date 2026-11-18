@@ -62,8 +62,9 @@ public class SeguridadConfig {
         return http.build();
     }
 
-    // Firebase anida el proveedor dentro del claim "firebase". Sin ese claim no es
-    // anonima: los tokens anonimos de Firebase siempre lo traen.
+    // Firebase anida el proveedor dentro del claim "firebase". Un token real sin el
+    // no llega aqui: TokenFirebase lo rechaza al decodificar (401). Este null solo lo
+    // ven los tests de MVC, que se saltan el decodificador.
     static boolean esCuentaIdentificada(Authentication autenticacion) {
         if (!(autenticacion instanceof JwtAuthenticationToken token)) {
             return false;

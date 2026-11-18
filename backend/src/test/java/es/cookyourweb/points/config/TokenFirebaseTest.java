@@ -23,6 +23,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -65,6 +66,7 @@ class TokenFirebaseTest {
                 .issuer(ISS_BUENO)
                 .audience(PROYECTO)
                 .subject("uid-1")
+                .claim("firebase", Map.of("sign_in_provider", "password"))
                 .issueTime(Date.from(Instant.now().minusSeconds(60)))
                 .expirationTime(Date.from(Instant.now().plusSeconds(3600)));
     }
@@ -132,6 +134,34 @@ class TokenFirebaseTest {
     @DisplayName("un token con sub vacio se rechaza")
     void subVacioFalla() throws Exception {
         String token = firmar(claimsValidos().subject("").build(), claves);
+
+        assertThatThrownBy(() -> decodificador.decode(token)).isInstanceOf(JwtException.class);
+    }
+
+    // Firebase siempre pone el proveedor en el token. Si falta, no sabemos si es
+    // anonima: se rechaza aqui, y la regla de "anonima fuera" nunca ve un hueco.
+    @Test
+    @DisplayName("un token sin el claim firebase se rechaza")
+    void sinClaimFirebaseFalla() throws Exception {
+        String token = firmar(claimsValidos().claim("firebase", null).build(), claves);
+
+        assertThatThrownBy(() -> decodificador.decode(token)).isInstanceOf(JwtException.class);
+    }
+
+    @Test
+    @DisplayName("un token con el claim firebase pero sin sign_in_provider se rechaza")
+    void sinProveedorFalla() throws Exception {
+        String token = firmar(claimsValidos()
+                .claim("firebase", Map.of("identities", Map.of())).build(), claves);
+
+        assertThatThrownBy(() -> decodificador.decode(token)).isInstanceOf(JwtException.class);
+    }
+
+    @Test
+    @DisplayName("un token con sign_in_provider vacio se rechaza")
+    void proveedorVacioFalla() throws Exception {
+        String token = firmar(claimsValidos()
+                .claim("firebase", Map.of("sign_in_provider", " ")).build(), claves);
 
         assertThatThrownBy(() -> decodificador.decode(token)).isInstanceOf(JwtException.class);
     }

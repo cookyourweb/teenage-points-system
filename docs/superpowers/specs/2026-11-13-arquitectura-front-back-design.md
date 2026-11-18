@@ -324,6 +324,32 @@ la familia de la dueña, **sin recortar la seguridad**.
 sesión extra para subir `/api/me` a Lambda y **medir el arranque en frío**, primero
 sin trucos y después con SnapStart (§10).
 
+### Antes de la sesión 5: deberes con fecha e "Importar deberes"
+
+Va después de "¿Olvidaste tu contraseña?" y antes de la sesión 5 (dueña, 18-nov).
+Calculado en 1-2 sesiones.
+
+**Por qué (dueña, 18-nov):** a un adolescente se le pasan los deberes, y cargarlos
+a mano no escala. Prueba del 18-nov: Claude in Chrome leyó Classroom con una
+sesión con acceso a las clases y armó una agenda con fechas, enlaces y códigos QR.
+Falta el último paso: que esa lista entre en la app como tareas que dan puntos.
+La API de Classroom no sirve sin el permiso del colegio, porque para menores el
+administrador tiene que habilitar la app.
+
+| Pieza | Decisión |
+|---|---|
+| Deber | Una tarea de **una sola vez**, con asignatura, fecha límite y enlace opcional. Al confirmarla, se archiva (`isActive=false`) |
+| Modelo | 🔶 Se decide en el diseño: ampliar `Task` con campos opcionales y un `TaskType` nuevo, o un tipo aparte. Ampliar `Task` choca con "`Task.java` intocable", que se decidió para el coach |
+| Importar | Una pantalla donde el adulto pega la lista que le da Chrome. La app la convierte en propuestas, y el adulto acepta, edita o descarta cada una. Se crean con el `POST` que ya existe |
+| Formato | Una línea fija por deber (asignatura · tarea · fecha · enlace), que se le pide a Chrome. El *parser* es una función pura, con TDD |
+| Enlaces | Solo `https://`. Nada de `javascript:` ni otros esquemas: el texto pegado es de fuera |
+| Puntos | Los pone el adulto. La sugerencia son bloques cortos de 5 puntos, porque si cuesta mantener la atención, el premio tiene que llegar en cada paso |
+| Fuera | Ni API de Google, ni OAuth, ni credenciales guardadas, ni scraping desde el servidor. La lectura de Classroom la hace el adulto con Claude in Chrome |
+| Privacidad | Datos escolares de un menor: se guarda solo lo que el adulto acepta, sin nombres de profesores |
+
+**Demo:** el adulto pega la lista de la semana, acepta 8 deberes y los ve en la
+semana ordenados por fecha. El hijo marca uno, el adulto lo confirma y suma puntos.
+
 ### Sesión 7: coach con LangGraph (Python), justo después de la demo
 
 **Por qué (dueña, 16-nov):** las ofertas piden Python con LangGraph, y el coach

@@ -343,6 +343,7 @@ administrador tiene que habilitar la app.
 | Importar | Una pantalla donde el adulto pega la lista que le da Chrome. La app la convierte en propuestas, y el adulto acepta, edita o descarta cada una. Se crean con el `POST` que ya existe |
 | Formato | Una línea fija por deber (asignatura · tarea · fecha · enlace), que se le pide a Chrome. El *parser* es una función pura, con TDD |
 | Enlaces | Solo `https://`. Nada de `javascript:` ni otros esquemas: el texto pegado es de fuera |
+| Enlace de cada deber | Cada deber lleva **su propio enlace**: la tarea o la ficha exacta de Classroom, sacada de la lista que copia Chrome. Nunca la portada genérica. El prototipo usa `https://classroom.google.com/` en todos los deberes a propósito, para no meter datos reales; en la app eso cuenta como un enlace que falta (dueña, 18-nov) |
 | Puntos | Los pone el adulto. La sugerencia son bloques cortos de 5 puntos, porque si cuesta mantener la atención, el premio tiene que llegar en cada paso |
 | Fuera | Ni API de Google, ni OAuth, ni credenciales guardadas, ni scraping desde el servidor. La lectura de Classroom la hace el adulto con Claude in Chrome |
 | Privacidad | Datos escolares de un menor: se guarda solo lo que el adulto acepta, sin nombres de profesores |

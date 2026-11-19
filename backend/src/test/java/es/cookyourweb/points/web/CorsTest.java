@@ -93,6 +93,19 @@ class CorsTest {
     }
 
     @Test
+    @DisplayName("la respuesta real expone Retry-After: sin eso el frontend lee null en un 429")
+    void exponeRetryAfter() throws Exception {
+        // Retry-After no es una cabecera CORS "segura": si no se expone, el navegador la
+        // esconde a fetch() aunque el servidor la mande.
+        mockMvc.perform(get("/api/tasks")
+                        .param("familyId", "familia-1")
+                        .with(jwt())
+                        .header("Origin", ORIGEN_DEL_FRONTEND))
+                .andExpect(header().string("Access-Control-Expose-Headers",
+                        org.hamcrest.Matchers.containsStringIgnoringCase("Retry-After")));
+    }
+
+    @Test
     @DisplayName("un origen que no es el frontend no recibe permiso")
     void origenDesconocidoRechazado() throws Exception {
         // Abrir CORS a "*" seria lo comodo, pero esta API va a llevar autenticacion

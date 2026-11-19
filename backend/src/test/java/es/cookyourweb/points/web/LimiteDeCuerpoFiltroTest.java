@@ -39,6 +39,49 @@ class LimiteDeCuerpoFiltroTest {
     }
 
     @Test
+    @DisplayName("sin Content-Length, leer mas de 16 KB por getReader() tambien se corta")
+    void getReaderTambienSeCorta() {
+        MockHttpServletRequest peticion = sinLongitud();
+        peticion.setContent(new byte[LimiteDeCuerpoFiltro.MAX_BYTES + 1]);
+
+        assertThatThrownBy(() -> new LimiteDeCuerpoFiltro().doFilter(peticion, new MockHttpServletResponse(),
+                (req, res) -> {
+                    java.io.BufferedReader lector = req.getReader();
+                    while (lector.read() != -1) {
+                        // leer hasta el final
+                    }
+                }))
+                .isInstanceOf(CuerpoDemasiadoGrandeException.class);
+    }
+
+    @Test
+    @DisplayName("sin Content-Length, exactamente 16 384 bytes pasan: el tope es 'mas de', no 'desde'")
+    void fronteraExactaPasa() throws Exception {
+        MockHttpServletRequest peticion = sinLongitud();
+        peticion.setContent(new byte[LimiteDeCuerpoFiltro.MAX_BYTES]);
+        int[] leidos = {0};
+
+        new LimiteDeCuerpoFiltro().doFilter(peticion, new MockHttpServletResponse(),
+                (req, res) -> leidos[0] = req.getInputStream().readAllBytes().length);
+
+        assertThat(leidos[0]).isEqualTo(16_384);
+    }
+
+    private static MockHttpServletRequest sinLongitud() {
+        return new MockHttpServletRequest("POST", "/api/tasks") {
+            @Override
+            public long getContentLengthLong() {
+                return -1;
+            }
+
+            @Override
+            public int getContentLength() {
+                return -1;
+            }
+        };
+    }
+
+    @Test
     @DisplayName("un fallo de lectura causado por el tope se responde 413, no 400")
     void lecturaCortadaDa413() {
         HttpMessageNotReadableException e = new HttpMessageNotReadableException("I/O error",

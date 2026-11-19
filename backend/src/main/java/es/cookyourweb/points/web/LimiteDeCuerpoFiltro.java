@@ -12,7 +12,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -65,6 +68,17 @@ public class LimiteDeCuerpoFiltro extends OncePerRequestFilter {
                 limitado = new FlujoLimitado(super.getInputStream());
             }
             return limitado;
+        }
+
+        /**
+         * getReader() tambien pasa por el flujo limitado: si no, un lector de texto (un
+         * conversor, un parser de formularios) se saltaria el tope leyendo por aqui.
+         */
+        @Override
+        public BufferedReader getReader() throws IOException {
+            String codificacion = getCharacterEncoding();
+            Charset juego = codificacion == null ? StandardCharsets.UTF_8 : Charset.forName(codificacion);
+            return new BufferedReader(new InputStreamReader(getInputStream(), juego));
         }
     }
 

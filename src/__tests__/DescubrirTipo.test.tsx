@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import DescubrirTipo from '../components/tipo/DescubrirTipo';
 import * as coach from '../services/coachService';
-import { ErrorHttp } from '../services/http';
+import { ErrorHttp, mensajeDemasiadasPeticiones } from '../services/http';
 
 vi.mock('../services/coachService');
 vi.mock('../firebase', () => ({ auth: {}, db: {} }));
@@ -302,6 +302,20 @@ describe('DescubrirTipo', () => {
     await responderTodo(user);
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Faltan respuestas');
+  });
+
+  it('un429MuestraCuandoReintentar', async () => {
+    const user = userEvent.setup();
+    vi.mocked(coach.pedirPerfil).mockRejectedValue(
+      new ErrorHttp(429, mensajeDemasiadasPeticiones(300), 'Demasiadas peticiones', 300),
+    );
+    pintar();
+    await responderTodo(user);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Has hecho muchos intentos seguidos. Vuelve a intentarlo en 5 minutos.',
+    );
+    expect(coach.pedirPerfil).toHaveBeenCalledTimes(1);
   });
 
   it('guardarConfirmaYSiFallaElRefrescoNoEsUnError', async () => {

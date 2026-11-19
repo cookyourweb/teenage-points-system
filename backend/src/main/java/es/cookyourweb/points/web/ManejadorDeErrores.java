@@ -173,12 +173,29 @@ public class ManejadorDeErrores {
         return p;
     }
 
-    /** JSON ilegible (p. ej. una frecuencia que no existe): 400 generico, sin eco del cuerpo. */
+    /**
+     * JSON ilegible (p. ej. una frecuencia que no existe): 400 generico, sin eco del cuerpo.
+     * Salvo que la lectura la cortara el tope de LimiteDeCuerpoFiltro (cuerpo chunked sin
+     * Content-Length): Spring lo envuelve como fallo de lectura, pero es un 413.
+     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail cuerpoIlegible(HttpMessageNotReadableException e) {
+        for (Throwable c = e.getCause(); c != null; c = c.getCause()) {
+            if (c instanceof CuerpoDemasiadoGrandeException) {
+                return cuerpoDemasiadoGrande();
+            }
+        }
         ProblemDetail p = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST, "el cuerpo de la peticion no se pudo leer");
         p.setTitle("Peticion invalida");
+        return p;
+    }
+
+    /** Mismo texto que el 413 que escribe LimiteDeCuerpoFiltro cuando hay Content-Length. */
+    private static ProblemDetail cuerpoDemasiadoGrande() {
+        ProblemDetail p = ProblemDetail.forStatusAndDetail(
+                HttpStatus.PAYLOAD_TOO_LARGE, "el cuerpo de la peticion supera 16 KB");
+        p.setTitle("Cuerpo demasiado grande");
         return p;
     }
 }

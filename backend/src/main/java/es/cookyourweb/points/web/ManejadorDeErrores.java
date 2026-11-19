@@ -7,8 +7,10 @@ import es.cookyourweb.points.ia.RespuestasInvalidasException;
 import es.cookyourweb.points.task.TaskNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -189,6 +191,17 @@ public class ManejadorDeErrores {
                 HttpStatus.BAD_REQUEST, "el cuerpo de la peticion no se pudo leer");
         p.setTitle("Peticion invalida");
         return p;
+    }
+
+    /** 429 con Retry-After (segundos): el cliente sabe cuando reintentar sin martillear. */
+    @ExceptionHandler(DemasiadasPeticionesException.class)
+    public ResponseEntity<ProblemDetail> demasiadasPeticiones(DemasiadasPeticionesException e) {
+        ProblemDetail p = ProblemDetail.forStatusAndDetail(
+                HttpStatus.TOO_MANY_REQUESTS, "has hecho demasiadas peticiones seguidas; espera un poco");
+        p.setTitle("Demasiadas peticiones");
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(e.segundos()))
+                .body(p);
     }
 
     /** Mismo texto que el 413 que escribe LimiteDeCuerpoFiltro cuando hay Content-Length. */

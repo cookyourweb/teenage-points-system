@@ -12,7 +12,7 @@ Código en `es.cookyourweb.points`, organizado por feature:
 
 - `./mvnw spring-boot:run` — API en http://localhost:8080 (puerto por defecto;
   `application.properties` no hay override).
-- `./mvnw --batch-mode test` — 122 tests (15-nov-2026). `PropiedadIntegracionTest`
+- `./mvnw --batch-mode test` — 144 tests (19-nov-2026). `PropiedadIntegracionTest`
   necesita **Docker** (Testcontainers levanta su propio Mongo); el resto pasa sin
   Mongo levantado. Con la conexión caida el log escupe una traza `ConnectException`
   del monitor de conexión de Mongo: es ruido conocido, no un fallo del test.
@@ -43,6 +43,16 @@ Mongo se levanta con Docker (`docker start mongo-points`, el 27017; ver
   (RFC 7807). No captures excepciones dentro del controller ni inventes códigos.
 - JSON de salida camelCase y SIN campos nulos (`non_null`): el frontend ya
   recibe esa forma. No traduzcas campos en el controller.
+- **Errores sin fuga (CWE-209)**: nunca devolver `e.getMessage()` de algo que pueda venir de
+  una libreria. Lo inesperado sale generico con `idError` y el detalle va al log con ese id.
+  El catch-all de `ManejadorDeErrores` relanza las excepciones del framework (`ErrorResponse`,
+  seguridad...) para no convertir un 400/404/405/401/403 en 500.
+- **Topes de entrada (CWE-770)**: `@Size` en cada DTO (nombre 50 y description 200 = los
+  `maxLength` del formulario) y cuerpo maximo 16 KB → 413 (`web/LimiteDeCuerpoFiltro`).
+- **Tope de peticiones (CWE-799)**: POST/PUT en `/api/ia/**`, 5 cada 10 min por `sub` → 429
+  con `Retry-After` (`config/LimiteIaConfig`). En memoria = por instancia: en Lambda con N
+  instancias el tope real es N×5. `LimiteIaConfig` NO es `WebMvcConfigurer` a proposito
+  (`@WebMvcTest` lo cargaria en cada test y pediria un `Clock`).
 - CORS solo desde `http://localhost:5173`, configurable vía
   `app.cors.origenes-permitidos`; el preflight lo vigila el test `CorsTest`.
   El frontend Vite es `strictPort` por diseño (falla si el 5173 está ocupado

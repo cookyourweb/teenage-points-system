@@ -16,14 +16,38 @@ export class ErrorHttp extends Error {
   status: number;
   /** El "title" del ProblemDetail, si lo hubo: identifica el tipo de error (ej. "Familia no encontrada"). */
   titulo?: string;
+  /** Segundos que pide esperar la cabecera Retry-After (solo en un 429 que la traiga bien formada). */
+  reintentarEnSegundos?: number;
 
-  constructor(status: number, message: string, titulo?: string) {
+  constructor(status: number, message: string, titulo?: string, reintentarEnSegundos?: number) {
     super(message);
     this.name = 'ErrorHttp';
     this.status = status;
     this.titulo = titulo;
+    this.reintentarEnSegundos = reintentarEnSegundos;
   }
 }
+
+/**
+ * El texto para el usuario cuando la API dice 429 (demasiadas peticiones).
+ *
+ * Es el UNICO sitio que lo redacta, para que cualquier pantalla diga lo mismo.
+ * Los minutos se redondean hacia arriba (61 s son 2 min, no 1: avisar de menos
+ * llevaria a otro 429) y como minimo 1. Sin segundos validos no se inventa
+ * ningun numero.
+ */
+export const mensajeDemasiadasPeticiones = (segundos?: number): string => {
+  if (segundos === undefined) return 'Has hecho muchos intentos seguidos. Vuelve a intentarlo en unos minutos.';
+  const minutos = Math.max(1, Math.ceil(segundos / 60));
+  return `Has hecho muchos intentos seguidos. Vuelve a intentarlo en ${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}.`;
+};
+
+/** Retry-After en segundos enteros positivos; una fecha HTTP o basura se ignora. */
+const segundosDeRetryAfter = (valor: string | null): number | undefined => {
+  if (valor === null || !/^\d+$/.test(valor.trim())) return undefined;
+  const segundos = Number(valor.trim());
+  return segundos > 0 ? segundos : undefined;
+};
 
 /**
  * Convierte una respuesta con error en un ErrorHttp con el motivo de verdad.
@@ -41,6 +65,19 @@ export class ErrorHttp extends Error {
  */
 const errorDesde = async (respuesta: Response): Promise<ErrorHttp> => {
   const cuerpo = await respuesta.text();
+
+  // El 429 no usa el detail del servidor: el usuario necesita saber cuando
+  // volver, y eso solo lo dice Retry-After.
+  if (respuesta.status === 429) {
+    const segundos = segundosDeRetryAfter(respuesta.headers.get('Retry-After'));
+    let titulo: string | undefined;
+    try {
+      titulo = JSON.parse(cuerpo).title;
+    } catch {
+      // Sin cuerpo JSON no pasa nada: el titulo es opcional.
+    }
+    return new ErrorHttp(429, mensajeDemasiadasPeticiones(segundos), titulo, segundos);
+  }
 
   try {
     const problema = JSON.parse(cuerpo);

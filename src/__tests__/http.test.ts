@@ -102,4 +102,53 @@ describe('apiFetch', () => {
 
     expect(await apiFetch('/api/x', { method: 'DELETE' })).toBeUndefined();
   });
+
+  describe('429 demasiadas peticiones', () => {
+    const limitado = (retryAfter?: string) =>
+      new Response(
+        JSON.stringify({ title: 'Demasiadas peticiones', detail: 'has hecho demasiadas peticiones seguidas; espera un poco' }),
+        {
+          status: 429,
+          headers: { 'Content-Type': 'application/json', ...(retryAfter ? { 'Retry-After': retryAfter } : {}) },
+        },
+      );
+
+    const falla429 = async (retryAfter?: string) => {
+      getIdToken.mockResolvedValue('tok');
+      fetchSimulado.mockImplementation(async () => limitado(retryAfter));
+      return apiFetch('/api/ia/perfil', { method: 'POST' }).catch((e) => e);
+    };
+
+    it('lee Retry-After y dice cuantos minutos esperar', async () => {
+      const fallo = await falla429('300');
+
+      expect(fallo).toBeInstanceOf(ErrorHttp);
+      expect(fallo.status).toBe(429);
+      expect(fallo.reintentarEnSegundos).toBe(300);
+      expect(fallo.message).toContain('5 minutos');
+    });
+
+    it('redondea hacia arriba y usa el singular', async () => {
+      expect((await falla429('61')).message).toContain('2 minutos');
+      const uno = await falla429('30');
+      expect(uno.message).toContain('1 minuto.');
+      expect(uno.message).not.toContain('1 minutos');
+    });
+
+    it.each([undefined, 'abc', '0', '-5', '1.5', 'Wed, 21 Oct 2026 07:28:00 GMT'])(
+      'sin Retry-After valido (%s) no inventa el numero',
+      async (cabecera) => {
+        const fallo = await falla429(cabecera);
+
+        expect(fallo.reintentarEnSegundos).toBeUndefined();
+        expect(fallo.message).toContain('unos minutos');
+      },
+    );
+
+    it('no reintenta solo: fetch se llama una vez', async () => {
+      await falla429('300');
+
+      expect(fetchSimulado).toHaveBeenCalledTimes(1);
+    });
+  });
 });

@@ -16,10 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -27,6 +30,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -103,6 +107,50 @@ class LimitesDeEntradaTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.campos.respuestas").exists());
         verifyNoInteractions(tipos);
+    }
+
+    @Test
+    @DisplayName("un cuerpo chunked (sin Content-Length) de mas de 16 KB da 413 de punta a punta, no 400")
+    void cuerpoChunkedEnormeDa413() throws Exception {
+        mockMvc.perform(post("/api/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(tarea("n", "f1", "d".repeat(17 * 1024)))
+                        .with(LimitesDeEntradaTest::sinContentLength)
+                        .with(jwt().jwt(j -> j.subject("uid-1"))))
+                .andExpect(status().isPayloadTooLarge())
+                .andExpect(jsonPath("$.title").value("Cuerpo demasiado grande"));
+        verifyNoInteractions(tareas);
+    }
+
+    /** Copia la peticion en una que dice no saber su longitud, como una chunked real. */
+    private static MockHttpServletRequest sinContentLength(MockHttpServletRequest original) {
+        MockHttpServletRequest copia = new MockHttpServletRequest(
+                original.getServletContext(), original.getMethod(), original.getRequestURI()) {
+            @Override
+            public long getContentLengthLong() {
+                return -1;
+            }
+
+            @Override
+            public int getContentLength() {
+                return -1;
+            }
+        };
+        copia.setContextPath(original.getContextPath());
+        copia.setServletPath(original.getServletPath());
+        copia.setPathInfo(original.getPathInfo());
+        copia.setContentType(original.getContentType());
+        copia.setCharacterEncoding(original.getCharacterEncoding());
+        copia.setContent(original.getContentAsByteArray());
+        for (String nombre : java.util.Collections.list(original.getHeaderNames())) {
+            if (!"Content-Length".equalsIgnoreCase(nombre)) {
+                copia.addHeader(nombre, original.getHeader(nombre));
+            }
+        }
+        for (String nombre : java.util.Collections.list(original.getAttributeNames())) {
+            copia.setAttribute(nombre, original.getAttribute(nombre));
+        }
+        return copia;
     }
 
     @Test

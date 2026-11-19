@@ -36,19 +36,28 @@ class LimitadorPorUsuarioTest {
     }
 
     @Test
-    @DisplayName("con muchas claves, las ventanas caducadas se barren: la memoria no crece sin fin")
+    @DisplayName("con muchas claves se barren SOLO las caducadas: una ventana activa conserva su cuenta")
     void barreCaducadas() {
         RelojMovil reloj = new RelojMovil();
         LimitadorPorUsuario limitador = new LimitadorPorUsuario(reloj, 5, Duration.ofMinutes(10));
-        for (int i = 0; i < LimitadorPorUsuario.BARRER_DESDE; i++) {
+        for (int i = 0; i < LimitadorPorUsuario.BARRER_DESDE - 1; i++) {
             limitador.intentar("uid-" + i);
+        }
+        // Una clave activa que abre su ventana mas tarde y ya gasto 3 de 5.
+        reloj.ahora = T0.plus(Duration.ofMinutes(9));
+        for (int i = 0; i < 3; i++) {
+            limitador.intentar("uid-activa");
         }
         assertThat(limitador.claves()).isEqualTo(LimitadorPorUsuario.BARRER_DESDE);
 
         reloj.ahora = T0.plus(Duration.ofMinutes(10));
         limitador.intentar("uid-nuevo");
 
-        assertThat(limitador.claves()).isEqualTo(1);
+        // Barrer todo (clear) seria un bypass: reiniciaria el cupo de quien lo esta gastando.
+        assertThat(limitador.claves()).isEqualTo(2);
+        assertThat(limitador.intentar("uid-activa")).isEmpty();
+        assertThat(limitador.intentar("uid-activa")).isEmpty();
+        assertThat(limitador.intentar("uid-activa")).isPresent();
     }
 
     @Test

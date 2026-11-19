@@ -12,7 +12,7 @@ Código en `es.cookyourweb.points`, organizado por feature:
 
 - `./mvnw spring-boot:run` — API en http://localhost:8080 (puerto por defecto;
   `application.properties` no hay override).
-- `./mvnw --batch-mode test` — 144 tests (19-nov-2026). `PropiedadIntegracionTest`
+- `./mvnw --batch-mode test` — 153 tests (19-nov-2026). `PropiedadIntegracionTest`
   necesita **Docker** (Testcontainers levanta su propio Mongo); el resto pasa sin
   Mongo levantado. Con la conexión caida el log escupe una traza `ConnectException`
   del monitor de conexión de Mongo: es ruido conocido, no un fallo del test.
@@ -49,6 +49,10 @@ Mongo se levanta con Docker (`docker start mongo-points`, el 27017; ver
   seguridad...) para no convertir un 400/404/405/401/403 en 500.
 - **Topes de entrada (CWE-770)**: `@Size` en cada DTO (nombre 50 y description 200 = los
   `maxLength` del formulario) y cuerpo maximo 16 KB → 413 (`web/LimiteDeCuerpoFiltro`).
+  `FormContentFilter` y multipart estan APAGADOS en `application.properties`: corrian antes
+  de la seguridad y leian el cuerpo entero sin tope. Ningun endpoint usa formularios ni
+  subidas; si alguno los necesita, hay que volver a acotar esa lectura.
+- `Retry-After` va en `exposedHeaders` de `CorsConfig`; sin eso el frontend lee null.
 - **Tope de peticiones (CWE-799)**: POST/PUT en `/api/ia/**`, 5 cada 10 min por `sub` → 429
   con `Retry-After` (`config/LimiteIaConfig`). En memoria = por instancia: en Lambda con N
   instancias el tope real es N×5. `LimiteIaConfig` NO es `WebMvcConfigurer` a proposito

@@ -154,6 +154,24 @@ class LimitesDeEntradaTest {
     }
 
     @Test
+    @DisplayName("los nombres de campo del 400 no devuelven las claves que mando el cliente")
+    void camposNoHacenEcoDeClavesDelCliente() throws Exception {
+        StringBuilder sb = new StringBuilder("{\"respuestas\":{");
+        for (int i = 0; i < 30; i++) {
+            sb.append(i == 0 ? "" : ",").append("\"eco-del-cliente-").append("z".repeat(40)).append(i)
+                    .append("\":\"NUNCA\"");
+        }
+        sb.append("}}");
+
+        mockMvc.perform(post("/api/ia/tipo/perfil").with(jwt())
+                        .contentType(MediaType.APPLICATION_JSON).content(sb.toString()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.respuestas").exists())
+                .andExpect(content().string(not(containsString("eco-del-cliente"))));
+        verifyNoInteractions(tipos);
+    }
+
+    @Test
     @DisplayName("una eleccion con mas de 10 colores o un principal de 33 caracteres da 400 sin llegar al servicio")
     void eleccionPasadaDeLimitesDa400() throws Exception {
         mockMvc.perform(put("/api/familias/f1/hijos/h1/tipo").with(jwt().jwt(j -> j.subject("uid-1")))

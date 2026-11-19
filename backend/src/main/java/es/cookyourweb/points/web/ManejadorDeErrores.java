@@ -83,19 +83,36 @@ public class ManejadorDeErrores {
         return p;
     }
 
+    /**
+     * 400 con {campo: motivo}, con el mismo tope de MAX_CAMPOS que los otros dos.
+     * El nombre se corta en el primer '[' o '<': en un Map o una lista, Spring pone ahi la
+     * clave o el indice ("respuestas<K>[clave-del-cliente]"), y eso seria devolver texto
+     * que escribio el cliente. Queda solo el nombre del campo, que es nuestro.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail datosInvalidos(MethodArgumentNotValidException e) {
         Map<String, String> porCampo = e.getBindingResult().getFieldErrors().stream()
                 .collect(Collectors.toMap(
-                        f -> f.getField(),
+                        f -> nombreDeCampo(f.getField()),
                         f -> f.getDefaultMessage() == null ? "valor invalido" : f.getDefaultMessage(),
                         (primero, segundo) -> primero));
 
         ProblemDetail p = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST, "hay campos que no cumplen las reglas");
         p.setTitle("Datos invalidos");
-        p.setProperty("campos", porCampo);
+        p.setProperty("campos", limitar(porCampo));
         return p;
+    }
+
+    private static String nombreDeCampo(String ruta) {
+        int corte = ruta.length();
+        for (char c : new char[]{'[', '<'}) {
+            int i = ruta.indexOf(c);
+            if (i >= 0 && i < corte) {
+                corte = i;
+            }
+        }
+        return ruta.substring(0, corte);
     }
 
     /**

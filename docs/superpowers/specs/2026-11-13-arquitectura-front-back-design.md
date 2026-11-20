@@ -344,7 +344,12 @@ administrador tiene que habilitar la app.
 | Formato | Una línea fija por deber (asignatura · tarea · fecha · enlace), que se le pide a Chrome. El *parser* es una función pura, con TDD |
 | Enlaces | Solo `https://`. Nada de `javascript:` ni otros esquemas: el texto pegado es de fuera |
 | Enlace de cada deber | Cada deber lleva **su propio enlace**: la tarea o la ficha exacta de Classroom, sacada de la lista que copia Chrome. Nunca la portada genérica. El prototipo usa `https://classroom.google.com/` en todos los deberes a propósito, para no meter datos reales; en la app eso cuenta como un enlace que falta (dueña, 18-nov) |
-| Puntos | Los pone el adulto. La sugerencia son bloques cortos de 5 puntos, porque si cuesta mantener la atención, el premio tiene que llegar en cada paso |
+| Puntos | Los pone el adulto. La sugerencia son bloques cortos de 5 puntos, porque si cuesta mantener la atención, el premio tiene que llegar en cada paso. 🔶 Abierto (dueña, 20-nov): no está claro que todos los deberes valgan lo mismo (estudiar un examen no es lo mismo que una ficha corta). Se decide antes del plan |
+| Qué saca la receta (dueña, 20-nov) | No solo entregas. Cuatro bloques: **exámenes** con qué entra exactamente (temas, páginas, frase literal del profesor), **entregas** con estado y si hay que imprimir, **material de estudio** (archivos, vídeos, enlaces) por tema y **avisos del tablón** que no son tareas. El material queda colgado de su examen |
+| Que no se pierda nada (dueña, 20-nov) | La receta termina con un **control de cobertura**: una línea por asignatura con lo que encontró. Lo que no está claro sale como `DUDA`, nunca inventado. Incluye lo atrasado y lo que no tiene fecha |
+| Sin duplicados (20-nov) | El **enlace de Classroom identifica** cada deber. Al importar, la app muestra solo 🆕 nuevo, ✏️ cambió (con el antes y el después) o lo da por igual. Si algo desaparece de Classroom, avisa y no lo borra |
+| Cada cuánto (dueña, 20-nov) | **Todos los días**, porque los profesores publican deberes y temas con fecha sin parar. La app muestra «Última importación: …» y avisa si pasa más de un día |
+| Receta versionada (20-nov) | El formato empieza con `=== DEBERES v1 ===` y termina con `=== FIN ===`, para reconocerlo y poder cambiarlo sin romper lo viejo. La receta vive en el repo (`docs/receta-classroom.md`) **solo con ejemplos ficticios** (fechas de otro año, enlaces `EJEMPLO`), y en Chrome como atajo |
 | Fuera | Ni API de Google, ni OAuth, ni credenciales guardadas, ni scraping desde el servidor. La lectura de Classroom la hace el adulto con Claude in Chrome |
 | Privacidad | Datos escolares de un menor: se guarda solo lo que el adulto acepta, sin nombres de profesores |
 

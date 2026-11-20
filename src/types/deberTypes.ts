@@ -57,3 +57,40 @@ export interface ResultadoImportacion {
   avisos: string[];
   completa: boolean;
 }
+
+/** Un deber guardado, tal como lo devuelve la API. */
+export interface Deber {
+  id: string;
+  familyId: string;
+  hijoId: string;
+  tipo: TipoDeber;
+  asignatura: string;
+  fecha?: string;
+  titulo: string;
+  enlace: string;
+  clave: string;
+  detalle?: string;
+  estado?: EstadoEntrega;
+  imprimir: boolean;
+  examen?: string;
+  isActive: boolean;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type CampoComparado = 'asignatura' | 'fecha' | 'titulo' | 'detalle' | 'estado' | 'imprimir';
+
+export interface Cambio {
+  campo: CampoComparado;
+  antes: string;
+  despues: string;
+}
+
+/** `guardado.isActive === false` se muestra como «Archivado». */
+export interface Comparacion {
+  nuevos: ItemImportado[];
+  cambiados: { item: ItemImportado; guardado: Deber; cambios: Cambio[] }[];
+  iguales: ItemImportado[];
+  yaNoAparecen: Deber[];
+}

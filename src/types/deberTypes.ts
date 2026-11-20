@@ -10,3 +10,50 @@ export const TOPES = {
   texto: 200_000,
   lineas: 300,
 } as const;
+
+/** Un deber leído del texto pegado; `enlace` y `examen` ya salen en forma canónica. */
+export interface ItemImportado {
+  linea: number;
+  tipo: TipoDeber;
+  asignatura: string;
+  fecha: string | null;
+  titulo: string;
+  enlace: string;
+  detalle: string;
+  estado: EstadoEntrega | null;
+  imprimir: boolean;
+  examen: string | null;
+}
+
+export interface Duda {
+  linea: number;
+  asignatura: string;
+  titulo: string;
+  detalle: string;
+  enlace: string | null;
+}
+
+export interface Cobertura {
+  asignatura: string;
+  examenes: number;
+  entregas: number;
+  material: number;
+  avisos: number;
+  dudas: number;
+}
+
+/** `texto`: la línea cruda, cortada a 80 caracteres. */
+export interface ErrorDeLinea {
+  linea: number;
+  motivo: string;
+  texto: string;
+}
+
+export interface ResultadoImportacion {
+  items: ItemImportado[];
+  dudas: Duda[];
+  cobertura: Cobertura[];
+  errores: ErrorDeLinea[];
+  avisos: string[];
+  completa: boolean;
+}

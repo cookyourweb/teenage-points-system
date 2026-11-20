@@ -93,6 +93,29 @@ describe('parsearDeberes', () => {
     expect(r.items.map((i) => i.titulo)).toEqual(['Bien']);
   });
 
+  it('caracteresDeControlODireccionSonErrorDeLinea', () => {
+    const E = 'https://classroom.google.com/c/EJEMPLO1/a/EJEMPLO2/details';
+    const r = parsearDeberes(
+      envuelve(
+        `EXAMEN | Matemáticas | 2027-03-15 | Examen \u202E1 | ${E} | | | |`,
+        `EXAMEN | Matemáticas | 2027-03-15 | Examen 2 | ${E}9 | Trae \u0007 regla | | |`,
+        `EXAMEN | Mate\u2066máticas | 2027-03-15 | Examen 3 | ${E}8 | | | |`,
+      ),
+    );
+    expect(r.errores.map((e) => [e.linea, e.motivo])).toEqual([
+      [2, 'El título tiene caracteres de control o de dirección'],
+      [3, 'El detalle tiene caracteres de control o de dirección'],
+      [4, 'La asignatura tiene caracteres de control o de dirección'],
+    ]);
+    expect(r.items).toEqual([]);
+  });
+
+  it('unaDudaConEnlaceInseguroEsErrorDeLinea', () => {
+    const r = parsearDeberes(envuelve('DUDA | Ciencias | | ¿Pregunta? | javascript:alert(1) | | | |'));
+    expect(r.errores.map((e) => [e.linea, e.motivo])).toEqual([[2, 'El enlace no es https:// seguro']]);
+    expect(r.dudas).toEqual([]);
+  });
+
   it('topesComoElServidor', () => {
     const r = parsearDeberes(
       envuelve(`AVISO | Ciencias | | ${'x'.repeat(121)} | https://classroom.google.com/c/EJEMPLO6/p/EJEMPLO7 | | | |`),

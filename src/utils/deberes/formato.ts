@@ -19,7 +19,7 @@ const COLUMNAS_COBERTURA = 7;
 const AYUDA_PIPE = '(¿hay un | dentro de un texto?)';
 // Control (U+0000-U+001F, U+007F) y dirección (U+202A-202E, U+2066-2069): igual que el servidor.
 // eslint-disable-next-line no-control-regex
-const CONTROL_O_DIRECCION = /[\u0000-\u001F\u007F‪-‮⁦-⁩]/;
+const CONTROL_O_DIRECCION = /[\u0000-\u001F\u007F\u202A-\u202E\u2066-\u2069]/;
 
 const limpiar = (campo: string): string => campo.replace(/\s+/g, ' ').trim();
 

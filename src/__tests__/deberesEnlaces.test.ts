@@ -36,6 +36,9 @@ const MALOS = [
   'https://ejemplo.com/\u007F',
   'https://ejemplo.com/\tx',
   'https://ejemplo.com/\nx',
+  'https://classroom.google.com./',
+  'https://classroom.google.com./u/0/c/EJEMPLO/a/EJEMPLO1',
+  'https://ejemplo.com./x',
 ];
 
 describe('enlaces de deberes', () => {

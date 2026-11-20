@@ -21,7 +21,8 @@ export function esEnlaceSeguro(texto: string): boolean {
   const url = analizar(texto);
   if (!url || url.protocol !== 'https:') return false;
   if (url.username !== '' || url.password !== '') return false;
-  const host = url.hostname.replace(/\.$/, '');
+  const host = url.hostname;
+  if (host.endsWith('.')) return false; // `ejemplo.com.` es el mismo sitio con otra grafía: no se acepta
   if (!host.includes('.') || host.split('.').some((etiqueta) => etiqueta === '')) return false;
   if (host.startsWith('[')) return false;
   if (/^[\d.]+$/.test(host)) return false;

@@ -56,6 +56,11 @@ export interface ResultadoImportacion {
   errores: ErrorDeLinea[];
   avisos: string[];
   completa: boolean;
+  /**
+   * Claves de las líneas que dieron error pero cuyo enlace (y el del examen, si lo hay) se leyó bien:
+   * el deber llegó, aunque roto. Comparar las cuenta como vistas para no decir «ya no aparece».
+   */
+  clavesConError: string[];
 }
 
 /** Un deber guardado, tal como lo devuelve la API. */

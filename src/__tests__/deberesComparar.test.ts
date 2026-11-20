@@ -104,6 +104,14 @@ describe('compararConGuardados', () => {
     expect(compararConGuardados([], [guardado()], { completa: false, hoy }).yaNoAparecen).toEqual([]);
   });
 
+  it('unaLineaConErrorNoCuentaComoQueYaNoAparece', () => {
+    const entrega = guardado({ id: 'g8', tipo: 'ENTREGA', clave: E2, enlace: E2, fecha: '2027-03-10' });
+    const sinMarca = compararConGuardados([], [entrega], { completa: true, hoy });
+    expect(sinMarca.yaNoAparecen).toHaveLength(1);
+    const conMarca = compararConGuardados([], [entrega], { completa: true, hoy, clavesConError: [E2] });
+    expect(conMarca.yaNoAparecen).toEqual([]);
+  });
+
   it('entregaActivaTambienAvisa', () => {
     const r = compararConGuardados([], [guardado({ id: 'g7', tipo: 'ENTREGA', clave: E2, fecha: '2027-03-10' })], { completa: true, hoy });
     expect(r.yaNoAparecen.map((d) => d.id)).toEqual(['g7']);

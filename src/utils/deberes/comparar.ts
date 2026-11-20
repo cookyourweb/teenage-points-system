@@ -45,10 +45,11 @@ function restarDias(fechaIso: string, dias: number): string {
 export function compararConGuardados(
   items: ItemImportado[],
   guardados: Deber[],
-  opciones: { completa: boolean; hoy: string },
+  opciones: { completa: boolean; hoy: string; clavesConError?: string[] },
 ): Comparacion {
   const porClave = new Map(guardados.map((g) => [g.clave, g]));
-  const vistas = new Set<string>();
+  // Una línea con error también «apareció»: llegó rota, no desapareció.
+  const vistas = new Set<string>(opciones.clavesConError ?? []);
   const resultado: Comparacion = { nuevos: [], cambiados: [], iguales: [], yaNoAparecen: [] };
 
   for (const item of items) {

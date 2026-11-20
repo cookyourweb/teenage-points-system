@@ -116,6 +116,20 @@ describe('parsearDeberes', () => {
     expect(r.dudas).toEqual([]);
   });
 
+  it('unaLineaConErrorPeroConEnlaceLegibleDejaSuClave', () => {
+    const r = parsearDeberes(
+      envuelve(
+        `ENTREGA | Lengua | 2027-02-30 | Corta | https://classroom.google.com/u/1/c/EJEMPLO3/a/EJEMPLO4/details | | PENDIENTE | SI |`,
+        'EXAMEN | Historia | 2027-03-20 | Portada | https://classroom.google.com/ | | | |',
+        'AVISO | Ciencias | | Bata | javascript:alert(1) | | | |',
+      ),
+    );
+    expect(r.items).toEqual([]);
+    expect(r.errores).toHaveLength(3);
+    expect(r.clavesConError).toEqual(['https://classroom.google.com/c/EJEMPLO3/a/EJEMPLO4/details']);
+    expect(parsearDeberes(envuelve(EXAMEN_E1)).clavesConError).toEqual([]);
+  });
+
   it('topesComoElServidor', () => {
     const r = parsearDeberes(
       envuelve(`AVISO | Ciencias | | ${'x'.repeat(121)} | https://classroom.google.com/c/EJEMPLO6/p/EJEMPLO7 | | | |`),

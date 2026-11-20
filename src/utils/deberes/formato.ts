@@ -31,6 +31,7 @@ function vacio(avisos: string[], errores: ErrorDeLinea[], motivo: string): Resul
     errores: [...errores, { linea: 0, motivo, texto: '' }],
     avisos,
     completa: false,
+    clavesConError: [],
   };
 }
 
@@ -133,6 +134,14 @@ function leerItem(c: string[], tipo: TipoDeber, linea: number): LineaLeida {
   };
 }
 
+/** Clave de una línea de ítem con error si sus enlaces se pueden leer; null si no. */
+function claveDeLineaConError(c: string[], tipo: TipoDeber): string | null {
+  const [, , , , enlace, , , , examen] = c;
+  if (validarEnlace(enlace, '', 'falta') !== null) return null;
+  if (tipo === 'MATERIAL' && examen !== '' && validarEnlace(examen, '', '') !== null) return null;
+  return claveDeDeber({ tipo, enlace, examen: tipo === 'MATERIAL' && examen !== '' ? examen : null });
+}
+
 function leerDuda(c: string[], linea: number): LineaLeida {
   const [, asignatura, , titulo, enlace, detalle] = c;
   const fallo =
@@ -215,6 +224,7 @@ export function parsearDeberes(texto: string): ResultadoImportacion {
   const cobertura: Cobertura[] = [];
   const errores: ErrorDeLinea[] = [];
   const avisos: string[] = [];
+  const clavesConError: string[] = [];
   const clavesVistas = new Map<string, number>();
 
   for (const n of datos) {
@@ -249,6 +259,10 @@ export function parsearDeberes(texto: string): ResultadoImportacion {
     const r = tipo === 'DUDA' ? leerDuda(c, linea) : leerItem(c, tipo as TipoDeber, linea);
     if (!r.ok) {
       error(r.motivo);
+      if (tipo !== 'DUDA') {
+        const clave = claveDeLineaConError(c, tipo as TipoDeber);
+        if (clave !== null) clavesConError.push(clave);
+      }
     } else if ('duda' in r) {
       dudas.push(r.duda);
     } else {
@@ -298,5 +312,5 @@ export function parsearDeberes(texto: string): ResultadoImportacion {
     }
   }
 
-  return { items, dudas, cobertura, errores, avisos, completa };
+  return { items, dudas, cobertura, errores, avisos, completa, clavesConError };
 }

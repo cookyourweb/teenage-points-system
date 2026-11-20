@@ -8,6 +8,7 @@ const normalizar = (texto: string | null | undefined): string => (texto ?? '').t
 
 function valoresDelItem(i: ItemImportado): Record<CampoComparado, string> {
   return {
+    tipo: normalizar(i.tipo),
     asignatura: normalizar(i.asignatura),
     fecha: normalizar(i.fecha),
     titulo: normalizar(i.titulo),
@@ -19,6 +20,7 @@ function valoresDelItem(i: ItemImportado): Record<CampoComparado, string> {
 
 function valoresDelGuardado(g: Deber): Record<CampoComparado, string> {
   return {
+    tipo: normalizar(g.tipo),
     asignatura: normalizar(g.asignatura),
     fecha: normalizar(g.fecha),
     titulo: normalizar(g.titulo),
@@ -28,7 +30,7 @@ function valoresDelGuardado(g: Deber): Record<CampoComparado, string> {
   };
 }
 
-const CAMPOS: CampoComparado[] = ['asignatura', 'fecha', 'titulo', 'detalle', 'estado', 'imprimir'];
+const CAMPOS: CampoComparado[] = ['tipo', 'asignatura', 'fecha', 'titulo', 'detalle', 'estado', 'imprimir'];
 
 function cambiosEntre(item: ItemImportado, guardado: Deber): Cambio[] {
   const nuevo = valoresDelItem(item);

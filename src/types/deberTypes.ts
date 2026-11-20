@@ -84,7 +84,7 @@ export interface Deber {
   updatedAt?: string;
 }
 
-export type CampoComparado = 'asignatura' | 'fecha' | 'titulo' | 'detalle' | 'estado' | 'imprimir';
+export type CampoComparado = 'tipo' | 'asignatura' | 'fecha' | 'titulo' | 'detalle' | 'estado' | 'imprimir';
 
 export interface Cambio {
   campo: CampoComparado;

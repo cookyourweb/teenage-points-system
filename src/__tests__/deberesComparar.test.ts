@@ -112,6 +112,26 @@ describe('compararConGuardados', () => {
     expect(conMarca.yaNoAparecen).toEqual([]);
   });
 
+  it('cambiarElTipoOElImprimirOElEstadoEsUnCambio', () => {
+    const o = { completa: true, hoy };
+    const tipo = compararConGuardados([item({ tipo: 'EXAMEN' })], [guardado({ tipo: 'AVISO' })], o);
+    expect(tipo.iguales).toEqual([]);
+    expect(tipo.cambiados[0]?.cambios).toEqual([{ campo: 'tipo', antes: 'AVISO', despues: 'EXAMEN' }]);
+    const imprimir = compararConGuardados([item({ imprimir: true })], [guardado({ imprimir: false })], o);
+    expect(imprimir.cambiados[0]?.cambios).toEqual([{ campo: 'imprimir', antes: 'no', despues: 'sí' }]);
+    const estado = compararConGuardados([item({ estado: 'ENTREGADA' })], [guardado({ estado: 'PENDIENTE' })], o);
+    expect(estado.cambiados[0]?.cambios).toEqual([{ campo: 'estado', antes: 'PENDIENTE', despues: 'ENTREGADA' }]);
+  });
+
+  it('nullYUndefinedSonLoMismo', () => {
+    const r = compararConGuardados([item({ estado: null, fecha: null })], [guardado({ estado: undefined, fecha: undefined })], {
+      completa: true,
+      hoy,
+    });
+    expect(r.iguales).toHaveLength(1);
+    expect(r.cambiados).toEqual([]);
+  });
+
   it('entregaActivaTambienAvisa', () => {
     const r = compararConGuardados([], [guardado({ id: 'g7', tipo: 'ENTREGA', clave: E2, fecha: '2027-03-10' })], { completa: true, hoy });
     expect(r.yaNoAparecen.map((d) => d.id)).toEqual(['g7']);

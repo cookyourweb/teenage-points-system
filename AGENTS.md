@@ -26,7 +26,7 @@ Backend (`backend/`): Java 17 / Spring Boot 4.1 con Maven wrapper. `./mvnw test`
 1. **El test va primero**: lo escribís, lo ves fallar por una aserción (no por módulo faltante), implementás lo mínimo y lo ves en verde. Si no hay unidad testable, extraé una función — no lo salteés. Las excepciones solo con permiso de la dueña.
 2. **Un commit por tarea**, en español, con el porqué en el título, y sin Co-Authored-By. Formato: `feat(ui): ...`, `fix(ui): ...`, `fix(ci): ...`, `refactor(ui): ...`, `test: ...`, `docs: ...`, `chore: ...`.
 3. **Antes de editar un fichero**, mirar su historia: `git log --oneline -10 -- <ruta>`.
-4. Ramas: se trabaja en `develop`; a `main` solo con el sí explícito de la dueña, nunca push directo. El Storybook se publica en GitHub Pages solo al empujar a `main` (`.github/workflows/storybook.yml`).
+4. Ramas (dueña, 20-nov, **siempre así**): cada cambio en su rama corta desde `develop` (`feature/…`, `fix/…`, `docs/…`), PR a `develop` con la plantilla, CI en verde, merge y **la rama se borra**. Nunca commits directos en `develop` ni en `main`. `develop` → `main` es un PR de release, solo con el sí explícito de la dueña. El Storybook se publica en GitHub Pages solo al empujar a `main` (`.github/workflows/storybook.yml`).
 5. **Antes de subir a main**: medir el antes, comparar con el después; si sale PEOR, no se sube, aunque el arreglo funcione.
 6. PR con el cuerpo:
    - **Qué sube** (por commit, con fichero:línea),

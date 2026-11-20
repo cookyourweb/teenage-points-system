@@ -3,7 +3,7 @@ import { TOPES, type TipoDeber } from '../../types/deberTypes';
 const HOST_CLASSROOM = 'classroom.google.com';
 // Espacios, control (U+0000-U+001F, U+007F) y de dirección (U+202A-202E, U+2066-2069).
 // eslint-disable-next-line no-control-regex
-const PROHIBIDOS = /[\s\u0000-\u001F\u007F‪-‮⁦-⁩]/;
+const PROHIBIDOS = /[\s\u0000-\u001F\u007F\u202A-\u202E\u2066-\u2069]/;
 
 function analizar(texto: string): URL | null {
   try {
@@ -17,11 +17,12 @@ function analizar(texto: string): URL | null {
 export function esEnlaceSeguro(texto: string): boolean {
   if (texto.length === 0 || texto.length > TOPES.enlace) return false;
   if (PROHIBIDOS.test(texto)) return false;
+  if (!/^https:\/\//i.test(texto)) return false;
   const url = analizar(texto);
   if (!url || url.protocol !== 'https:') return false;
   if (url.username !== '' || url.password !== '') return false;
-  const host = url.hostname;
-  if (!host.includes('.')) return false;
+  const host = url.hostname.replace(/\.$/, '');
+  if (!host.includes('.') || host.split('.').some((etiqueta) => etiqueta === '')) return false;
   if (host.startsWith('[')) return false;
   if (/^[\d.]+$/.test(host)) return false;
   if (host === 'localhost' || host.endsWith('.localhost')) return false;
@@ -57,6 +58,7 @@ export function esPortadaDeClassroom(enlace: string): boolean {
 
 /** Clave única del deber; el MATERIAL lleva también su examen (los enlaces no tienen espacios). */
 export function claveDeDeber(d: { tipo: TipoDeber; enlace: string; examen?: string | null }): string {
-  if (d.tipo === 'MATERIAL') return `MATERIAL ${d.enlace} ${d.examen ?? ''}`;
-  return d.enlace;
+  const enlace = claveDeEnlace(d.enlace);
+  if (d.tipo === 'MATERIAL') return `MATERIAL ${enlace} ${d.examen ? claveDeEnlace(d.examen) : ''}`;
+  return enlace;
 }

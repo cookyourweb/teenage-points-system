@@ -23,9 +23,19 @@ const MALOS = [
   'https://127.0.0.1/',
   'https://[::1]/',
   '//ejemplo.com/x',
-  'https://ejemplo.com/‮exe',
+  'https://ejemplo.com/\u202Eexe',
   'https://ejemplo.com/\u0007',
   'https://ejemplo.com/' + 'a'.repeat(500),
+  'https://localhost./',
+  'https://foo.localhost./',
+  'https://a..b/',
+  'https://.com/',
+  'https:ejemplo.com',
+  'https:/ejemplo.com',
+  'https:\\\\ejemplo.com/x',
+  'https://ejemplo.com/\u007F',
+  'https://ejemplo.com/\tx',
+  'https://ejemplo.com/\nx',
 ];
 
 describe('enlaces de deberes', () => {
@@ -54,5 +64,11 @@ describe('enlaces de deberes', () => {
   it('laClaveDelMaterialLlevaSuExamen', () => {
     expect(claveDeDeber({ tipo: 'EXAMEN', enlace: E1 })).toBe(E1);
     expect(claveDeDeber({ tipo: 'MATERIAL', enlace: VIDEO, examen: E1 })).toBe(CLAVE_MATERIAL);
+  });
+
+  it('claveDeDeberCanonicaSuEnlaceYSuExamen', () => {
+    const E1_CUENTA = 'https://Classroom.Google.com/u/1/c/EJEMPLO1/a/EJEMPLO2/details/?authuser=1#x';
+    expect(claveDeDeber({ tipo: 'EXAMEN', enlace: E1_CUENTA })).toBe(E1);
+    expect(claveDeDeber({ tipo: 'MATERIAL', enlace: VIDEO, examen: E1_CUENTA })).toBe(CLAVE_MATERIAL);
   });
 });

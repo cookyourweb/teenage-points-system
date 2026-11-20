@@ -1,5 +1,12 @@
 import { useState } from "react";
 import Field from "../ui/Field";
+import Button from "../ui/Button";
+import {
+  MENSAJES_RECUPERACION,
+  correoValido,
+  mensajeDeErrorDeRecuperacion,
+  pedirCambioDeContrasena,
+} from "../../services/authService";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../firebase";
@@ -10,7 +17,27 @@ const Signin = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [recuperacion, setRecuperacion] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
+  const [enviandoRecuperacion, setEnviandoRecuperacion] = useState(false);
   const navigate = useNavigate();
+
+  const handleRecuperar = async () => {
+    if (enviandoRecuperacion) return;
+    if (!correoValido(email)) {
+      setRecuperacion({ tipo: "error", texto: MENSAJES_RECUPERACION.correoInvalido });
+      return;
+    }
+    setRecuperacion(null);
+    setEnviandoRecuperacion(true);
+    try {
+      await pedirCambioDeContrasena(email);
+      setRecuperacion({ tipo: "ok", texto: MENSAJES_RECUPERACION.enviado });
+    } catch (err: unknown) {
+      setRecuperacion({ tipo: "error", texto: mensajeDeErrorDeRecuperacion(err) });
+    } finally {
+      setEnviandoRecuperacion(false);
+    }
+  };
 
   // Función para manejar errores de Firebase
   const handleFirebaseError = (errorCode: string) => {
@@ -163,6 +190,27 @@ const Signin = () => {
         )}
       </button>
       
+      <Button
+        variant="ghost"
+        size="sm"
+        layout="full"
+        onClick={handleRecuperar}
+        disabled={enviandoRecuperacion}
+      >
+        ¿Olvidaste tu contraseña?
+      </Button>
+
+      {recuperacion?.tipo === "ok" && (
+        <p role="status" className="text-sm font-medium text-content">
+          {recuperacion.texto}
+        </p>
+      )}
+      {recuperacion?.tipo === "error" && (
+        <p role="alert" className="text-sm font-medium text-negative-text">
+          {recuperacion.texto}
+        </p>
+      )}
+
       <p className="text-center text-sm text-content-muted">
         ¿No tienes cuenta?{" "}
         <span className="font-medium text-link">

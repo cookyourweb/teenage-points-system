@@ -165,6 +165,13 @@ class DeberControllerTest {
     @DisplayName("un id de ruta con caracteres raros (incluida la barra) es 400 y no llega al servicio")
     void idsDeRutaAcotados() throws Exception {
         mockMvc.perform(como(post("/api/familias/fA/hijos/le%20o/deberes"), cuerpo(""))).andExpect(status().isBadRequest());
+        // Este si llega al validador de ruta (el %20 lo corta antes el firewall, sin cuerpo): campo por nombre, sin eco del valor (`instance` es la ruta que el cliente mando, Spring la pone siempre).
+        mockMvc.perform(como(post("/api/familias/fA/hijos/le.o/deberes"), cuerpo("")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.hijoId").exists())
+                .andExpect(jsonPath("$.campos.hijoId").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("le.o"))))
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("le.o"))))
+                .andExpect(jsonPath("$.title").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("le.o"))));
         mockMvc.perform(como(post("/api/familias/fA/hijos/le%2Fo/deberes"), cuerpo(""))).andExpect(status().isBadRequest());
         mockMvc.perform(como(post("/api/familias/f.A/hijos/leo/deberes"), cuerpo(""))).andExpect(status().isBadRequest());
         mockMvc.perform(get("/api/familias/fA/hijos/" + "h".repeat(129) + "/deberes").with(jwt().jwt(j -> j.subject("ana"))))

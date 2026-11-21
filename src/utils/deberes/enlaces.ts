@@ -19,7 +19,8 @@ export function esEnlaceSeguro(texto: string): boolean {
   if (PROHIBIDOS.test(texto)) return false;
   if (!/^https:\/\//i.test(texto)) return false;
   // java.net.URI (la clave del back) no lee estos caracteres, que WHATWG deja crudos: se avisa aquí.
-  if (/[|^{}`<>"]/.test(texto)) return false;
+  if (/[|^{}`<>"\\]/.test(texto)) return false;
+  if (/%(?![0-9A-Fa-f]{2})/.test(texto)) return false;
   const url = analizar(texto);
   if (!url || url.protocol !== 'https:') return false;
   if (url.username !== '' || url.password !== '') return false;
@@ -29,11 +30,15 @@ export function esEnlaceSeguro(texto: string): boolean {
   if (host.startsWith('[')) return false;
   if (/^[\d.]+$/.test(host)) return false;
   if (host === 'localhost' || host.endsWith('.localhost')) return false;
+  // Java solo lee [ ] en el query, no en la ruta.
+  if (/[[\]]/.test(url.pathname)) return false;
+  // Gramática de hostname de java.net.URI: sin `_`, sin etiqueta que termine en `-`, TLD que no empieza por dígito.
+  if (!/^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]([a-z0-9-]*[a-z0-9])?$/.test(host)) return false;
   // El query de Classroom se reserializa y el back no admite %XX ahí (ver EnlaceSeguroValidator).
   // Se mira el query YA reserializado: `!~():,/;@$` crudos salen como %21, %7E...
   if (host === HOST_CLASSROOM) {
     url.searchParams.delete('authuser');
-    if (url.search.includes('%')) return false;
+    if (url.search.includes('%') || /(^\?|&)=/.test(url.search)) return false; // %XX o parámetro sin nombre
   }
   return true;
 }

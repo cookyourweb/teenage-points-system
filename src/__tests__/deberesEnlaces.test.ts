@@ -45,6 +45,12 @@ const MALOS = [
 const BUENOS_DEL_FRONT = [
   'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?q=a%20b&authuser=0',
   "https://ejemplo.com/l'eau.pdf",
+  'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details',
+  'https://www.youtube.com/watch?v=EJEMPLO5',
+  'https://docs.google.com/document/d/abc_DEF-1/edit?usp=sharing',
+  'https://drive.google.com/file/d/abc/view#x',
+  'https://xn--espaa-rta.example.com/a',
+  'https://ejemplo.com/x?ids[]=1',
 ];
 // java.net.URI no los lee, o el query de Classroom lleva %XX que el back no admite: se avisan en la vista previa.
 const MALOS_PARA_EL_BACK = [
@@ -52,6 +58,16 @@ const MALOS_PARA_EL_BACK = [
   'https://ejemplo.com/x?a=b|c',
   'https://ejemplo.com/x?a=b^c',
   'https://ejemplo.com/x?a={b}',
+  // Java los rechaza y el front los daba por buenos (revision final B).
+  'https://ejemplo.com/100%',
+  'https://ejemplo.com/x%zz',
+  'https://ejemplo.com/x?a=b\\c',
+  'https://ejemplo.com/a[b]',
+  'https://ej_x.ejemplo.com/a',
+  'https://ejemplo-.com/a',
+  'https://ejemplo.123/a',
+  'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?=x',
+  'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?a=1&=x',
   'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?q=a%2Fb',
   // JS los reserializa a %21, %7E, %28, %3A: el back no admite %XX en Classroom.
   'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?x=a!b',

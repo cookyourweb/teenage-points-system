@@ -66,6 +66,17 @@ class EnlaceSeguroValidatorTest {
     }
 
     @Test
+    @DisplayName("acepta enlaces reales (espejo de BUENOS_DEL_FRONT)")
+    void aceptaEnlacesReales() {
+        for (String bueno : List.of(E1, "https://www.youtube.com/watch?v=EJEMPLO5",
+                "https://docs.google.com/document/d/abc_DEF-1/edit?usp=sharing",
+                "https://drive.google.com/file/d/abc/view#x",
+                "https://xn--espaa-rta.example.com/a", "https://ejemplo.com/x?ids[]=1")) {
+            assertThat(EnlaceSeguroValidator.esSeguro(bueno)).as(bueno).isTrue();
+        }
+    }
+
+    @Test
     @DisplayName("lo que JS reescribiria y Java no: se rechaza para que las dos claves coincidan")
     void noCanonicoSeRechaza() {
         assertThat(EnlaceSeguroValidator.esSeguro("https://ejemplo.com/a/../b")).isFalse();
@@ -94,7 +105,11 @@ class EnlaceSeguroValidatorTest {
         for (String malo : List.of("https://ejemplo.com/a|b", "https://ejemplo.com/x?a=b|c",
                 "https://ejemplo.com/x?a=b^c", "https://ejemplo.com/x?a={b}",
                 "https://ejemplo.com/x?q='a'", E1 + "?q=a%2Fb", E1 + "?x=a!b", E1 + "?x=a~b",
-                E1 + "?x=(a)", E1 + "?x=a:b")) {
+                E1 + "?x=(a)", E1 + "?x=a:b",
+                // Guardas: Java ya los rechaza; el front tambien (revision final B).
+                "https://ejemplo.com/100%", "https://ejemplo.com/x%zz", "https://ejemplo.com/x?a=b\\c",
+                "https://ejemplo.com/a[b]", "https://ej_x.ejemplo.com/a",
+                "https://ejemplo-.com/a", "https://ejemplo.123/a", E1 + "?=x", E1 + "?a=1&=x")) {
             assertThat(EnlaceSeguroValidator.esSeguro(malo)).as(malo).isFalse();
         }
     }

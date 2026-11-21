@@ -1,6 +1,7 @@
 package es.cookyourweb.points.config;
 
 import com.mongodb.MongoException;
+import es.cookyourweb.points.deber.Deber;
 import es.cookyourweb.points.familia.Membresia;
 import es.cookyourweb.points.ia.EleccionTipo;
 import org.slf4j.Logger;
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Crea los indices unicos de Membresia (uid, familyId) y de EleccionTipo al arrancar, SIN bloquear el arranque.
+ * Crea los indices unicos de Membresia (uid, familyId), de EleccionTipo y de Deber (familyId, hijoId, clave)
+ * al arrancar, SIN bloquear el arranque. Importacion no lleva indice: su _id ya es por hijo.
  *
  * Por que no spring.data.mongodb.auto-index-creation=true: esa propiedad crea los indices
  * dentro del arranque del contexto, y con Mongo caido el contexto no arranca tras ~30 s
@@ -50,7 +52,7 @@ public class IndicesMongo {
 
     void crear() {
         // Cada entidad en su propio try: si una falla (p. ej. duplicados), la otra igual se indexa.
-        for (Class<?> entidad : List.of(Membresia.class, EleccionTipo.class)) {
+        for (Class<?> entidad : List.of(Membresia.class, EleccionTipo.class, Deber.class)) {
             crearIndices(entidad);
         }
     }

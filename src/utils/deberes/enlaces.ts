@@ -30,7 +30,8 @@ export function esEnlaceSeguro(texto: string): boolean {
   if (/^[\d.]+$/.test(host)) return false;
   if (host === 'localhost' || host.endsWith('.localhost')) return false;
   // El query de Classroom se reserializa y el back no admite %XX ahí (ver EnlaceSeguroValidator).
-  if (host === HOST_CLASSROOM && url.search.includes('%')) {
+  // Se mira el query YA reserializado: `!~():,/;@$` crudos salen como %21, %7E...
+  if (host === HOST_CLASSROOM) {
     url.searchParams.delete('authuser');
     if (url.search.includes('%')) return false;
   }

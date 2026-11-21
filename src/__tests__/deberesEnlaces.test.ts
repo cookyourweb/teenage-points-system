@@ -53,6 +53,11 @@ const MALOS_PARA_EL_BACK = [
   'https://ejemplo.com/x?a=b^c',
   'https://ejemplo.com/x?a={b}',
   'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?q=a%2Fb',
+  // JS los reserializa a %21, %7E, %28, %3A: el back no admite %XX en Classroom.
+  'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?x=a!b',
+  'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?x=a~b',
+  'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?x=(a)',
+  'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?x=a:b',
 ];
 
 describe('enlaces de deberes', () => {

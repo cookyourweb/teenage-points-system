@@ -93,7 +93,8 @@ class EnlaceSeguroValidatorTest {
     void rechazaLoQueElFrontTambienRechaza() {
         for (String malo : List.of("https://ejemplo.com/a|b", "https://ejemplo.com/x?a=b|c",
                 "https://ejemplo.com/x?a=b^c", "https://ejemplo.com/x?a={b}",
-                "https://ejemplo.com/x?q='a'", E1 + "?q=a%2Fb")) {
+                "https://ejemplo.com/x?q='a'", E1 + "?q=a%2Fb", E1 + "?x=a!b", E1 + "?x=a~b",
+                E1 + "?x=(a)", E1 + "?x=a:b")) {
             assertThat(EnlaceSeguroValidator.esSeguro(malo)).as(malo).isFalse();
         }
     }

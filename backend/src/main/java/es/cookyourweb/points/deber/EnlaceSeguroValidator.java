@@ -20,10 +20,11 @@ public class EnlaceSeguroValidator implements ConstraintValidator<EnlaceSeguro, 
     static final int MAX = 500;
     private static final String HOST_CLASSROOM = "classroom.google.com";
     private static final Pattern CUENTA = Pattern.compile("^/u/\\d+(?=/|$)");
-    // Classroom: JS reserializa el query al borrar authuser; solo pares nombre=valor con caracteres
-    // que esa serializacion no cambia.
+    // Classroom: JS reserializa el query al borrar authuser (espacio -> '+'); solo pares nombre=valor con
+    // caracteres que esa serializacion no cambia. Sin %XX a proposito: el front tambien los rechaza
+    // en Classroom, porque aceptarlos exigiria reproducir aqui el decode/encode exacto de URLSearchParams.
     private static final Pattern CONSULTA_CANONICA =
-            Pattern.compile("[A-Za-z0-9_.*-]+=[A-Za-z0-9_.*-]*(&[A-Za-z0-9_.*-]+=[A-Za-z0-9_.*-]*)*");
+            Pattern.compile("[A-Za-z0-9_.*+-]+=[A-Za-z0-9_.*+-]*(&[A-Za-z0-9_.*+-]+=[A-Za-z0-9_.*+-]*)*");
 
     @Override
     public boolean isValid(String valor, ConstraintValidatorContext contexto) {
@@ -34,8 +35,7 @@ public class EnlaceSeguroValidator implements ConstraintValidator<EnlaceSeguro, 
         if (texto == null || texto.isEmpty() || texto.length() > MAX) return false;
         for (int i = 0; i < texto.length(); i++) {
             char c = texto.charAt(i);
-            // ASCII visible y nada mas. La comilla simple la reescribe JS en el query (%27).
-            if (c < 0x21 || c > 0x7E || c == '\\' || c == '\'') return false;
+            if (c < 0x21 || c > 0x7E || c == '\\') return false;
         }
         if (!texto.startsWith("https://")) return false;
         URI uri;
@@ -44,6 +44,8 @@ public class EnlaceSeguroValidator implements ConstraintValidator<EnlaceSeguro, 
         } catch (URISyntaxException e) {
             return false;
         }
+        // La comilla simple la reescribe JS como %27 SOLO en el query; en la ruta se queda igual.
+        if (uri.getRawQuery() != null && uri.getRawQuery().indexOf('\'') >= 0) return false;
         if (uri.getRawUserInfo() != null || uri.getHost() == null) return false;
         String host = uri.getHost();
         if (host.startsWith("[") || host.endsWith(".")) return false;

@@ -79,6 +79,25 @@ class EnlaceSeguroValidatorTest {
         assertThat(EnlaceSeguroValidator.esSeguro("https://ejemplo.com/x#ancla")).isTrue();
     }
 
+    // Espejo de BUENOS_DEL_FRONT y MALOS_NUEVOS en src/__tests__/deberesEnlaces.test.ts: lo que el
+    // front da por canonico, el back lo acepta (si no, el POST fallaria tras ver el aviso verde).
+    @Test
+    @DisplayName("acepta lo que el front produce como canonico")
+    void aceptaLoQueElFrontProduce() {
+        assertThat(EnlaceSeguroValidator.esSeguro(E1 + "?q=a+b")).isTrue();
+        assertThat(EnlaceSeguroValidator.esSeguro("https://ejemplo.com/l'eau.pdf")).isTrue();
+    }
+
+    @Test
+    @DisplayName("rechaza lo que java.net.URI no sabe leer o el query de Classroom con %XX (el front tambien)")
+    void rechazaLoQueElFrontTambienRechaza() {
+        for (String malo : List.of("https://ejemplo.com/a|b", "https://ejemplo.com/x?a=b|c",
+                "https://ejemplo.com/x?a=b^c", "https://ejemplo.com/x?a={b}",
+                "https://ejemplo.com/x?q='a'", E1 + "?q=a%2Fb")) {
+            assertThat(EnlaceSeguroValidator.esSeguro(malo)).as(malo).isFalse();
+        }
+    }
+
     @Test
     @DisplayName("nulo vale para el validador (el @NotBlank del enlace lo exige aparte)")
     void nuloVale() {

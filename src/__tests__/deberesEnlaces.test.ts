@@ -41,7 +41,29 @@ const MALOS = [
   'https://ejemplo.com./x',
 ];
 
+// Espejo de EnlaceSeguroValidatorTest (Java): lo canónico que el front acepta, el back lo acepta.
+const BUENOS_DEL_FRONT = [
+  'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?q=a%20b&authuser=0',
+  "https://ejemplo.com/l'eau.pdf",
+];
+// java.net.URI no los lee, o el query de Classroom lleva %XX que el back no admite: se avisan en la vista previa.
+const MALOS_PARA_EL_BACK = [
+  'https://ejemplo.com/a|b',
+  'https://ejemplo.com/x?a=b|c',
+  'https://ejemplo.com/x?a=b^c',
+  'https://ejemplo.com/x?a={b}',
+  'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?q=a%2Fb',
+];
+
 describe('enlaces de deberes', () => {
+  it('loCanonicoDelFrontLoAceptaElBack', () => {
+    for (const bueno of BUENOS_DEL_FRONT) expect(esEnlaceSeguro(bueno), bueno).toBe(true);
+    expect(claveDeEnlace(BUENOS_DEL_FRONT[0])).toBe(
+      'https://classroom.google.com/c/EJEMPLO/a/EJEMPLO/details?q=a+b',
+    );
+    for (const malo of MALOS_PARA_EL_BACK) expect(esEnlaceSeguro(malo), malo).toBe(false);
+  });
+
   it('soloHttps', () => {
     expect(esEnlaceSeguro(E1)).toBe(true);
     for (const malo of MALOS) expect(esEnlaceSeguro(malo), malo).toBe(false);

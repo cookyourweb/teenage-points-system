@@ -18,6 +18,8 @@ export function esEnlaceSeguro(texto: string): boolean {
   if (texto.length === 0 || texto.length > TOPES.enlace) return false;
   if (PROHIBIDOS.test(texto)) return false;
   if (!/^https:\/\//i.test(texto)) return false;
+  // java.net.URI (la clave del back) no lee estos caracteres, que WHATWG deja crudos: se avisa aquí.
+  if (/[|^{}`<>"]/.test(texto)) return false;
   const url = analizar(texto);
   if (!url || url.protocol !== 'https:') return false;
   if (url.username !== '' || url.password !== '') return false;
@@ -27,6 +29,11 @@ export function esEnlaceSeguro(texto: string): boolean {
   if (host.startsWith('[')) return false;
   if (/^[\d.]+$/.test(host)) return false;
   if (host === 'localhost' || host.endsWith('.localhost')) return false;
+  // El query de Classroom se reserializa y el back no admite %XX ahí (ver EnlaceSeguroValidator).
+  if (host === HOST_CLASSROOM && url.search.includes('%')) {
+    url.searchParams.delete('authuser');
+    if (url.search.includes('%')) return false;
+  }
   return true;
 }
 

@@ -20,6 +20,8 @@ export interface Decision {
 export interface ResultadoGuardado {
   guardados: number;
   fallidos: { item: ItemImportado; motivo: string }[];
+  /** Todo se guardo pero no se pudo anotar la importacion: el aviso de «mas de un dia» seguira. */
+  importacionSinRegistrar?: true;
 }
 
 const EN_VUELO = 4;
@@ -66,9 +68,28 @@ export const aDeberNuevo = (item: ItemImportado, guardado?: Deber): DeberNuevo =
   isActive: guardado ? guardado.isActive : true,
 });
 
-const motivoDe = (error: unknown): string => {
-  if (error instanceof ErrorHttp && error.status === 409) return MOTIVO_409;
-  return error instanceof Error ? error.message : 'No se pudo guardar';
+/** Texto fijo en español por estado: el mensaje crudo (HTML de un proxy, «Failed to fetch») nunca se enseña. */
+const motivoDe = (error: unknown, esCambio: boolean): string => {
+  if (!(error instanceof ErrorHttp)) {
+    return error instanceof TypeError
+      ? 'No hay conexión. Revisa internet y vuelve a intentarlo.'
+      : 'No se ha podido guardar. Inténtalo de nuevo.';
+  }
+  switch (error.status) {
+    case 400:
+      return 'Algún dato no cumple los límites. Revísalo y vuelve a guardar.';
+    case 401:
+    case 403:
+      return 'Tu sesión ha caducado. Vuelve a entrar.';
+    case 404:
+      return 'Ese deber ya no existe.';
+    case 409:
+      return esCambio ? 'Ese enlace ya lo usa otro deber.' : MOTIVO_409;
+    case 413:
+      return 'Es demasiado largo para guardarlo.';
+    default:
+      return 'No se ha podido guardar. Inténtalo de nuevo.';
+  }
 };
 
 /**
@@ -93,10 +114,17 @@ export const guardarImportacion = async (
     );
     respuestas.forEach((r, j) => {
       if (r.status === 'fulfilled') resultado.guardados++;
-      else resultado.fallidos.push({ item: trozo[j].item, motivo: motivoDe(r.reason) });
+      else resultado.fallidos.push({ item: trozo[j].item, motivo: motivoDe(r.reason, Boolean(trozo[j].guardado)) });
     });
   }
 
-  if (resultado.fallidos.length === 0) await registrarImportacion(familyId, hijoId);
+  if (resultado.fallidos.length === 0) {
+    try {
+      await registrarImportacion(familyId, hijoId);
+    } catch {
+      // Los deberes ya estan guardados: no se tira el resultado, se avisa de que falto anotarla.
+      resultado.importacionSinRegistrar = true;
+    }
+  }
   return resultado;
 };

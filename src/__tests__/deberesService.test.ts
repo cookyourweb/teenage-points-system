@@ -123,10 +123,36 @@ describe('deberesService', () => {
     expect(llamadas('PUT')).toHaveLength(0);
   });
 
-  it('otroErrorUsaSuMensaje', async () => {
-    apiFetch.mockRejectedValueOnce(new ErrorHttp(400, 'el titulo es obligatorio'));
+  it.each([
+    [400, 'Algún dato no cumple los límites. Revísalo y vuelve a guardar.'],
+    [401, 'Tu sesión ha caducado. Vuelve a entrar.'],
+    [403, 'Tu sesión ha caducado. Vuelve a entrar.'],
+    [404, 'Ese deber ya no existe.'],
+    [413, 'Es demasiado largo para guardarlo.'],
+    [502, 'No se ha podido guardar. Inténtalo de nuevo.'],
+  ])('un %i se cuenta con un texto fijo en español, nunca el del servidor', async (status, motivo) => {
+    apiFetch.mockRejectedValueOnce(new ErrorHttp(status, '<html>502 Bad Gateway</html>'));
     const r = await guardarImportacion('fA', 'leo', [{ item: item(1) }]);
-    expect(r.fallidos[0].motivo).toBe('el titulo es obligatorio');
+    expect(r.fallidos[0].motivo).toBe(motivo);
+    expect(r.fallidos[0].motivo).not.toContain('<html>');
+  });
+
+  it('sinConexionDiceQueNoHayConexion', async () => {
+    apiFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    const r = await guardarImportacion('fA', 'leo', [{ item: item(1) }]);
+    expect(r.fallidos[0].motivo).toBe('No hay conexión. Revisa internet y vuelve a intentarlo.');
+  });
+
+  it('un409AlCambiarEsOtroDeberConEseEnlace', async () => {
+    apiFetch.mockRejectedValueOnce(new ErrorHttp(409, 'x', 'Deber repetido'));
+    const r = await guardarImportacion('fA', 'leo', [{ item: item(1), guardado: guardado() }]);
+    expect(r.fallidos[0].motivo).toBe('Ese enlace ya lo usa otro deber.');
+  });
+
+  it('siFallaRegistrarLaImportacionNoSePierdeLoGuardado', async () => {
+    apiFetch.mockResolvedValueOnce({}).mockRejectedValueOnce(new ErrorHttp(500, 'boom'));
+    const r = await guardarImportacion('fA', 'leo', [{ item: item(1) }]);
+    expect(r).toEqual({ guardados: 1, fallidos: [], importacionSinRegistrar: true });
   });
 
   it('elCuerpoSiempreLlevaImprimirEIsActiveYNuncaClave', async () => {

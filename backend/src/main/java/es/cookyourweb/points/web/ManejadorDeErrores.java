@@ -1,5 +1,7 @@
 package es.cookyourweb.points.web;
 
+import es.cookyourweb.points.deber.DeberDuplicadoException;
+import es.cookyourweb.points.deber.DeberNoEncontradoException;
 import es.cookyourweb.points.familia.FamiliaNoEncontradaException;
 import es.cookyourweb.points.familia.ServicioExternoException;
 import es.cookyourweb.points.ia.EleccionInvalidaException;
@@ -19,6 +21,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -71,6 +74,22 @@ public class ManejadorDeErrores {
         return p;
     }
 
+    /** 404 tanto si el deber no existe como si es de otra familia o hijo: no deja sondear ids. Texto fijo. */
+    @ExceptionHandler(DeberNoEncontradoException.class)
+    public ProblemDetail deberNoEncontrado(DeberNoEncontradoException e) {
+        ProblemDetail p = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "deber no encontrado");
+        p.setTitle("Deber no encontrado");
+        return p;
+    }
+
+    /** 409: la clave (enlace canonico) ya existe para ese hijo. Texto fijo, sin eco de la clave. */
+    @ExceptionHandler(DeberDuplicadoException.class)
+    public ProblemDetail deberDuplicado(DeberDuplicadoException e) {
+        ProblemDetail p = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "ya hay un deber con esa clave");
+        p.setTitle("Deber repetido");
+        return p;
+    }
+
     /** 502 y no 404: que Firestore falle no significa que no seas de la familia. */
     @ExceptionHandler(ServicioExternoException.class)
     public ProblemDetail servicioExterno(ServicioExternoException e) {
@@ -97,6 +116,33 @@ public class ManejadorDeErrores {
                         f -> f.getDefaultMessage() == null ? "valor invalido" : f.getDefaultMessage(),
                         (primero, segundo) -> primero));
 
+        ProblemDetail p = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "hay campos que no cumplen las reglas");
+        p.setTitle("Datos invalidos");
+        p.setProperty("campos", limitar(porCampo));
+        return p;
+    }
+
+    /**
+     * Cuando un metodo del controller tiene restricciones en sus parametros (p. ej. @Pattern en las
+     * variables de ruta), Spring valida todo junto y los fallos del cuerpo llegan aqui en vez de como
+     * MethodArgumentNotValidException. Misma forma {campo: motivo}: los del cuerpo por nombre de campo
+     * (con el mismo recorte de nombreDeCampo) y los de ruta por el nombre del parametro, nunca por su valor.
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ProblemDetail validacionDeMetodo(HandlerMethodValidationException e) {
+        Map<String, String> porCampo = new java.util.LinkedHashMap<>();
+        e.getParameterValidationResults().forEach(r -> {
+            if (r instanceof org.springframework.validation.method.ParameterErrors pe) {
+                pe.getFieldErrors().forEach(f -> porCampo.putIfAbsent(nombreDeCampo(f.getField()),
+                        f.getDefaultMessage() == null ? "valor invalido" : f.getDefaultMessage()));
+            } else {
+                String nombre = r.getMethodParameter().getParameterName();
+                String motivo = r.getResolvableErrors().stream().map(x -> x.getDefaultMessage())
+                        .filter(java.util.Objects::nonNull).findFirst().orElse("valor invalido");
+                porCampo.putIfAbsent(nombre == null ? "parametro" : nombre, motivo);
+            }
+        });
         ProblemDetail p = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST, "hay campos que no cumplen las reglas");
         p.setTitle("Datos invalidos");

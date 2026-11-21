@@ -4,6 +4,7 @@ import PrivilegeRedeemDialog from './PrivilegeRedeemDialog';
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { initialPrivileges } from '../../config/rewardConfig';
+import type { Privilege } from '../../types/privilegeTypes';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faTrophy, 
@@ -22,7 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const ChildView: React.FC = () => {
   const { familyId, childId } = useParams<{ familyId: string; childId: string }>();
-  const [selectedPrivilege, setSelectedPrivilege] = useState<any>(null);
+  const [selectedPrivilege, setSelectedPrivilege] = useState<Privilege | null>(null);
   const [isRedeeming, setIsRedeeming] = useState(false);
 
   const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -74,7 +75,7 @@ const ChildView: React.FC = () => {
   };
 
   // Función para canjear privilegio
-  const handleRedeemPrivilege = async (privilege: any, selectedDate: string) => {
+  const handleRedeemPrivilege = async (privilege: Privilege, selectedDate: string) => {
     if (!familyId || !childId) return;
 
     try {
@@ -86,6 +87,11 @@ const ChildView: React.FC = () => {
         childName: childName
       };
       
+      // Privilege.id es opcional en el tipo (el documento suele traerlo,
+      // pero nadie lo promete). Lanzar cae en el mismo catch de siempre.
+      if (!privilege.id) {
+        throw new Error('Privilegio sin id: no se puede canjear');
+      }
       const currentPrivilege = await getPrivilegeById(privilege.id);
       const currentHistory = currentPrivilege?.history || [];
       
@@ -114,7 +120,7 @@ const ChildView: React.FC = () => {
   };
 
   // Función para enviar notificación a la familia
-  const sendFamilyNotification = async (privilege: any, date: string) => {
+  const sendFamilyNotification = async (privilege: Privilege, date: string) => {
     try {
       // Guardar notificación en Firestore para que la vea el dashboard
       const notification = {

@@ -26,8 +26,12 @@ service cloud.firestore {
 
     // ---------- Ayudas ----------
 
+    // Una cuenta anónima la crea cualquiera con una llamada, sin pasar por la
+    // app: su token es válido pero no identifica a nadie, así que no cuenta
+    // como sesión. Firebase siempre pone `sign_in_provider` en el token.
     function haIniciadoSesion() {
-      return request.auth != null;
+      return request.auth != null
+             && request.auth.token.firebase.sign_in_provider != 'anonymous';
     }
 
     function miDocumento() {
@@ -57,13 +61,36 @@ service cloud.firestore {
                     && request.resource.data.rol == resource.data.rol
                     && request.resource.data.familyId == resource.data.familyId;
 
-      allow create: if haIniciadoSesion() && request.auth.uid == uid;
+      // Al crearse: sin campos de más, siempre `padre` (el admin se asigna a
+      // mano, nunca desde el cliente) y solo en una familia donde ya figuras
+      // como adulto. El alta crea la familia primero y el usuario después, así
+      // que esa familia ya existe cuando llega este documento. Sin esto,
+      // cualquiera se daba de alta como admin o en la familia de otro.
+      allow create: if haIniciadoSesion()
+                    && request.auth.uid == uid
+                    && request.resource.data.keys().hasOnly(
+                         ['nombre', 'email', 'rol', 'familyId', 'fechaCreacion'])
+                    && request.resource.data.rol == 'padre'
+                    && request.auth.uid in get(/databases/$(database)/documents/familias/$(request.resource.data.familyId)).data.miembros.padres;
       allow delete: if false;
     }
 
     // ---------- Familias ----------
     match /familias/{familyId} {
-      allow read, write: if esMiFamilia(familyId);
+      allow read, update: if esMiFamilia(familyId);
+
+      // Borrar: nadie. El id de la familia es el que ata sus tareas y membresias
+      // en la API; si se pudiera borrar, otra cuenta podria recrearla con el mismo
+      // id y heredar todo lo que colgaba de ella.
+      allow delete: if false;
+
+      // Crear: aún no existe `usuarios/{uid}`, así que `esMiFamilia` no sirve
+      // (el alta crea la familia antes que el usuario). Se exige que el único
+      // adulto sea quien la crea y que no traiga hijos: nadie puede fundar una
+      // familia metiendo a otro dentro.
+      allow create: if haIniciadoSesion()
+                    && request.resource.data.miembros.padres.keys().hasOnly([request.auth.uid])
+                    && request.resource.data.miembros.hijos.size() == 0;
     }
 
     // ---------- Puntos de la semana ----------
@@ -87,8 +114,16 @@ service cloud.firestore {
       allow delete: if esMiFamilia(resource.data.familyId);
     }
 
-    // ---------- Privilegios ----------
-    match /privilegios/{privilegeId} {
+    // ---------- Privilegios (recompensas) ----------
+    // Antes este bloque se llamaba `privilegios`, pero el código siempre usó la
+    // colección `privileges`: la regla no coincidía con ninguna ruta real y todo
+    // caía en el "denegar por defecto" de abajo. La pantalla de privilegios
+    // fallaba entera y nadie lo veía porque ningún test miraba esta colección.
+    //
+    // Mismo patrón que `weeklyTasks`: se comprueba el CAMPO `familyId`. Por eso
+    // listar exige `where('familyId', '==', ...)`: Firestore no deja pedir una
+    // colección entera si alguna regla podría rechazar algún documento.
+    match /privileges/{privilegeId} {
       allow read: if esMiFamilia(resource.data.familyId);
       allow create: if esMiFamilia(request.resource.data.familyId);
       allow update: if esMiFamilia(resource.data.familyId)
@@ -96,15 +131,30 @@ service cloud.firestore {
       allow delete: if esMiFamilia(resource.data.familyId);
     }
 
+    // ---------- Historial de canjes ----------
+    // Es un libro de registro: cada fila dice "este hijo canjeó este privilegio
+    // este día". Se lee y se añade, pero NUNCA se reescribe ni se borra: si un
+    // canje se pudiera editar, se podría falsificar qué se gastó y cuándo.
+    // Un error se corrige apuntando otro canje, no borrando el anterior.
+    match /privilegeHistory/{canjeId} {
+      allow read: if esMiFamilia(resource.data.familyId);
+      allow create: if esMiFamilia(request.resource.data.familyId);
+      allow update, delete: if false;
+    }
+
     // ---------- FAQs ----------
-    // Se leen sin sesión a propósito: la página `/faqs` es pública, para que
-    // un padre pueda mandarle el enlace a un abuelo que no tiene cuenta.
+    // Leer necesita sesión. Antes se leía sin ella a propósito, para que un
+    // padre pudiera mandarle el enlace de `/faqs` a un abuelo sin cuenta. Esa
+    // decisión se revirtió: `categorias` guarda el contenido del método, que
+    // es de su autor (Vicent Ginés Romero) y no nuestro para publicarlo.
+    // Leerlo solo desde el backend llega con la sesión 4; hasta entonces, con
+    // sesión.
     //
     // Escribir es otra cosa. Antes la ruta `/admin/faqs` solo comprobaba que
     // hubieras iniciado sesión, así que cualquiera con cuenta podía borrar las
     // FAQs de todas las familias. Un hijo incluido.
     match /categorias/{categoriaId} {
-      allow read: if true;
+      allow read: if haIniciadoSesion();
       allow write: if soyAdmin();
     }
 

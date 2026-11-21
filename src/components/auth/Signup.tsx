@@ -4,8 +4,10 @@ import { setDoc, doc } from "firebase/firestore";
 import { useState } from "react";
 import Field from "../ui/Field";
 import { addFamily } from "../../services/familyService";
+import { useSesion } from "../../auth/useSesion";
 
 const SignUp: React.FC = () => {
+  const { iniciarAlta, terminarAlta } = useSesion();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,6 +67,12 @@ const SignUp: React.FC = () => {
     
     setIsLoading(true);
 
+    // Se marca el alta ANTES de crear la cuenta: en cuanto Firebase abre la
+    // sesión el panel ya se pinta, y sin esta marca vería "sin documento" (el
+    // documento lo creamos unas líneas más abajo) y mostraría un error. Todavía
+    // no hay uid: el AuthProvider la ata al primer usuario que llegue.
+    iniciarAlta();
+
     try {
       console.log("Iniciando registro para:", email);
       
@@ -116,6 +124,9 @@ const SignUp: React.FC = () => {
         setError("Error inesperado al registrarse");
       }
     } finally {
+      // Siempre se cierra, también si createUser rechaza: una alta fallida no
+      // debe dejar el panel en "Preparando…" para siempre.
+      terminarAlta();
       setIsLoading(false);
     }
   };

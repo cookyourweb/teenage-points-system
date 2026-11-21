@@ -1,9 +1,36 @@
 //usersService.ts
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import type { EstadoPerfil } from "../auth/useSesion";
 
 // Actualizar el número de teléfono del usuario
 export const updatePhoneNumber = async (userId: string, phone: string): Promise<void> => {
   const userRef = doc(db, "usuarios", userId);
   await updateDoc(userRef, { telefono: phone });
 };
+
+// Observa `usuarios/{uid}` en vivo. Devuelve la función de baja.
+// Un documento inexistente no es un error: es 'sin-documento' (el alta aún no
+// lo ha creado) y cuando aparezca llegará otro evento con 'listo'.
+export const observarPerfil = (uid: string, alCambiar: (e: EstadoPerfil) => void): (() => void) =>
+  onSnapshot(
+    doc(db, "usuarios", uid),
+    (snap) => {
+      // NO se filtra `snap.metadata.hasPendingWrites` a propósito: la escritura
+      // local de Signup (setDoc de usuarios) dispara este snapshot `listo` antes
+      // de que setDoc resuelva en el servidor. Eso evita que parpadee "cuenta no
+      // configurada" cuando Signup llama a terminarAlta. Filtrarlo reabriría la carrera.
+      if (!snap.exists()) return alCambiar({ tipo: "sin-documento" });
+      const d = snap.data();
+      alCambiar({
+        tipo: "listo",
+        perfil: { nombre: d.nombre ?? "", rol: d.rol ?? "", familyId: d.familyId ?? "" },
+      });
+    },
+    // Un error termina el listener en Firestore: distinguirlo de "sin documento"
+    // evita decirle a alguien con la red caida que su cuenta no esta configurada.
+    (error) => {
+      console.error("Error observando el perfil:", error);
+      alCambiar({ tipo: "error" });
+    },
+  );

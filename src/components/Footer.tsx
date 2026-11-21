@@ -6,8 +6,9 @@ import { Link } from 'react-router-dom';
  *
  * Hace dos cosas:
  *
- *  1. Da una PUERTA a las FAQs. Existen en `/faqs`, son publicas y funcionan
- *     desde hace tiempo, y no habia ni un enlace en toda la aplicacion: solo se
+ *  1. Da una PUERTA a las FAQs. Existen en `/faqs`, que pide sesion (el contenido
+ *     es del metodo de su autor, no es nuestro para publicarlo). Funcionan desde
+ *     hace tiempo, y no habia ni un enlace en toda la aplicacion: solo se
  *     llegaba escribiendo la URL. La pantalla estaba, faltaba la puerta.
  *  2. Firma quien lo ha hecho.
  *

@@ -1,0 +1,147 @@
+# CI del proyecto: cuatro jobs, front, back, reglas de Firestore y script de baja.
+#
+# Sin --passWithNoTests y sin continue-on-error: si un paso falla, falla.
+#
+# El backend no necesita un Mongo instalado en CI: casi todos los tests mockean el
+# repositorio y el contexto arranca sin Mongo (la traza ConnectException del log es
+# ruido conocido). La excepcion es task/PropiedadIntegracionTest, que levanta su
+# propio Mongo con Testcontainers y SI necesita Docker; los runners ubuntu-latest de
+# GitHub ya lo traen, por eso no hay ningun paso extra.
+#
+# Ojo con el wrapper de Maven: NO se versiona el jar. .mvn/wrapper/
+# maven-wrapper.properties es distributionType=only-script, asi que mvnw
+# descarga Maven (3.9.16) por su cuenta. En un checkout fresco anda igual
+# que en local, pero necesita red.
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Si se empuja dos veces seguidas, se cancela la corrida vieja en vez de
+# encolarla (mismo renglón que usa storybook.yml para Pages).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend (lint → typecheck → tests → build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Primero lo barato. Nunca corrió en CI hasta 2026-10: con estos errores
+      # el repo pisoaba igual, por eso este paso existe.
+      - name: Lint
+        run: npm run lint
+
+      # npm run typecheck (tsc -b), nunca `tsc --noEmit` a secas: el tsconfig
+      # raíz es { "files": [], "references": [...] } y compila cero ficheros.
+      - name: Tipos
+        run: npm run typecheck
+
+      # Tests y build con Firebase FALSO a propósito: ningún test ni build
+      # habla con la base real. Igual que hace storybook.yml. Sin esto,
+      # src/firebase.ts revienta con auth/invalid-api-key al cargar el módulo.
+      - name: Tests
+        run: npx vitest run
+        env:
+          VITE_FIREBASE_API_KEY: clave-de-prueba
+          VITE_FIREBASE_AUTH_DOMAIN: prueba.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: proyecto-de-prueba
+          VITE_FIREBASE_STORAGE_BUCKET: prueba.appspot.com
+          VITE_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+          VITE_FIREBASE_APP_ID: "1:000000000000:web:7777777777777777777777"
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: clave-de-prueba
+          VITE_FIREBASE_AUTH_DOMAIN: prueba.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: proyecto-de-prueba
+          VITE_FIREBASE_STORAGE_BUCKET: prueba.appspot.com
+          VITE_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+          VITE_FIREBASE_APP_ID: "1:000000000000:web:7777777777777777777777"
+
+  backend:
+    name: Backend (./mvnw test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      # --batch-mode para sin colores ni banners; --no-transfer-progress para
+      # no llenar el log con el progreso de descargas que cachea setup-java.
+      - name: Tests
+        run: ./mvnw --batch-mode --no-transfer-progress test
+
+  # Las reglas de Firestore se prueban contra el emulador en cada push: si
+  # alguien las afloja y nadie corre los tests, se abren sin que nadie lo vea.
+  # El emulador es Java, por eso va setup-java. firebase-tools va fijado a
+  # 13.13.0 para que el emulador no cambie de versión entre corridas.
+  reglas:
+    name: Reglas de Firestore (emulador)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - run: npm ci
+
+      - name: Reglas
+        run: npx firebase-tools@13.13.0 emulators:exec --only firestore --project demo-teenage-points "npx vitest run --config vitest.rules.config.ts"
+
+  # El script de baja de una familia borra datos de verdad (RGPD): se prueba
+  # entero contra los emuladores de Firestore y Auth y un Mongo en memoria
+  # (mongodb-memory-server descarga su mongod, no necesita Docker).
+  baja-familia:
+    name: Script de baja de familia (emuladores)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - run: npm ci
+
+      - name: Baja de familia
+        run: npx firebase-tools@13.13.0 emulators:exec --only firestore,auth --project demo-teenage-points "npx vitest run --config vitest.baja.config.ts"

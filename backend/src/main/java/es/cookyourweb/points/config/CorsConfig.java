@@ -39,7 +39,10 @@ public class CorsConfig implements WebMvcConfigurer {
                 // No se pone "*": si manana hace falta PATCH, que haya que anadirlo aqui
                 // y verlo en el diff.
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("Content-Type")
+                .allowedHeaders("Content-Type", "Authorization")
+                // Retry-After (del 429 de LimiteIaConfig) no es cabecera CORS "segura": sin
+                // exponerla, el navegador se la esconde a fetch() y el frontend lee null.
+                .exposedHeaders("Retry-After")
                 // Sin credenciales: la autenticacion ira por cabecera Authorization,
                 // no por cookie, asi que el navegador no necesita mandar credenciales
                 // de origen cruzado. Activarlo sin necesitarlo solo amplia la superficie.

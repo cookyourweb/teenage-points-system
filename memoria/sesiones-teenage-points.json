@@ -1,0 +1,68 @@
+[
+  {
+    "fecha": "2026-10-16",
+    "tema": "Agentes: AGENTS.md ×2 + lint a cero (8 any tipados) + ci.yml + plantilla PR + MEMORY.md + tracker",
+    "minutos": 75,
+    "creado": "2026-10-16T09:30:30.899Z"
+  },
+  {
+    "fecha": "2026-10-17",
+    "tema": "Plan coach (método Efera / Vicent Ginés): research, derechos, acuerdos y 5 iteraciones",
+    "minutos": 131,
+    "creado": "2026-10-17T13:20:00.000Z"
+  },
+  {
+    "fecha": "2026-10-18",
+    "tema": "Estructura .opencode (agente + 4 skills), backend Java explicado, plan del coach movido al repo y gitignored",
+    "minutos": 60,
+    "creado": "2026-10-18T14:45:00.000Z"
+  },
+  {
+    "fecha": "2026-10-19",
+    "tema": "MCP chrome-devtools + plugins v1→v2 + API key nueva + MEMORY al día + engram + informe RAG; auditoría de login (consola, red, a11y) y 7 commits sin empujar",
+    "minutos": 372,
+    "creado": "2026-10-19T11:46:00.000Z"
+  },
+  {
+    "fecha": "2026-11-10",
+    "tema": "AWS fase 0: justificación (histórico weeklyTasks muerto), plan con agente, Docker→ECR→Lambda con imagen, regla Always Free",
+    "minutos": 63,
+    "creado": "2026-11-10T18:05:00.000Z"
+  },
+  {
+    "fecha": "2026-11-11",
+    "tema": "/doctor (y deshecho lo de las skills), 12 puntos de tu-vuelta-al-sol, traza del hook salvavidas",
+    "minutos": 67,
+    "creado": "2026-11-11T05:01:00.000Z"
+  },
+  {
+    "fecha": "2026-11-12",
+    "tema": "Push de develop con CI verde, hook salvavidas arreglado (jq 17× más rápido + async), AWS fase 1: cuenta propia vero-labs",
+    "minutos": 37,
+    "creado": "2026-11-12T12:45:00.000Z"
+  },
+  {
+    "fecha": "2026-11-13",
+    "tema": "AWS fase 1: cuenta propia en plan gratuito (0 $), AWS CLI instalado; aws login y CloudShell bloqueados por la verificación de la cuenta nueva",
+    "minutos": 104,
+    "creado": "2026-11-13T06:29:00.000Z"
+  },
+  {
+    "fecha": "2026-11-14",
+    "tema": "Sesión 1 reglas desplegadas y privilegios arreglados; sesión 2 (API verifica el token de Firebase, /api/me, AuthProvider, carrera del alta) y sesión 3 (membresías, 404 entre familias, Testcontainers), probadas en local",
+    "minutos": 330,
+    "creado": "2026-11-14T12:05:00.000Z"
+  },
+  {
+    "fecha": "2026-11-15",
+    "tema": "Regla familias delete:false desplegada; script de baja de familia (RGPD) con ensayo por defecto, probado contra emuladores y en CI; sesión 4: perfil de los cinco colores calculado en el servidor (mezcla, no un tipo), elección por adulto en Mongo, pantalla probada en local",
+    "minutos": 434,
+    "creado": "2026-11-15T12:10:00.000Z"
+  },
+  {
+    "fecha": "2026-11-16",
+    "tema": "Sesión 4 cerrada: arreglos de la revisión final, chat guiado de afirmaciones (una por mensaje) y foco accesible; falta recuperar contraseña",
+    "minutos": 290,
+    "creado": "2026-11-16T10:25:00.000Z"
+  }
+]

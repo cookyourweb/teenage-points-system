@@ -1,5 +1,5 @@
 // src/components/dashboard/TaskManagement.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -70,14 +70,12 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [saving, setSaving] = useState(false);
 
-  // Cargar tareas personalizadas
-  useEffect(() => {
-    loadCustomTasks();
-  }, [familyId]);
-
-  const loadCustomTasks = async () => {
+  // Cargar tareas personalizadas. useCallback para que el efecto no dependa
+  // de una funcion llana, cuya instancia es nueva en cada render: eso haria
+  // volver a correr el efecto en cada render y pedir a la API en bucle.
+  const loadCustomTasks = useCallback(async () => {
     if (!familyId) return;
-    
+
     try {
       setLoading(true);
       const tasks = await getTasksByFamily(familyId);
@@ -88,7 +86,13 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [familyId]);
+
+  // Con la instancia estable, el efecto solo corre al montar o si cambia
+  // la familia, que es lo que el [familyId] siempre quiso decir.
+  useEffect(() => {
+    loadCustomTasks();
+  }, [familyId, loadCustomTasks]);
 
   // Validar formulario
   const validateForm = (data: TaskFormData): boolean => {
@@ -288,8 +292,9 @@ const TaskManagement: React.FC<TaskManagementProps> = ({ familyId }) => {
     }
   };
 
-  // Actualizar campo del formulario
-  const updateFormField = (field: keyof TaskFormData, value: any) => {
+  // Actualizar campo del formulario. El generico liga value al campo:
+  // string en nombre, number en puntos, boolean en isActive.
+  const updateFormField = <K extends keyof TaskFormData>(field: K, value: TaskFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Limpiar error del campo si existe

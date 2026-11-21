@@ -25,10 +25,11 @@ class TasksPrivilegesService {
     }
   }
 
-  async getChildPrivileges(childId: string): Promise<Privilege[]> {
+  async getChildPrivileges(familyId: string, childId: string): Promise<Privilege[]> {
     try {
       const q = query(
         collection(db, "privileges"), 
+        where("familyId", "==", familyId),
         where("childId", "==", childId)
       );
       const querySnapshot = await getDocs(q);
@@ -38,6 +39,7 @@ class TasksPrivilegesService {
         return {
           id: doc.id,
           privilegioId: doc.id,
+          familyId: data.familyId,
           name: data.name,
           description: data.description,
           points: data.points,
@@ -51,15 +53,16 @@ class TasksPrivilegesService {
     }
   }
 
-  async getPrivilegeHistory(childId: string): Promise<PrivilegeHistory[]> {
+  async getPrivilegeHistory(familyId: string, childId: string): Promise<PrivilegeHistory[]> {
     try {
       const q = query(
         collection(db, "privilegeHistory"), 
-        where("childId", "==", childId),
-        orderBy("dateUnlocked", "desc")
+        where("familyId", "==", familyId),
+        where("childId", "==", childId)
       );
       const querySnapshot = await getDocs(q);
       
+      // Orden en cliente: where + orderBy pediría un índice compuesto.
       return querySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -69,18 +72,18 @@ class TasksPrivilegesService {
           unlockedBy: data.unlockedBy,
           childId: data.childId
         } as PrivilegeHistory;
-      });
+      }).sort((a, b) => String(b.dateUnlocked ?? "").localeCompare(String(a.dateUnlocked ?? "")));
     } catch (error) {
       console.error("Error fetching privilege history:", error);
       throw new Error("Failed to fetch privilege history");
     }
   }
 
-  async getAllPrivileges(): Promise<Privilege[]> {
+  async getAllPrivileges(familyId: string): Promise<Privilege[]> {
     try {
       const q = query(
         collection(db, "privileges"),
-        orderBy("points", "asc")
+        where("familyId", "==", familyId)
       );
       const querySnapshot = await getDocs(q);
       
@@ -89,13 +92,14 @@ class TasksPrivilegesService {
         return {
           id: doc.id,
           privilegioId: doc.id,
+          familyId: data.familyId,
           name: data.name,
           description: data.description,
           points: data.points,
           unlocked: data.unlocked,
           history: data.history || []
         } as Privilege;
-      });
+      }).sort((a, b) => a.points - b.points);
     } catch (error) {
       console.error("Error fetching all privileges:", error);
       throw new Error("Failed to fetch all privileges");

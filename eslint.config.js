@@ -24,5 +24,20 @@ export default tseslint.config({ ignores: ['dist', 'storybook-static'] }, {
       'warn',
       { allowConstantExport: true },
     ],
+
+    // El design system descarta className y style con asignacion furnida
+    // para que no lleguen al DOM (ver Button.tsx: el contrato no los acepta).
+    // Es enforcement, no descuido, por eso se nombra con _ y se ignora.
+    // ignoreRestSiblings: los descartados no cuentan como "no usados" si
+    // el resto del objeto se usa. Args/vars con ^_: convencion del repo
+    // para "reservado y deliberadamente vacio".
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+      },
+    ],
   },
 }, storybook.configs["flat/recommended"]);

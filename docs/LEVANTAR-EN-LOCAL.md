@@ -54,8 +54,13 @@ SPRING_MONGODB_URI='mongodb+srv://...' ./mvnw spring-boot:run
 
 ```bash
 cd backend
-./mvnw spring-boot:run
+FIREBASE_PROJECT_ID='<id del proyecto Firebase>' ./mvnw spring-boot:run
 ```
+
+**`FIREBASE_PROJECT_ID` es obligatoria**: la API verifica el token de Firebase
+(`iss` y `aud` llevan el id del proyecto) y sin ella **no arranca**, a propósito.
+El id no se escribe en ningún fichero versionado (repo público): va por entorno.
+Mientras el frontend no mande el token, `/api/tasks` responde `401` en local.
 
 Comprobar que está vivo **y conectado**:
 
@@ -119,3 +124,9 @@ npx vitest run      # los tests
 `{ "files": [], "references": [...] }`, así que compila cero ficheros y sale
 con 0 diga lo que diga el código. Por eso existe el script `typecheck`, que usa
 `tsc -b` y sí sigue las referencias.
+
+---
+
+## Dar de baja a una familia
+
+El script de borrado RGPD tiene su propia guía: [BAJA-DE-FAMILIA.md](./BAJA-DE-FAMILIA.md).

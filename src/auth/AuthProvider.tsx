@@ -1,0 +1,115 @@
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { auth } from "../firebase";
+import { observarPerfil } from "../services/usersService";
+import { asegurarMembresia } from "../services/identidadService";
+import { SesionContext, type EstadoPerfil, type SesionConAcciones } from "./useSesion";
+
+// Única excepción a "Firebase solo en services/": este proveedor es el único
+// sitio que observa la sesión (onAuthStateChanged). El perfil NO se lee aquí:
+// va por usersService.observarPerfil.
+//
+// Por qué un solo proveedor: antes cada pantalla se suscribía por su cuenta y
+// el panel leía `usuarios/{uid}` con un getDoc antes de que el alta lo creara.
+// Ahora el perfil se observa en vivo y, cuando el documento aparece, la
+// pantalla se actualiza sola (la carrera se resuelve con el dato, no con
+// esperas).
+
+// `undefined` = Firebase aún no ha contestado; `null` = nadie con sesión.
+type UsuarioObservado = User | null | undefined;
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<UsuarioObservado>(undefined);
+  // El perfil lleva el uid al que pertenece: si no coincide con el usuario
+  // actual se considera 'cargando'. Así, al cambiar de cuenta, el perfil de la
+  // anterior nunca se muestra ni durante un render.
+  const [perfilDe, setPerfilDe] = useState<{ uid: string; estado: EstadoPerfil } | null>(null);
+  // La alta en curso también pertenece a un uid: si el alta falla sin llamar a
+  // terminarAlta, la siguiente cuenta no debe heredar el "Preparando…".
+  const [altaDe, setAltaDe] = useState<string | null>(null);
+
+  // Alta pedida cuando todavía no había usuario (Signup llama a iniciarAlta
+  // ANTES de crear la cuenta, así que no hay uid al que atarla). Se ata al
+  // primer usuario que entregue Firebase. Es un ref y no estado porque debe
+  // leerse en el mismo callback de onAuthStateChanged, sin esperar a un render.
+  const altaPendiente = useRef(false);
+  // uid vigente para que iniciarAlta (callback estable) sepa si ya hay usuario.
+  const uidActual = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    const baja = onAuthStateChanged(auth, (u) => {
+      uidActual.current = u?.uid;
+      // setAltaDe antes de setUser: React los agrupa y el primer render
+      // autenticado ya trae altaEnCurso true (sin un instante de "sin-documento").
+      if (u && altaPendiente.current) setAltaDe(u.uid);
+      altaPendiente.current = false;
+      // Al quedar sin sesión se borra todo lo de la cuenta anterior: si la misma
+      // cuenta vuelve a entrar no debe verse un instante su perfil viejo.
+      if (!u) {
+        setPerfilDe(null);
+        setAltaDe(null);
+      }
+      setUser(u);
+    });
+    return baja;
+  }, []);
+
+  const uid = user?.uid;
+  useEffect(() => {
+    if (!uid) return;
+    // La baja de la suscripción es lo que devuelve el efecto: al cambiar de
+    // uid (o en el doble montaje de StrictMode) React la llama antes de abrir la nueva.
+    return observarPerfil(uid, (estado) => setPerfilDe({ uid, estado }));
+  }, [uid]);
+
+  // familyId del perfil SOLO si es listo y de la cuenta actual (mismo criterio
+  // de `perfilDe`: el de otra cuenta no cuenta). Vacio = aun no hay familia.
+  const familyId =
+    perfilDe && perfilDe.uid === uid && perfilDe.estado.tipo === "listo"
+      ? perfilDe.estado.perfil.familyId
+      : undefined;
+  // uid cuya membresia ya se pidio: una llamada por cuenta aunque el perfil se
+  // emita varias veces o StrictMode repita el efecto (el ref sobrevive a ambos).
+  const uidAsegurado = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    // Sin sesion se olvida: si la misma cuenta vuelve a entrar, se asegura de nuevo.
+    if (!uid) {
+      uidAsegurado.current = undefined;
+      return;
+    }
+    if (!familyId || uidAsegurado.current === uid) return;
+    uidAsegurado.current = uid;
+    // El backend exige membresia para las tareas. El servidor la crea leyendo la
+    // familia en Firestore con nuestro token (idempotente). Un fallo no tumba la
+    // sesion: solo se registra; la siguiente entrada lo reintenta.
+    // async + try/catch (y no solo .catch) para que tambien un throw sincrono quede registrado.
+    void (async () => {
+      try {
+        await asegurarMembresia();
+      } catch (e) {
+        console.error("No se pudo asegurar la membresia", e);
+      }
+    })();
+  }, [uid, familyId]);
+
+  const iniciarAlta = useCallback(() => {
+    if (uidActual.current) setAltaDe(uidActual.current);
+    else altaPendiente.current = true;
+  }, []);
+  const terminarAlta = useCallback(() => {
+    altaPendiente.current = false;
+    setAltaDe(null);
+  }, []);
+  const cerrarSesion = useCallback(() => signOut(auth), []);
+
+  const valor = useMemo<SesionConAcciones>(() => {
+    const acciones = { iniciarAlta, terminarAlta, cerrarSesion };
+    if (user === undefined) return { tipo: "cargando", ...acciones };
+    if (user === null) return { tipo: "anonimo", ...acciones };
+    const perfil: EstadoPerfil =
+      perfilDe && perfilDe.uid === user.uid ? perfilDe.estado : { tipo: "cargando" };
+    return { tipo: "autenticado", user, perfil, altaEnCurso: altaDe === user.uid, ...acciones };
+  }, [user, perfilDe, altaDe, iniciarAlta, terminarAlta, cerrarSesion]);
+
+  return <SesionContext.Provider value={valor}>{children}</SesionContext.Provider>;
+};

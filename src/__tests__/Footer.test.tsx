@@ -12,8 +12,9 @@ import Footer from '../components/Footer';
  *
  * Hace dos cosas a la vez:
  *
- *  1. Da una puerta a las FAQs. Existen en `/faqs`, son publicas y funcionan, y
- *     hasta hoy no habia ni un enlace en toda la aplicacion: solo se llegaba
+ *  1. Da una puerta a las FAQs. Existen en `/faqs`, que pide sesion (el contenido
+ *     es del metodo de su autor, no es nuestro para publicarlo) y funcionan.
+ *     Hasta hoy no habia ni un enlace en toda la aplicacion: solo se llegaba
  *     escribiendo la URL.
  *  2. Firma quien lo ha hecho, con enlace a wunjocreations.com.
  *

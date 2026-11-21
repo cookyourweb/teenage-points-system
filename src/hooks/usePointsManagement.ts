@@ -7,6 +7,11 @@ import { initialTasks } from '../config/rewardConfig';
 import { toast } from 'react-toastify';
 import { CustomTask, getActiveTasksByFamily } from '../services/customTaskService';
 
+// Siempre los mismos siete dias, una sola vez a nivel de modulo. Al tener
+// identidad estable, los useCallback que la usan no cambian de instancia
+// en cada render (y el efecto de montaje deja de volver a correr).
+const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
 // Interfaces
 interface ChildPoints {
   childId: string;
@@ -55,8 +60,6 @@ export const usePointsManagement = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpdatedByOther, setIsUpdatedByOther] = useState(false);
-
-  const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
   // Obtener nombre del hijo
   useEffect(() => {
@@ -144,7 +147,7 @@ export const usePointsManagement = ({
     });
 
     return combinedTasks;
-  }, [diasSemana, childId]);
+  }, [childId]);
 
   // Cargar datos iniciales
   const loadWeeklyData = useCallback(async () => {
@@ -220,7 +223,7 @@ export const usePointsManagement = ({
     } finally {
       setLoading(false);
     }
-  }, [familyId, childId, userId, diasSemana, loadCustomTasks, createCombinedTasks]);
+  }, [familyId, childId, userId, loadCustomTasks, createCombinedTasks]);
 
   // Cargar datos al montar
   useEffect(() => {

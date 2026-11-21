@@ -20,7 +20,7 @@ import {
 
 } from '@fortawesome/free-solid-svg-icons';
 import { 
-  fetchPrivileges, 
+  getPrivilegesByFamily, 
   addPrivilege, 
   updatePrivilege, 
   deletePrivilege 
@@ -69,12 +69,13 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
   // Cargar privilegios
   useEffect(() => {
     loadPrivileges();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [familyId]);
 
   const loadPrivileges = async () => {
     try {
       setLoading(true);
-      const privilegesData = await fetchPrivileges();
+      const privilegesData = await getPrivilegesByFamily(familyId);
       setPrivileges(privilegesData);
     } catch (error) {
       console.error('Error loading privileges:', error);
@@ -172,6 +173,7 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
 
     try {
       const privilegeData: Privilege = {
+        familyId,
         name: formData.name.trim(),
         points: formData.points,
         description: formData.description.trim(),
@@ -190,7 +192,7 @@ const PrivilegeManagement: React.FC<PrivilegeManagementProps> = ({ familyId }) =
         toast.success('✅ Privilegio actualizado correctamente');
       } else {
         // Crear nuevo privilegio
-        const newPrivilege = await addPrivilege(privilegeData);
+        const newPrivilege = await addPrivilege({ ...privilegeData, familyId });
         setPrivileges(prev => [...prev, newPrivilege]);
         toast.success('✅ Nuevo privilegio creado correctamente');
       }

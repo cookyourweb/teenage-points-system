@@ -38,3 +38,10 @@ storybook-static
 
 # Registro de la CLI de Firebase, se regenera solo
 firebase-debug.log
+
+# Planes de sesión: pueden contener contenido del método (no versionable, ver NOTICE)
+.opencode/plan/
+.claude/RESUME.md
+
+# Pegadas reales de Classroom, solo para probar a mano (nunca se versionan)
+*.pegada.txt

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
@@ -29,5 +29,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts',
+    // Las reglas se prueban contra el emulador: `npm run test:rules`.
+    // El test de integracion del script de baja tambien necesita emuladores.
+    exclude: [...configDefaults.exclude, 'tests/rules/**', 'scripts/**/integracion.test.ts'],
   },
 })

@@ -81,3 +81,19 @@ describe('los componentes no exportan servicios', () => {
     expect(infractores).toEqual([]);
   });
 });
+
+describe('toda llamada a la API pasa por apiFetch', () => {
+  it('fetchSoloEnHttp: ningun fichero fuera de services/http.ts contiene fetch(', () => {
+    // La API exige el token de Firebase en cada peticion. Si un servicio llama a
+    // fetch( por su cuenta, esa peticion sale sin Authorization y el servidor la
+    // rechaza con 401... o peor, alguien la "arregla" copiando el token a mano.
+    // Un unico punto de salida garantiza que el token se pone siempre igual.
+    // Sin lista de excepciones: hoy solo lo usa customTaskService, y lo hace via apiFetch.
+    const infractores = ficherosFuente()
+      .filter((ruta) => relativo(ruta) !== 'services/http.ts')
+      .filter((ruta) => /\bfetch\(/.test(readFileSync(ruta, 'utf8')))
+      .map(relativo);
+
+    expect(infractores).toEqual([]);
+  });
+});

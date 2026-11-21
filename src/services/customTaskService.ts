@@ -10,8 +10,8 @@
 // venian los datos; solo conocian estas funciones. El puerto ya estaba construido y
 // solo habia que escribir otro adaptador.
 
-/** Base de la API. En local no hace falta configurar nada. */
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
+import { ErrorHttp, apiFetch } from './http';
+import { asegurarMembresia } from './identidadService';
 
 export interface CustomTask {
   id?: string;
@@ -29,56 +29,43 @@ export interface CustomTask {
   updatedAt?: string;
 }
 
-/**
- * Convierte una respuesta con error en un Error con el motivo de verdad.
- *
- * La API devuelve ProblemDetail (RFC 7807). Y el orden de lectura importa:
- *
- * En un 400 de validacion, "detail" es generico ("hay campos que no cumplen las
- * reglas") y el motivo real esta en "campos", una propiedad por campo que falla.
- * Quedarse con el detail es enseñarle a quien rellena el formulario un mensaje
- * que no le dice que arreglar.
- *
- * En un 404 no hay "campos", y ahi el detail SI es el mensaje bueno.
- *
- * Por eso se mira primero campos y despues detail, y no al reves.
- */
-const errorDesde = async (respuesta: Response): Promise<Error> => {
-  const cuerpo = await respuesta.text();
+// Promesa en curso de asegurarMembresia: si N peticiones fallan a la vez con
+// "Familia no encontrada" (varias pantallas piden tareas en el primer acceso),
+// comparten UNA llamada a /api/membresias/yo en vez de disparar N.
+let asegurando: Promise<unknown> | null = null;
 
-  try {
-    const problema = JSON.parse(cuerpo);
-
-    const porCampo = problema.campos;
-    if (porCampo && typeof porCampo === 'object') {
-      const motivos = Object.values(porCampo).filter(Boolean);
-      // Se muestran todos, no solo el primero: si fallan tres campos y solo
-      // enseñas uno, se corrige, se reenvia y vuelve a fallar. Tres veces.
-      if (motivos.length > 0) return new Error(motivos.join('. '));
-    }
-
-    const motivo = problema.detail ?? problema.title;
-    if (motivo) return new Error(motivo);
-  } catch {
-    // No era JSON: un 502 de un proxy, o la API caida. Se usa el texto tal cual.
-  }
-
-  return new Error(cuerpo || `${respuesta.status} ${respuesta.statusText}`);
+const asegurarUnaVez = (): Promise<unknown> => {
+  asegurando ??= asegurarMembresia().finally(() => {
+    asegurando = null;
+  });
+  return asegurando;
 };
 
-/** Una llamada a la API. Centraliza cabeceras, errores y el 204 sin cuerpo. */
+const esFamiliaNoEncontrada = (e: unknown): boolean =>
+  e instanceof ErrorHttp && e.status === 404 && e.titulo === 'Familia no encontrada';
+
+/**
+ * Una llamada a la API. Delega en apiFetch, que pone el token de Firebase y
+ * centraliza errores y el 204 sin cuerpo (ver http.ts).
+ *
+ * En el primer acceso de una cuenta la membresia puede no existir todavia (los
+ * efectos de las pantallas corren antes que el alta, y /yo hace un viaje a
+ * Firestore): la API contesta 404 "Familia no encontrada". Entonces se asegura la
+ * membresia UNA vez y se repite la peticion UNA vez. Si sigue fallando, o si
+ * asegurar falla, se propaga el error original: no hay bucles.
+ */
 const peticion = async <T>(ruta: string, opciones: RequestInit = {}): Promise<T> => {
-  const respuesta = await fetch(`${API_URL}${ruta}`, {
-    ...opciones,
-    headers: { 'Content-Type': 'application/json', ...opciones.headers },
-  });
-
-  if (!respuesta.ok) throw await errorDesde(respuesta);
-
-  // DELETE responde 204 sin cuerpo. Intentar parsearlo reventaria.
-  if (respuesta.status === 204) return undefined as T;
-
-  return respuesta.json() as Promise<T>;
+  try {
+    return await apiFetch<T>(ruta, opciones);
+  } catch (error) {
+    if (!esFamiliaNoEncontrada(error)) throw error;
+    try {
+      await asegurarUnaVez();
+      return await apiFetch<T>(ruta, opciones);
+    } catch {
+      throw error;
+    }
+  }
 };
 
 // Los ids van escapados: uno con espacios o con & romperia la URL en silencio

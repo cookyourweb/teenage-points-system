@@ -75,3 +75,8 @@ Mongo se levanta con Docker (`docker start mongo-points`, el 27017; ver
 | `POST /api/ia/tipo/perfil` | respuestas → nivel por color (`id`, `nombre`, `nivel`); `400` con `campos` `{id: motivo}` |
 | `PUT /api/familias/{f}/hijos/{h}/tipo` | el adulto guarda sus colores (+ principal opcional); `400` con `campos` `{campo: motivo}` |
 | `GET /api/familias/{f}/hijos/{h}/tipo` | elecciones de la familia sobre ese hijo y si coinciden |
+| `GET /api/familias/{f}/hijos/{h}/deberes` | deberes del hijo (`?soloActivos=`) |
+| `POST /api/familias/{f}/hijos/{h}/deberes` | crear un deber → `201`; `409` si la `clave` ya existe |
+| `PUT /api/familias/{f}/hijos/{h}/deberes/{id}` | actualizar o archivar un deber |
+| `PUT /api/familias/{f}/hijos/{h}/importaciones-deberes` | anota la fecha de la última importación |
+| `GET /api/familias/{f}/hijos/{h}/importaciones-deberes` | cuándo fue la última importación |

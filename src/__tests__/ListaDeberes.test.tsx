@@ -160,3 +160,25 @@ describe('ListaDeberes', () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+describe('ListaDeberes al cambiar de hijo', () => {
+  it('cambiarDeHijoNuncaMuestraLosDeberesDelOtro', async () => {
+    const DE_MIA = base('x1', { hijoId: 'mia', titulo: 'Deber de Mía', fecha: '2027-03-11' });
+    let resolverMia: (l: Deber[]) => void = () => {};
+    vi.mocked(svc.getDeberes).mockImplementation((_f, hijo) =>
+      hijo === 'leo'
+        ? Promise.resolve([ENTREGA])
+        : new Promise<Deber[]>((r) => {
+            resolverMia = r;
+          }),
+    );
+    const { rerender } = render(<ListaDeberes familyId="fA" hijoId="leo" ahora={AHORA} onImportar={vi.fn()} />);
+    expect(await titulo_('Ficha de verbos')).toBeInTheDocument();
+
+    rerender(<ListaDeberes familyId="fA" hijoId="mia" ahora={AHORA} onImportar={vi.fn()} />);
+
+    expect(screen.queryByText('Ficha de verbos', { selector: 'p' })).not.toBeInTheDocument();
+    resolverMia([DE_MIA]);
+    expect(await titulo_('Deber de Mía')).toBeInTheDocument();
+  });
+});

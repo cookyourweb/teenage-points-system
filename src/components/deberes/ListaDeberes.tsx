@@ -95,6 +95,10 @@ export default function ListaDeberes({ familyId, hijoId, ahora, onImportar }: Li
 
   useEffect(() => {
     let vigente = true;
+    // Otro hijo: nada del anterior se ve ni se puede archivar mientras carga.
+    setDeberes(null);
+    setUltima(undefined);
+    setError(null);
     setCargada(false);
     Promise.all([getDeberes(familyId, hijoId, true), getUltimaImportacion(familyId, hijoId)])
       .then(([lista, en]) => {

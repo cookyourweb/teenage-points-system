@@ -11,7 +11,8 @@ import {
   faTasks,
   faGift,
   faChartLine,
-  faCircleQuestion
+  faCircleQuestion,
+  faBook
 } from "@fortawesome/free-solid-svg-icons";
 import AddEditChild from "./AddEditChild";
 import InviteMember from "./InviteMember";
@@ -19,6 +20,7 @@ import CompleteProfile from "./CompleteProfile";
 import FamilyPointsOverview from "./FamilyPointsOverview";
 import TaskManagement from "./TaskManagement";
 import PrivilegeManagement from "./PrivilegeManagement";
+import PanelDeberes from "../deberes/PanelDeberes";
 
 import Button from "../ui/Button";
 import Modal from "../ui/Modal";
@@ -55,7 +57,7 @@ const Dashboard: React.FC = () => {
   const [childToDiscover, setChildToDiscover] = useState<Child | null>(null);
   
   // Estados de UI - Pestañas principales
-  const [activeTab, setActiveTab] = useState<'overview' | 'children' | 'tasks' | 'privileges' | 'faqs'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'children' | 'tasks' | 'privileges' | 'faqs' | 'deberes'>('overview');
   
   // Estados de modales
   const [isInviting, setIsInviting] = useState(false);
@@ -406,6 +408,9 @@ const Dashboard: React.FC = () => {
           </div>
         );
 
+      case 'deberes':
+        return <PanelDeberes familyId={familyId!} hijos={children} />;
+
       case 'faqs':
         return <Faqs headingLevel={3} />;
 
@@ -581,6 +586,13 @@ const Dashboard: React.FC = () => {
               id: 'privileges',
               label: 'Privilegios Personalizados',
               icon: <FontAwesomeIcon icon={faGift} />,
+              disabled: !isPadre,
+              disabledReason: 'solo disponible para padres',
+            },
+            {
+              id: 'deberes',
+              label: 'Deberes',
+              icon: <FontAwesomeIcon icon={faBook} />,
               disabled: !isPadre,
               disabledReason: 'solo disponible para padres',
             },

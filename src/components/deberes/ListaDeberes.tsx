@@ -142,7 +142,7 @@ export default function ListaDeberes({ familyId, hijoId, ahora, onImportar }: Li
       </div>
 
       {error ? (
-        <p role="alert" className="text-sm text-danger">
+        <p role="alert" className="text-sm text-negative-text">
           {error}
         </p>
       ) : null}

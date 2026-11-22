@@ -131,6 +131,14 @@ describe('ListaDeberes', () => {
     expect(screen.queryByText(/502/)).toBeNull();
   });
 
+  it('el aviso de error usa el token semantico, no una clase de paleta inexistente', async () => {
+    vi.mocked(svc.actualizarDeber).mockRejectedValue(new Error('x'));
+    const user = userEvent.setup();
+    render_();
+    await user.click(await screen.findByRole('button', { name: 'Archivar Traer calculadora' }));
+    expect(await screen.findByRole('alert')).toHaveClass('text-negative-text');
+  });
+
   it('enlaceAbreClassroom', async () => {
     render_();
     const f = await fila('Ficha de verbos');

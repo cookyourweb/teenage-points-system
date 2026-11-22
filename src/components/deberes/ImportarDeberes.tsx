@@ -283,7 +283,7 @@ export default function ImportarDeberes({
         />
         <Field
           name={`titulo-${item.linea}`}
-          label="Título"
+          label={`Título de «${item.titulo}»`}
           value={e.titulo}
           maxLength={TOPES.titulo}
           error={fallo.titulo}
@@ -291,7 +291,7 @@ export default function ImportarDeberes({
         />
         <Field
           name={`fecha-${item.linea}`}
-          label="Fecha"
+          label={`Fecha de «${item.titulo}»`}
           hint="aaaa-mm-dd, o vacía si no tiene"
           inputMode="numeric"
           maxLength={10}
@@ -321,6 +321,7 @@ export default function ImportarDeberes({
           hint={`La lista de ${nombreHijo}, tal cual la escribe Claude in Chrome.`}
           rows={8}
           maxLength={TOPES.texto}
+          disabled={cargando || fase === 'guardando'}
           value={texto}
           onChange={(ev) => {
             setTexto(ev.target.value);

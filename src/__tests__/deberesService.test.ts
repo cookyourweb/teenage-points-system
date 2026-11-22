@@ -59,7 +59,7 @@ describe('deberesService', () => {
   });
 
   it('nuevoEsPostYCambioEsPut', async () => {
-    await guardarImportacion('fA', 'leo', [{ item: item(1) }, { item: item(2), guardado: guardado({ id: 'd1' }) }]);
+    await guardarImportacion('fA', 'leo', [{ item: item(1) }, { item: item(2), guardado: guardado({ id: 'd1' }) }], { registrar: true });
     const posts = llamadas('POST');
     const puts = llamadas('PUT').map(([r]) => r);
     expect(posts.map(([r]) => r)).toEqual(['/api/familias/fA/hijos/leo/deberes']);
@@ -71,7 +71,7 @@ describe('deberesService', () => {
   });
 
   it('sinDecisionesSoloRegistraLaImportacion', async () => {
-    const r = await guardarImportacion('fA', 'leo', []);
+    const r = await guardarImportacion('fA', 'leo', [], { registrar: true });
     expect(apiFetch).toHaveBeenCalledTimes(1);
     expect(apiFetch).toHaveBeenCalledWith('/api/familias/fA/hijos/leo/importaciones-deberes', { method: 'PUT' });
     expect(r).toEqual({ guardados: 0, fallidos: [] });
@@ -107,7 +107,7 @@ describe('deberesService', () => {
         estado: 'PENDIENTE',
       }),
     }));
-    await guardarImportacion('fA', 'leo', decisiones);
+    await guardarImportacion('fA', 'leo', decisiones, { registrar: true });
     const deDeber = llamadas('POST');
     expect(deDeber).toHaveLength(60);
     for (const [, op] of deDeber) {
@@ -123,7 +123,7 @@ describe('deberesService', () => {
       .mockResolvedValueOnce({})
       .mockRejectedValueOnce(new ErrorHttp(409, 'x', 'Deber repetido'))
       .mockResolvedValueOnce({});
-    const r = await guardarImportacion('fA', 'leo', d);
+    const r = await guardarImportacion('fA', 'leo', d, { registrar: true });
     expect(r).toEqual({
       guardados: 2,
       fallidos: [{ item: d[1].item, motivo: 'Ya estaba guardado: vuelve a importar para ver el cambio' }],
@@ -140,31 +140,31 @@ describe('deberesService', () => {
     [502, 'No se ha podido guardar. Inténtalo de nuevo.'],
   ])('un %i se cuenta con un texto fijo en español, nunca el del servidor', async (status, motivo) => {
     apiFetch.mockRejectedValueOnce(new ErrorHttp(status, '<html>502 Bad Gateway</html>'));
-    const r = await guardarImportacion('fA', 'leo', [{ item: item(1) }]);
+    const r = await guardarImportacion('fA', 'leo', [{ item: item(1) }], { registrar: true });
     expect(r.fallidos[0].motivo).toBe(motivo);
     expect(r.fallidos[0].motivo).not.toContain('<html>');
   });
 
   it('sinConexionDiceQueNoHayConexion', async () => {
     apiFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'));
-    const r = await guardarImportacion('fA', 'leo', [{ item: item(1) }]);
+    const r = await guardarImportacion('fA', 'leo', [{ item: item(1) }], { registrar: true });
     expect(r.fallidos[0].motivo).toBe('No hay conexión. Revisa internet y vuelve a intentarlo.');
   });
 
   it('un409AlCambiarEsOtroDeberConEseEnlace', async () => {
     apiFetch.mockRejectedValueOnce(new ErrorHttp(409, 'x', 'Deber repetido'));
-    const r = await guardarImportacion('fA', 'leo', [{ item: item(1), guardado: guardado() }]);
+    const r = await guardarImportacion('fA', 'leo', [{ item: item(1), guardado: guardado() }], { registrar: true });
     expect(r.fallidos[0].motivo).toBe('Ese enlace ya lo usa otro deber.');
   });
 
   it('siFallaRegistrarLaImportacionNoSePierdeLoGuardado', async () => {
     apiFetch.mockResolvedValueOnce({}).mockRejectedValueOnce(new ErrorHttp(500, 'boom'));
-    const r = await guardarImportacion('fA', 'leo', [{ item: item(1) }]);
+    const r = await guardarImportacion('fA', 'leo', [{ item: item(1) }], { registrar: true });
     expect(r).toEqual({ guardados: 1, fallidos: [], importacionSinRegistrar: true });
   });
 
   it('elCuerpoSiempreLlevaImprimirEIsActiveYNuncaClave', async () => {
-    await guardarImportacion('fA', 'leo', [{ item: item(1) }]);
+    await guardarImportacion('fA', 'leo', [{ item: item(1) }], { registrar: true });
     const cuerpo = JSON.parse(llamadas('POST')[0][1].body as string);
     expect(cuerpo.imprimir).toBe(false);
     expect(cuerpo.isActive).toBe(true);

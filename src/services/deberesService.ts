@@ -101,7 +101,7 @@ export const guardarImportacion = async (
   familyId: string,
   hijoId: string,
   decisiones: Decision[],
-  { registrar = true }: { registrar?: boolean } = {},
+  { registrar }: { registrar: boolean },
 ): Promise<ResultadoGuardado> => {
   const resultado: ResultadoGuardado = { guardados: 0, fallidos: [] };
 

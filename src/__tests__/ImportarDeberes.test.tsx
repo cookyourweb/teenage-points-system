@@ -114,12 +114,42 @@ describe('ImportarDeberes', () => {
     expect(d.find((x) => x.item.tipo === 'EXAMEN')?.guardado).toEqual(EXAMEN_GUARDADO);
   });
 
+  it('el campo de texto no se edita mientras se carga ni mientras se guarda', async () => {
+    const user = userEvent.setup();
+    let soltarCarga: (d: Deber[]) => void = () => {};
+    vi.mocked(svc.getDeberes).mockReturnValue(new Promise((r) => (soltarCarga = r)));
+    render(<ImportarDeberes familyId="fA" hijoId="leo" nombreHijo="Leo" hoy="2027-03-09" onGuardado={onGuardado} />);
+    const area = screen.getByLabelText('Pega aquí la lista de Claude in Chrome');
+    await user.click(area);
+    await user.paste(EJEMPLO);
+    await user.click(screen.getByRole('button', { name: 'Ver qué cambia' }));
+    expect(area).toBeDisabled();
+    soltarCarga([]);
+    await screen.findByRole('heading', { name: 'Cobertura' });
+    expect(area).toBeEnabled();
+
+    let soltarGuardado: (r: { guardados: number; fallidos: never[] }) => void = () => {};
+    vi.mocked(svc.guardarImportacion).mockReturnValue(new Promise((r) => (soltarGuardado = r)));
+    await user.click(screen.getByRole('button', { name: 'Guardar 4 deberes' }));
+    expect(area).toBeDisabled();
+    soltarGuardado({ guardados: 4, fallidos: [] });
+  });
+
+  it('cada titulo y fecha lleva el deber en su nombre accesible', async () => {
+    const user = userEvent.setup();
+    vi.mocked(svc.getDeberes).mockResolvedValue([]);
+    await revisar(user);
+    expect(screen.getByLabelText('Título de «Redacción sobre el invierno»')).toBeInTheDocument();
+    expect(screen.getByLabelText('Fecha de «Redacción sobre el invierno»')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Título')).toBeNull();
+  });
+
   it('editarTitulo', async () => {
     const user = userEvent.setup();
     vi.mocked(svc.getDeberes).mockResolvedValue([]);
     await revisar(user);
 
-    const titulo = within(fila('Redacción sobre el invierno')).getByLabelText('Título');
+    const titulo = within(fila('Redacción sobre el invierno')).getByLabelText('Título de «Redacción sobre el invierno»');
     await user.clear(titulo);
     await user.type(titulo, 'Redacción corregida');
     await user.click(screen.getByRole('button', { name: 'Guardar 4 deberes' }));
@@ -134,7 +164,7 @@ describe('ImportarDeberes', () => {
     vi.mocked(svc.getDeberes).mockResolvedValue([]);
     await revisar(user);
 
-    await user.clear(within(fila('Redacción sobre el invierno')).getByLabelText('Título'));
+    await user.clear(within(fila('Redacción sobre el invierno')).getByLabelText('Título de «Redacción sobre el invierno»'));
     await user.click(screen.getByRole('button', { name: 'Guardar 4 deberes' }));
 
     expect(within(fila('Redacción sobre el invierno')).getByText('Falta el título')).toBeInTheDocument();
@@ -155,7 +185,7 @@ describe('ImportarDeberes', () => {
     vi.mocked(svc.getDeberes).mockResolvedValue([]);
     await revisar(user);
 
-    const fecha = within(fila('Redacción sobre el invierno')).getByLabelText('Fecha');
+    const fecha = within(fila('Redacción sobre el invierno')).getByLabelText('Fecha de «Redacción sobre el invierno»');
     await user.clear(fecha);
     await user.type(fecha, '2027-13-01');
     await user.click(screen.getByRole('button', { name: 'Guardar 4 deberes' }));

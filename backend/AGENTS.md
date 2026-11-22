@@ -12,7 +12,7 @@ Código en `es.cookyourweb.points`, organizado por feature:
 
 - `./mvnw spring-boot:run` — API en http://localhost:8080 (puerto por defecto;
   `application.properties` no hay override).
-- `./mvnw --batch-mode test` — 153 tests (19-nov-2026). `PropiedadIntegracionTest`
+- `./mvnw --batch-mode test` — 195 tests (22-nov-2026). `PropiedadIntegracionTest`
   necesita **Docker** (Testcontainers levanta su propio Mongo); el resto pasa sin
   Mongo levantado. Con la conexión caida el log escupe una traza `ConnectException`
   del monitor de conexión de Mongo: es ruido conocido, no un fallo del test.

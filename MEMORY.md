@@ -6,7 +6,7 @@
 ## Estado actual
 
 - **Importar deberes, entrega 1 hecha**: PR #10 (A, puro), #11 (B, backend `deber/`), PR C (servicio, importar, lista y pestaña «Deberes» en el panel). Falta la prueba a mano con la cuenta de la dueña.
-- `develop`: sesión 4 cerrada y subida (16-nov). 💚 **426 tests front** + **27/27 reglas** + **122 backend** (lint/typecheck 0; los de integración usan Docker).
+- `develop`: sesión 4 cerrada y subida (16-nov). 💚 **565 tests front** + **27/27 reglas** + **195 backend** (lint/typecheck 0; los de integración usan Docker).
 - **Sesión 4 (colores)**: el hijo es una **mezcla**; `ia/TipoService` (puro) da nada/algo/mucho por color; cada adulto guarda sus colores + principal en Mongo (`eleccionesTipo`, `requireMember`); pantalla en chat guiado. Contenido **[FICTICIO]**: el real sale del curso de Vicent. Plan: `docs/superpowers/plans/2026-11-15-sesion-4-tipo.md`.
 - **Reglas de Firestore desplegadas 14-nov y 18-nov** (producción == `firestore.rules`, verificado): alta limitada (nadie se hace admin ni entra en familia ajena), `categorias` pide sesión (HTTP 403 sin ella), `privileges` por familia y `privilegeHistory` append-only. Diseño y orden S0-S6: `docs/superpowers/specs/2026-11-13-arquitectura-front-back-design.md` §8.
 - Iteración 0: ✅ `NOTICE.md` (`0b85f1f`); ⏳ limpieza de `categorias`. Iteración 1 empezada: ✅ `src/utils/perfilPadre.ts` + test (`d3b6fa4`, `aa27b1b`).

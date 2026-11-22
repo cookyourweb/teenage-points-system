@@ -77,6 +77,14 @@ describe('deberesService', () => {
     expect(r).toEqual({ guardados: 0, fallidos: [] });
   });
 
+  it('unaListaSuciaNoRegistraLaImportacion', async () => {
+    // Lista cortada o con errores: se guarda lo aceptado, pero el día no queda revisado.
+    const r = await guardarImportacion('fA', 'leo', [{ item: item(1) }], { registrar: false });
+    expect(llamadas('PUT')).toEqual([]);
+    expect(llamadas('POST')).toHaveLength(1);
+    expect(r).toEqual({ guardados: 1, fallidos: [] });
+  });
+
   it('sesentaDeberesSonSesentaPeticionesBajoElTope', async () => {
     let pendientes = 0;
     let maximo = 0;

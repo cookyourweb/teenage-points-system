@@ -95,11 +95,13 @@ const motivoDe = (error: unknown, esCambio: boolean): string => {
 /**
  * Guarda las decisiones de cuatro en cuatro. Solo si TODO salio bien registra la importacion
  * (asi el aviso de «mas de un dia» sigue hasta que una importacion sale limpia); tambien con [].
+ * `registrar: false` cuando la lista llego cortada o con errores: se guarda, pero el dia no queda revisado.
  */
 export const guardarImportacion = async (
   familyId: string,
   hijoId: string,
   decisiones: Decision[],
+  { registrar = true }: { registrar?: boolean } = {},
 ): Promise<ResultadoGuardado> => {
   const resultado: ResultadoGuardado = { guardados: 0, fallidos: [] };
 
@@ -118,7 +120,7 @@ export const guardarImportacion = async (
     });
   }
 
-  if (resultado.fallidos.length === 0) {
+  if (registrar && resultado.fallidos.length === 0) {
     try {
       await registrarImportacion(familyId, hijoId);
     } catch {

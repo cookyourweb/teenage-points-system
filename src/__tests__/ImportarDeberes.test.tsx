@@ -63,6 +63,7 @@ const conLineas = (...lineas: string[]) =>
 const LINEA_JAVASCRIPT = 'ENTREGA | Lengua | 2027-03-11 | Ficha | javascript:alert(1) | | PENDIENTE | NO |';
 
 const onGuardado = vi.fn();
+const CORTADA = 'La lista llegó cortada o con errores: vuelve a sacarla de Classroom para dar el día por revisado.';
 
 const revisar = async (user: ReturnType<typeof userEvent.setup>, texto = EJEMPLO) => {
   const vista = render(
@@ -100,10 +101,10 @@ describe('ImportarDeberes', () => {
     const user = userEvent.setup();
     await revisar(user);
 
-    await user.click(within(fila('Traer bata al laboratorio')).getByRole('checkbox', { name: 'Guardar' }));
+    await user.click(within(fila('Traer bata al laboratorio')).getByRole('checkbox', { name: 'Guardar «Traer bata al laboratorio»' }));
     await user.click(screen.getByRole('button', { name: 'Guardar 3 deberes' }));
 
-    expect(svc.guardarImportacion).toHaveBeenCalledWith('fA', 'leo', expect.any(Array));
+    expect(svc.guardarImportacion).toHaveBeenCalledWith('fA', 'leo', expect.any(Array), { registrar: true });
     const d = decisiones();
     expect(d).toHaveLength(3);
     expect(d.some((x) => x.item.tipo === 'AVISO')).toBe(false);
@@ -140,26 +141,113 @@ describe('ImportarDeberes', () => {
     expect(svc.guardarImportacion).not.toHaveBeenCalled();
   });
 
-  it('enlaceEditadoSeValidaYSeNormaliza', async () => {
+  it('elEnlaceNoSeEdita', async () => {
+    const user = userEvent.setup();
+    // El enlace es la identidad del deber: cambiarlo lo duplicaría en la próxima importación.
+    await revisar(user);
+
+    expect(screen.queryByLabelText('Enlace')).toBeNull();
+    expect(screen.queryByRole('textbox', { name: /enlace/i })).toBeNull();
+  });
+
+  it('fechaMalEscritaNoSeGuarda', async () => {
     const user = userEvent.setup();
     vi.mocked(svc.getDeberes).mockResolvedValue([]);
     await revisar(user);
 
-    const enlace = within(fila('Redacción sobre el invierno')).getByLabelText('Enlace');
-    await user.clear(enlace);
-    await user.type(enlace, 'javascript:alert(1)');
+    const fecha = within(fila('Redacción sobre el invierno')).getByLabelText('Fecha');
+    await user.clear(fecha);
+    await user.type(fecha, '2027-13-01');
     await user.click(screen.getByRole('button', { name: 'Guardar 4 deberes' }));
 
-    expect(within(fila('Redacción sobre el invierno')).getByText('El enlace no es https:// seguro')).toBeInTheDocument();
+    expect(within(fila('Redacción sobre el invierno')).getByText('La fecha debe ser aaaa-mm-dd')).toBeInTheDocument();
     expect(svc.guardarImportacion).not.toHaveBeenCalled();
 
-    await user.clear(enlace);
-    await user.type(enlace, 'https://classroom.google.com/u/1/c/EJEMPLO3/a/EJEMPLO9/details');
+    await user.clear(fecha);
+    await user.type(fecha, '2027-03-11');
+    await user.click(screen.getByRole('button', { name: 'Guardar 4 deberes' }));
+    expect(decisiones().find((x) => x.item.tipo === 'ENTREGA')?.item.fecha).toBe('2027-03-11');
+  });
+
+  it('cadaCasillaNombraSuDeber', async () => {
+    const user = userEvent.setup();
+    await revisar(user);
+
+    expect(screen.getByRole('checkbox', { name: 'Guardar «Redacción sobre el invierno»' })).toBeChecked();
+    expect(screen.queryByRole('checkbox', { name: 'Guardar' })).toBeNull();
+  });
+
+  it('listaLimpiaRegistraLaImportacion', async () => {
+    const user = userEvent.setup();
+    await revisar(user);
     await user.click(screen.getByRole('button', { name: 'Guardar 4 deberes' }));
 
-    expect(decisiones().find((x) => x.item.tipo === 'ENTREGA')?.item.enlace).toBe(
-      'https://classroom.google.com/c/EJEMPLO3/a/EJEMPLO9/details',
-    );
+    expect(svc.guardarImportacion).toHaveBeenCalledWith('fA', 'leo', expect.any(Array), { registrar: true });
+  });
+
+  it('listaConErroresNoRegistraLaImportacion', async () => {
+    const user = userEvent.setup();
+    await revisar(user, conLineas(LINEA_JAVASCRIPT));
+
+    expect(screen.getByText(CORTADA)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Guardar 4 deberes' }));
+
+    expect(svc.guardarImportacion).toHaveBeenCalledWith('fA', 'leo', expect.any(Array), { registrar: false });
+    expect(await screen.findByText(CORTADA)).toBeInTheDocument();
+  });
+
+  it('listaCortadaNoRegistraLaImportacion', async () => {
+    const user = userEvent.setup();
+    vi.mocked(svc.getDeberes).mockResolvedValue(ITEMS.map((i) => aGuardado(i)));
+    await revisar(user, EJEMPLO.replace('=== FIN ===', ''));
+
+    expect(screen.getByText(CORTADA)).toBeInTheDocument();
+    const revisado = screen.getByRole('button', { name: 'Revisado, sin cambios' });
+    expect(revisado).toBeDisabled();
+    await user.click(revisado);
+    expect(svc.guardarImportacion).not.toHaveBeenCalled();
+  });
+
+  it('nadaMarcadoEsRevisadoSinCambios', async () => {
+    const user = userEvent.setup();
+    vi.mocked(svc.getDeberes).mockResolvedValue([]);
+    await revisar(user);
+    for (const c of screen.getAllByRole('checkbox', { name: /^Guardar «/ })) await user.click(c);
+
+    expect(screen.queryByRole('button', { name: /^Guardar \d/ })).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Revisado, sin cambios' }));
+    expect(svc.guardarImportacion).toHaveBeenCalledWith('fA', 'leo', [], { registrar: true });
+  });
+
+  it('cambiarElTextoBorraLaVistaPrevia', async () => {
+    const user = userEvent.setup();
+    await revisar(user);
+
+    await user.type(screen.getByLabelText('Pega aquí la lista de Claude in Chrome'), 'x');
+
+    expect(screen.queryByRole('heading', { name: 'Cobertura' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Guardar \d/ })).toBeNull();
+  });
+
+  it('unFalloAlRecargarBorraLaVistaPrevia', async () => {
+    const user = userEvent.setup();
+    await revisar(user);
+    vi.mocked(svc.getDeberes).mockRejectedValue(new TypeError('Failed to fetch'));
+
+    await user.click(screen.getByRole('button', { name: 'Ver qué cambia' }));
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Cobertura' })).toBeNull();
+  });
+
+  it('noSePuedeVolverAVerMientrasGuarda', async () => {
+    const user = userEvent.setup();
+    vi.mocked(svc.guardarImportacion).mockReturnValue(new Promise(() => {}));
+    await revisar(user);
+
+    await user.click(screen.getByRole('button', { name: 'Guardar 4 deberes' }));
+
+    expect(screen.getByRole('button', { name: 'Ver qué cambia' })).toBeDisabled();
   });
 
   it('sinCambiosRegistraLaImportacion', async () => {
@@ -171,7 +259,7 @@ describe('ImportarDeberes', () => {
     expect(screen.queryByRole('button', { name: /^Guardar \d/ })).toBeNull();
     await user.click(screen.getByRole('button', { name: 'Revisado, sin cambios' }));
 
-    expect(svc.guardarImportacion).toHaveBeenCalledWith('fA', 'leo', []);
+    expect(svc.guardarImportacion).toHaveBeenCalledWith('fA', 'leo', [], { registrar: true });
   });
 
   it('unArchivadoNoVuelveComoNuevo', async () => {

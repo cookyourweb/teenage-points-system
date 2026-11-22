@@ -13,7 +13,7 @@ import type {
 } from '../../types/deberTypes';
 import { TOPES } from '../../types/deberTypes';
 import { compararConGuardados, hoyEnMadrid } from '../../utils/deberes/comparar';
-import { claveDeEnlace, esEnlaceSeguro } from '../../utils/deberes/enlaces';
+import { esEnlaceSeguro } from '../../utils/deberes/enlaces';
 import { parsearDeberes } from '../../utils/deberes/formato';
 import Accordion from '../ui/Accordion';
 import Button from '../ui/Button';
@@ -39,17 +39,26 @@ export interface ImportarDeberesProps {
 
 type Fase = 'pegar' | 'revisar' | 'guardando' | 'hecho';
 
+/** El enlace no se edita: es la identidad del deber y viene de Classroom. */
 interface Edicion {
   guardar: boolean;
   titulo: string;
   fecha: string;
-  enlace: string;
 }
 
 interface ErroresFila {
   titulo?: string;
-  enlace?: string;
+  fecha?: string;
 }
+
+const CORTADA = 'La lista llegó cortada o con errores: vuelve a sacarla de Classroom para dar el día por revisado.';
+
+const fechaValida = (f: string): boolean => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f);
+  if (!m) return false;
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  return d.toISOString().slice(0, 10) === f;
+};
 
 const TIPO: Record<TipoDeber, string> = {
   EXAMEN: 'Examen',
@@ -131,6 +140,14 @@ export default function ImportarDeberes({
   const [resumen, setResumen] = useState<ResultadoGuardado | null>(null);
 
   const ilegible = resultado?.errores.some((e) => e.linea === 0) ?? false;
+  // Solo una lista completa y sin errores da el día por revisado.
+  const limpia = resultado !== null && resultado.completa && resultado.errores.length === 0;
+
+  const olvidarVistaPrevia = () => {
+    setResultado(null);
+    setComparacion(null);
+    setFase('pegar');
+  };
 
   const ver = async () => {
     setError(null);
@@ -148,6 +165,7 @@ export default function ImportarDeberes({
       guardados = await getDeberes(familyId, hijoId, false);
     } catch {
       setError('No se han podido cargar los deberes guardados. Inténtalo de nuevo.');
+      olvidarVistaPrevia();
       setCargando(false);
       return;
     }
@@ -159,7 +177,7 @@ export default function ImportarDeberes({
     });
     const iniciales: Record<number, Edicion> = {};
     for (const i of [...c.nuevos, ...c.cambiados.map((x) => x.item)]) {
-      iniciales[i.linea] = { guardar: true, titulo: i.titulo, fecha: i.fecha ?? '', enlace: i.enlace };
+      iniciales[i.linea] = { guardar: true, titulo: i.titulo, fecha: i.fecha ?? '' };
     }
     setResultado(r);
     setComparacion(c);
@@ -183,27 +201,27 @@ export default function ImportarDeberes({
     for (const { item, guardado } of marcadas) {
       const e = ediciones[item.linea];
       const titulo = e.titulo.trim();
-      const enlace = e.enlace.trim();
+      const fecha = e.fecha.trim();
       const fallo: ErroresFila = {};
       if (titulo === '') fallo.titulo = 'Falta el título';
-      // Mismas reglas que el back: un enlace editado que no pase daría 400.
-      if (!esEnlaceSeguro(enlace)) fallo.enlace = 'El enlace no es https:// seguro';
-      if (fallo.titulo || fallo.enlace) {
+      if (fecha !== '' && !fechaValida(fecha)) fallo.fecha = 'La fecha debe ser aaaa-mm-dd';
+      if (fallo.titulo || fallo.fecha) {
         errores[item.linea] = fallo;
         continue;
       }
       decisiones.push({
-        item: { ...item, titulo, fecha: e.fecha || null, enlace: claveDeEnlace(enlace) },
+        item: { ...item, titulo, fecha: fecha || null },
         ...(guardado ? { guardado } : {}),
       });
     }
     setErroresFila(errores);
     if (Object.keys(errores).length > 0) return;
+    if (decisiones.length === 0 && !limpia) return;
 
     setError(null);
     setFase('guardando');
     try {
-      setResumen(await guardarImportacion(familyId, hijoId, decisiones));
+      setResumen(await guardarImportacion(familyId, hijoId, decisiones, { registrar: limpia }));
     } catch {
       setError('No se ha podido guardar. Inténtalo de nuevo.');
       setFase('revisar');
@@ -219,6 +237,7 @@ export default function ImportarDeberes({
         <p role="status" className="text-base font-semibold text-content">
           Guardados: {resumen.guardados}
         </p>
+        {!limpia && <p className="text-sm text-content">{CORTADA}</p>}
         {resumen.importacionSinRegistrar && (
           <p className="text-sm text-content">
             Se ha guardado todo, pero no se ha podido anotar la importación: el aviso de «más de un día» seguirá
@@ -258,7 +277,7 @@ export default function ImportarDeberes({
         {cambios && <TablaCambios cambios={cambios} />}
         <Checkbox
           name={`guardar-${item.linea}`}
-          label="Guardar"
+          label={`Guardar «${item.titulo}»`}
           checked={e.guardar}
           onChange={() => editar(item.linea, { guardar: !e.guardar })}
         />
@@ -273,24 +292,17 @@ export default function ImportarDeberes({
         <Field
           name={`fecha-${item.linea}`}
           label="Fecha"
-          type="date"
+          hint="aaaa-mm-dd, o vacía si no tiene"
+          inputMode="numeric"
+          maxLength={10}
           value={e.fecha}
+          error={fallo.fecha}
           onChange={(ev) => editar(item.linea, { fecha: ev.target.value })}
-        />
-        <Field
-          name={`enlace-${item.linea}`}
-          label="Enlace"
-          inputMode="url"
-          value={e.enlace}
-          maxLength={TOPES.enlace}
-          error={fallo.enlace}
-          onChange={(ev) => editar(item.linea, { enlace: ev.target.value })}
         />
       </li>
     );
   };
 
-  const hayCambios = filas.length > 0;
   const n = marcadas.length;
 
   return (
@@ -310,9 +322,13 @@ export default function ImportarDeberes({
           rows={8}
           maxLength={TOPES.texto}
           value={texto}
-          onChange={(ev) => setTexto(ev.target.value)}
+          onChange={(ev) => {
+            setTexto(ev.target.value);
+            // Otro texto, otra comparación: no se guarda una vista previa vieja.
+            if (resultado) olvidarVistaPrevia();
+          }}
         />
-        <Button onClick={() => void ver()} disabled={texto.trim() === ''} loading={cargando}>
+        <Button onClick={() => void ver()} disabled={texto.trim() === '' || fase === 'guardando'} loading={cargando}>
           Ver qué cambia
         </Button>
       </div>
@@ -481,8 +497,18 @@ export default function ImportarDeberes({
                 )}
               </section>
 
-              <Button onClick={() => void guardar()} loading={fase === 'guardando'}>
-                {hayCambios ? `Guardar ${n} ${n === 1 ? 'deber' : 'deberes'}` : 'Revisado, sin cambios'}
+              {!limpia && (
+                <p id="deberes-cortada" className="text-sm text-negative-text">
+                  {CORTADA}
+                </p>
+              )}
+              <Button
+                onClick={() => void guardar()}
+                loading={fase === 'guardando'}
+                disabled={n === 0 && !limpia}
+                aria-describedby={limpia ? undefined : 'deberes-cortada'}
+              >
+                {n > 0 ? `Guardar ${n} ${n === 1 ? 'deber' : 'deberes'}` : 'Revisado, sin cambios'}
               </Button>
             </>
           )}

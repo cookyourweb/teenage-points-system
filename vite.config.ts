@@ -29,6 +29,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts',
+    // Con 8 workers jsdom en paralelo, userEvent y axe sobre pantallas grandes pasan de los 5 s por defecto.
+    testTimeout: 20_000,
     // Las reglas se prueban contra el emulador: `npm run test:rules`.
     // El test de integracion del script de baja tambien necesita emuladores.
     exclude: [...configDefaults.exclude, 'tests/rules/**', 'scripts/**/integracion.test.ts'],

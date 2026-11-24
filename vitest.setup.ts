@@ -1,9 +1,13 @@
 import '@testing-library/jest-dom'; // Extensiones de Testing Library
+import { configure } from '@testing-library/react';
 import { expect } from 'vitest';
 import * as matchersAxe from 'vitest-axe/matchers';
 
 // toHaveNoViolations para las pantallas nuevas (vitest-axe)
 expect.extend(matchersAxe);
+
+// findBy/waitFor esperan 1 s por defecto: bajo carga de la suite entera no alcanza. Solo tolerancia, no relaja ninguna aserción.
+configure({ asyncUtilTimeout: 5000 });
 
 // Mock de import.meta.env
 Object.defineProperty(import.meta, 'env', {
